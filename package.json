@@ -23,6 +23,9 @@
         "optimist": "*",
         "co": "*",
         "crankshaft": "*",
-        "crankshaft-tools": "*"
+        "crankshaft-tools": "*",
+        "front-matter": "*",
+        "js-yaml": "*",
+        "react": "*"
     }
 }
