@@ -26,6 +26,7 @@
         "crankshaft-tools": "*",
         "front-matter": "*",
         "js-yaml": "*",
-        "react": "*"
+        "react": "0.13.0-beta.1",
+        "6to5": "*"
     }
 }

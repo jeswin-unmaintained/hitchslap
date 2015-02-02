@@ -1,3 +1,6 @@
+//This polyfill is needed on ES5
+require("6to5/polyfill");
+
 import co from "co";
 import optimist from "optimist";
 import * as commands from "./commands";
@@ -8,19 +11,12 @@ import fs from "fs";
 var argv = optimist.argv;
 
 
-var loadOptions = function() {
-    var options = {};
-    options.source = path.resolve(argv.source || argv.s || "./");
-    options.destination = argv.destination || argv.d ? path.resolve(argv.destination || argv.d) :
-        path.join(options.source, "_site");
-    return options;
-};
-
-
-var loadConfig = function(options) {
-    var configFilePath = path.join(options.source, "_config.yml");
-    var config = yaml.safeLoad(fs.readFileSync(configFilePath));
-    config._libDir = __dirname;
+var getGlobalConfiguration = function() {
+    var config = {};
+    config.source = path.resolve(argv.source || argv.s || "./");
+    config.destination = argv.destination || argv.d ? path.resolve(argv.destination || argv.d) :
+        path.join(config.source, "_site");
+    config.__libdir = __dirname;
     return config;
 };
 
@@ -36,21 +32,16 @@ var getCommand = function() {
         command = process.argv[2];
     }
 
-    return command;
+    return commands[`_${command}`];
 };
 
 
 co(function*() {
     try {
         var command = getCommand();
-        var fnCmd = commands[`_${command}`];
-
-        if (command === "version" || command === "help") {
-            yield* fnCmd();
-        } else if (fnCmd) {
-            var options = loadOptions();
-            var config = loadConfig(options);
-            yield* fnCmd(config, options);
+        if (command) {
+            var config = getGlobalConfiguration();
+            yield* command(config);
         } else {
             console.log("Usage: hitchslap command [options]. Type hitchslap -h for help.");
         }

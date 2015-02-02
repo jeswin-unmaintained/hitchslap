@@ -1,7 +1,10 @@
 import tools from "crankshaft-tools";
 import fs from "fs";
+import optimist from "optimist";
+import path from "path";
 
 var exec = tools.process.exec({log: console.log});
+var argv = optimist.argv;
 
 export default function*(config) {
 
@@ -12,9 +15,9 @@ export default function*(config) {
         }
     };
 
-    var createTemplate = function*(templateName, dest) {
+    var createTemplate = function*(dest) {
         yield* exec(`mkdir -p ${dest}`);
-        var files = yield* exec(`cp ${config._libDir}/templates/${templateName}/* ${dest} -r`);
+        var files = yield* exec(`cp ${config.__libdir}/site_template/* ${dest} -r`);
         return files;
     };
 
@@ -25,11 +28,12 @@ export default function*(config) {
         return;
     }
 
-    if (yield* isEmpty(dest)) {
-        console.error(`Conflict: ${dest} is not empty.`);
+    var force = argv.force || false;
+    if (!force && yield* isEmpty(dest)) {
+        console.error(`Conflict: ${path.resolve(dest)} is not empty.`);
         return;
     }
 
-    yield* createTemplate("default", dest);
-    console.log(`New hitchslap site installed in ${dest}.`);
+    yield* createTemplate(dest);
+    console.log(`New hitchslap site installed in ${path.resolve(dest)}.`);
 }
