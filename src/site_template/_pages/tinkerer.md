@@ -1,6 +1,6 @@
-The Tinkerer
-============
-
+---
+title: The Tinkerer
+---
 Marshall Smith is a relatively unknown tinkerer. Living a quiet life, he rarely stepped out of his small, some may say tiny social circle. On most days Marshall is at work in his basement with mechanical devices of different forms and sizes, some of which may bear the name of an uncertain Rube Goldberg if such a man were to be born as some of us expect. But to Marshall, these machines quench a momentary curiosity, an itch that would die only if the idea was molded into a geared-machination and the truth wrung out. As being among the few lucky ones with access to Marshall’s laboratory, it would not surprise me if a two-ton steam engine ultimately punched a hole the size of a peanut in a cardboard sheet.
 
 Some of these cardboard sheets, pigments and other seemingly pointless results from various experiments end up in his house, providing mild amusement to the occasional visitor Marshall has at home. The more inquisitive among them ask Marshall what he is working on and if his work is like that of an artist. They ask these questions for one of two reasons. One, the sophisticated 18th century mind is finally ready to say that art cannot be constrained by a rigid definition and could be anything that enriches our sensory experience. Or two, they just take the little bit of oddity that is Marshall’s life and hang it like a painting on the tiring, gray walls of their own lives. More often, the latter.

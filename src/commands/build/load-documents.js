@@ -13,7 +13,7 @@ export default function*(dir) {
         var markdownFiles = files.filter(file => [".md", ".markdown"].indexOf(path.extname(file).toLowerCase()) >= 0);
         for (let i = 0; i < markdownFiles.length; i++) {
             var file = markdownFiles[i];
-            yield frontMatter(fs.readFileSync(file));
+            yield frontMatter(fs.readFileSync(file).toString());
         }
     }
 }

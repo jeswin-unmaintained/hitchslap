@@ -6,7 +6,7 @@ export default function*(config, buildOptions, siteConfig) {
     var docs = loadDocuments(path.join(config.source, "_pages"));
 
     for(let doc of docs) {
-        yield* processTemplate(doc, { layout: "pages" }, config, buildOptions, siteConfig);
+        yield* processTemplate(doc, { layout: "page" }, config, buildOptions, siteConfig);
     }
 
     GLOBAL.site.pages = docs;

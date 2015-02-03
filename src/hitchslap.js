@@ -43,7 +43,7 @@ co(function*() {
             var config = getGlobalConfiguration();
             yield* command(config);
         } else {
-            console.log("Usage: hitchslap command [options]. Type hitchslap -h for help.");
+            console.log("Invalid command. Use --help for more information.");
         }
     }
     catch(err) {
