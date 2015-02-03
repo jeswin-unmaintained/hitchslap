@@ -17,7 +17,7 @@ export default function*(config) {
 
     var createTemplate = function*(dest) {
         yield* exec(`mkdir -p ${dest}`);
-        var files = yield* exec(`cp ${config.__libdir}/site_template/* ${dest} -r`);
+        var files = yield* exec(`cp -rf ${config.__libdir}/site_template/* ${dest}`);
         yield* exec(`(cd ${dest} && npm install)`);
         return files;
     };
