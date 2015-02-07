@@ -7,17 +7,17 @@ export default class Page extends React.Component {
 
     render() {
         return (
-            <div class="navbar">
-                <div class="navbar-header">
-                    <button class="navbar-toggle collapsed" type="button" data-toggle="collapse">
-                        <span class="sr-only">Toggle navigation</span>
-                        <span class="icon-bar"></span>
-                        <span class="icon-bar"></span>
-                        <span class="icon-bar"></span>
+            <div className="navbar">
+                <div className="navbar-header">
+                    <button className="navbar-toggle collapsed" type="button" data-toggle="collapse">
+                        <span className="sr-only">Toggle navigation</span>
+                        <span className="icon-bar"></span>
+                        <span className="icon-bar"></span>
+                        <span className="icon-bar"></span>
                     </button>
                 </div>
-                <nav class="collapse navbar-collapse">
-                    <ul class="nav navbar-nav">
+                <nav className="collapse navbar-collapse">
+                    <ul className="nav navbar-nav">
                         <li style={{background:"darkgreen"}}>
                             <a href="/">Home</a>
                         </li>

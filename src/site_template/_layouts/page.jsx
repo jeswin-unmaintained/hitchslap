@@ -10,14 +10,14 @@ export default class Page extends React.Component {
 
         return (
             <Default title={this.props.page.title}>
-                <div class="post">
+                <div className="post">
 
-                    <header class="post-header">
-                        <h1 class="post-title">{ this.props.page.title }</h1>
+                    <header className="post-header">
+                        <h1 className="post-title">{ this.props.page.title }</h1>
                     </header>
 
-                    <article class="post-content">
-                        { this.props.content }
+                    <article className="post-content">
+                        <div dangerouslySetInnerHTML={{__html: this.props.content}}></div>
                     </article>
 
                 </div>

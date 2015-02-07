@@ -16,8 +16,8 @@ export default class Default extends React.Component {
 
                     <Header />
 
-                    <div class="page-content">
-                        <div class="wrapper">
+                    <div className="page-content">
+                        <div className="wrapper">
                             {this.props.children}
                         </div>
                     </div>

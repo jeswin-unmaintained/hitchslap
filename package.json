@@ -27,6 +27,7 @@
         "front-matter": "*",
         "js-yaml": "*",
         "react": "0.13.0-beta.1",
-        "6to5": "*"
+        "6to5": "*",
+        "node-markdown": "*"
     }
 }

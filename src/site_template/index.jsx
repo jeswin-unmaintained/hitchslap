@@ -9,16 +9,16 @@ export class Index extends React.Component {
 
     render() {
         return (
-            <div class="home">
-                <div class="container-fluid">
-                    <div class="row fitted">
-                        <div class="col-md-2 index-pane">
+            <div className="home">
+                <div className="container-fluid">
+                    <div className="row fitted">
+                        <div className="col-md-2 index-pane">
                             <Nav />
                         </div>
-                        <div class="col-md-4 left-pane">
-                            <section class="content-area list">
+                        <div className="col-md-4 left-pane">
+                            <section className="content-area list">
                                 <h2><a href="/articles">Articles</a></h2>
-                                <ul class="tight">
+                                <ul className="tight">
                                 {
                                     site.posts.map(post =>
                                         <li>
@@ -28,7 +28,7 @@ export class Index extends React.Component {
                                                     <a href="{post.externalUrl}">{post.title}</a>
                                                 </h4> :
                                                 <h4>
-                                                    <a class="post-link" href="{ post.url | prepend: site.baseurl }">{post.title}</a>
+                                                    <a className="post-link" href="{ post.url | prepend: site.baseurl }">{post.title}</a>
                                                 </h4>,
                                             post.summary &&
                                                 <p>{post.summary}</p>
@@ -37,13 +37,13 @@ export class Index extends React.Component {
                                     )
                                 }
                                 </ul>
-                                <p class="more-link"><a href="/articles">More articles...</a></p>
+                                <p className="more-link"><a href="/articles">More articles...</a></p>
                             </section>
                         </div>
-                        <div class="col-md-4 right-pane">
-                            <section class="content-area list">
+                        <div className="col-md-4 right-pane">
+                            <section className="content-area list">
                                 <h2><a href="/projects">Projects</a></h2>
-                                <ul class="tight">
+                                <ul className="tight">
                                 {
                                     site.data.projects.map(proj =>
                                         <li>
@@ -57,23 +57,23 @@ export class Index extends React.Component {
                                     )
                                 }
                                 </ul>
-                                <p class="more-link"><a href="/projects">More projects...</a></p>
+                                <p className="more-link"><a href="/projects">More projects...</a></p>
                             </section>
                         </div>
-                        <div class="col-md-2 alt-pane">
-                            <section class="content-area list">
-                                <ul class="gallery">
+                        <div className="col-md-2 alt-pane">
+                            <section className="content-area list">
+                                <ul className="gallery">
                                 {
                                     site.data.projects.map(img =>
                                         <li>
                                             <img src="{{img.src}}" alt="{{img.name}}" />
                                             <br />
-                                            <p class="caption">{img.name}</p>
+                                            <p className="caption">{img.name}</p>
                                         </li>
                                     )
                                 }
                                 </ul>
-                                <p class="more-link"><a href="/art">More art...</a></p>
+                                <p className="more-link"><a href="/art">More art...</a></p>
                             </section>
                         </div>
                     </div>

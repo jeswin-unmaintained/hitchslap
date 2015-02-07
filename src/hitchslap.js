@@ -10,6 +10,8 @@ import fs from "fs";
 
 var argv = optimist.argv;
 
+//debug mode?
+if (argv.debug){ GLOBAL.CRANKSHAFT_DEBUG_MODE = true;}
 
 var getGlobalConfiguration = function() {
     var config = {};
@@ -41,6 +43,7 @@ co(function*() {
         var command = getCommand();
         if (command) {
             var config = getGlobalConfiguration();
+            debugger;
             yield* command(config);
         } else {
             console.log("Invalid command. Use --help for more information.");

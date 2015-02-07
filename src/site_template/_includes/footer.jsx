@@ -8,7 +8,7 @@ export default class Page extends React.Component {
     render() {
         return (
             <footer>
-                <div class="container">
+                <div className="container">
                     <p>
                         <small>Ceramic is GPL V3. You can find me at <a href="http://www.github.com/jeswin">github.com/jeswin</a> and
                             <a href="http://www.twitter.com/jeswin">twitter.com/jeswin</a>. <br /> Ceramic cover picture is by
