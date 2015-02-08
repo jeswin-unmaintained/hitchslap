@@ -2,7 +2,7 @@ import path from "path";
 import frontMatter from "front-matter";
 import processTemplate from "./process-template";
 
-export default function*(config, siteConfig) {
+export default function*(siteConfig) {
 
     GLOBAL.site.posts = [];
 
@@ -47,7 +47,7 @@ export default function*(config, siteConfig) {
     return function() {
         var extensions = siteConfig.markdown_ext.map(ext => `_posts/*.${ext}`);
         this.watch(extensions, function*(filePath, ev, matches) {
-            var { page } = yield* processTemplate(filePath, "page", makePath, config, siteConfig);
+            var { page } = yield* processTemplate(filePath, "page", makePath, siteConfig);
             GLOBAL.site.posts.push(page);
         }, "build_posts");
     };

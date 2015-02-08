@@ -6,7 +6,7 @@ import path from "path";
 var exec = tools.process.exec({log: console.log});
 var argv = optimist.argv;
 
-export default function*(config, siteConfig) {
+export default function*(siteConfig) {
 
     var isEmpty = function*(dest) {
         if (fs.existsSync(dest)) {
@@ -17,7 +17,7 @@ export default function*(config, siteConfig) {
 
     var createTemplate = function*(dest) {
         yield* exec(`mkdir -p ${dest}`);
-        var files = yield* exec(`cp -rf ${config.__libdir}/site_template/* ${dest}`);
+        var files = yield* exec(`cp -rf ${GLOBAL.__libdir}/site_template/* ${dest}`);
         yield* exec(`(cd ${dest} && npm install)`);
         return files;
     };

@@ -13,27 +13,23 @@ var argv = optimist.argv;
 //debug mode?
 if (argv.debug){ GLOBAL.CRANKSHAFT_DEBUG_MODE = true;}
 
-var getGlobalConfig = function() {
-    var config = {};
-    config.source = path.resolve(argv.source || argv.s || "./");
-    config.destination = argv.destination || argv.d ? path.resolve(argv.destination || argv.d) :
-        path.join(config.source, "_site");
-    config.__libdir = __dirname;
-    return config;
-};
-
+//Commands might need the templates directory. Easier from root.
+GLOBAL.__libdir = __dirname;
 
 var getCommand = function() {
-    var command = (
+    return (
         (argv.help || argv.h) ? "help" :
         (argv.version || argv.v) ? "version" :
         process.argv[2]
     );
-
-    return commands[`_${command}`];
 };
 
-var getSiteConfig = function*(config) {
+
+var getSiteConfig = function*() {
+
+    var source = path.resolve(argv.source || argv.s || "./");
+    var destination = argv.destination || argv.d ? path.resolve(argv.destination || argv.d) :
+        path.join(source, "_site");
 
     var getValueSetter = (config) => (prop, defaultValue) => {
         if (typeof argv[prop] !== "undefined" && argv[prop] !== null) {
@@ -43,11 +39,12 @@ var getSiteConfig = function*(config) {
         }
     };
 
-    var configFilePath = path.join(config.source, (argv.config || "_config.yml"));
+    var configFilePath = path.join(source, (argv.config || "_config.yml"));
     var siteConfig = yaml.safeLoad(fs.readFileSync(configFilePath));
 
     var defaults = [
-        ["destination", "./_site"],
+        ['source', source],
+        ['destination', destination],
         ["plugins", "./_plugins"],
         ["layouts", "./_layouts"],
         ["data_source", "./_data"],
@@ -93,11 +90,10 @@ var getSiteConfig = function*(config) {
 
 co(function*() {
     try {
-        var command = getCommand();
-        if (command) {
-            var config = getGlobalConfig();
-            var siteConfig = yield* getSiteConfig(config);
-            yield* command(config, siteConfig);
+        var commandName = getCommand();
+        if (commandName) {
+            var command = commands[`_${commandName}`];
+            yield* command(commandName !== "new" ? yield* getSiteConfig() : null);
         } else {
             console.log("Invalid command. Use --help for more information.");
         }

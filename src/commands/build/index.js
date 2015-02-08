@@ -12,7 +12,7 @@ import copyStaticFiles from "./copy-static-files";
 
 var argv = optimist.argv;
 
-export default function*(config, siteConfig) {
+export default function*(siteConfig) {
 
     /*
         _data directory contains a set of yaml files.
@@ -21,7 +21,7 @@ export default function*(config, siteConfig) {
     var loadData = function*(dir) {
         GLOBAL.site.data = {};
 
-        var fullPath = path.join(config.source, `_${dir}`);
+        var fullPath = path.join(siteConfig.source, `_${dir}`);
         if (fs.existsSync(fullPath)) {
             var files = fs.readdirSync(fullPath).map(file => path.join(fullPath, file));
             files.forEach(file => {
@@ -45,8 +45,8 @@ export default function*(config, siteConfig) {
         return options;
     };
 
-    console.log(`Source: ${config.source}`);
-    console.log(`Destination: ${config.destination}`);
+    console.log(`Source: ${siteConfig.source}`);
+    console.log(`Destination: ${siteConfig.destination}`);
 
     //Create a crankshaft build
     var build = crankshaft.create({ threads: 1 });
@@ -55,13 +55,8 @@ export default function*(config, siteConfig) {
     yield* loadData("data");
 
     for (var fn of [generatePages, generatePosts]) {
-        build.configure(yield* fn(config, siteConfig), config.source);
+        build.configure(yield* fn(siteConfig), siteConfig.source);
     }
-
-    //build.configure(yield* generatePages(config, siteConfig), config.source);
-    //build.configure(yield* generatePosts(config, siteConfig), config.source);
-    //yield* generateCollections(config, siteConfig, build);
-    //yield* copyStaticFiles(config, siteConfig, build);
 
     /* Start */
     build.start(siteConfig.watch);

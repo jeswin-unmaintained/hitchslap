@@ -2,7 +2,7 @@ import path from "path";
 import frontMatter from "front-matter";
 import processTemplate from "./process-template";
 
-export default function*(config, siteConfig) {
+export default function*(siteConfig) {
 
     GLOBAL.site.pages = [];
 
@@ -30,7 +30,7 @@ export default function*(config, siteConfig) {
         ];
         this.watch(extensions, function*(filePath, ev, matches) {
             if (!excludedDirs.some(regex => regex.test(filePath))) {
-                var result = yield* processTemplate(filePath, "page", makePath, config, siteConfig);
+                var result = yield* processTemplate(filePath, "page", makePath, siteConfig);
                 GLOBAL.site.pages.push(result.page);
             }
         }, "build_pages");
