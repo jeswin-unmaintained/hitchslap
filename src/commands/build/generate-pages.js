@@ -2,7 +2,7 @@ import path from "path";
 import frontMatter from "front-matter";
 import processTemplate from "./process-template";
 
-export default function*(config, siteConfig, build) {
+export default function*(config, siteConfig) {
 
     GLOBAL.site.pages = [];
 
@@ -12,7 +12,7 @@ export default function*(config, siteConfig, build) {
         var basename = path.basename(filePath, extension);
 
         return permalink === "pretty" ?
-            path.join(dir, basename, "index.html") :            
+            path.join(dir, basename, "index.html") :
             path.join(dir, `${basename}.html`);
     };
 
@@ -22,7 +22,7 @@ export default function*(config, siteConfig, build) {
             b) directories outside collections
     */
 
-    build.configure(function() {
+    return function() {
         var extensions = siteConfig.markdown_ext.map(ext => `*.${ext}`);
         var excludedDirs = [
             /^node_modules\//,
@@ -34,26 +34,5 @@ export default function*(config, siteConfig, build) {
                 GLOBAL.site.pages.push(result.page);
             }
         }, "build_pages");
-    }, config.source);
-
-    /* Start */
-    try {
-        build.start(siteConfig.watch);
-    } catch(e) {
-        console.log(e.stack);
-        if (e._inner) console.log(e._inner.stack);
-    }
-
-
-
-    /*
-    var docs = loadDocuments(path.join(config.source, "_pages"), config, buildOptions, siteConfig);
-
-    for(let doc of docs) {
-        var { frontMatter, filename } = doc;
-        var html = yield* processTemplate(frontMatter, { filename: filename, layout: "page" }, config, buildOptions, siteConfig);
-    }
-
-    GLOBAL.site.pages = docs;
-    */
+    };
 }

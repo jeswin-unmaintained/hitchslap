@@ -113,8 +113,15 @@ export default function*(config) {
 
     GLOBAL.site = {};
     yield* loadData("data");
-    yield* generatePages(config, siteConfig, build);
-    //yield* generatePosts(config, siteConfig, build);
+
+    for (var fn of [generatePages, generatePosts]) {
+        build.configure(yield* fn(config, siteConfig), config.source);
+    }
+    //build.configure(yield* generatePages(config, siteConfig), config.source);
+    //build.configure(yield* generatePosts(config, siteConfig), config.source);
     //yield* generateCollections(config, siteConfig, build);
     //yield* copyStaticFiles(config, siteConfig, build);
+
+    /* Start */
+    build.start(siteConfig.watch);
 }
