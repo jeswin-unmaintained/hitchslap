@@ -29,6 +29,8 @@
         "react": "0.13.0-beta.1",
         "6to5": "*",
         "node-markdown": "*",
-        "mkdirp": "*"
+        "mkdirp": "*",
+        "koa": "*",
+        "koa-static": "*"
     }
 }

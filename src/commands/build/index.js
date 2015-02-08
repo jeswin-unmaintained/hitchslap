@@ -12,7 +12,7 @@ import copyStaticFiles from "./copy-static-files";
 
 var argv = optimist.argv;
 
-export default function*(config) {
+export default function*(config, siteConfig) {
 
     /*
         _data directory contains a set of yaml files.
@@ -45,68 +45,8 @@ export default function*(config) {
         return options;
     };
 
-
-    var getSiteConfig = function*() {
-
-        var getValueSetter = (config) => (prop, defaultValue) => {
-            if (typeof argv[prop] !== "undefined" && argv[prop] !== null) {
-                config[prop] = argv[prop];
-            } else if (typeof config[prop] === "undefined" || config[prop] === null) {
-                config[prop] = defaultValue;
-            }
-        };
-
-        var configFilePath = path.join(config.source, (argv.config || "_config.yml"));
-        var siteConfig = yaml.safeLoad(fs.readFileSync(configFilePath));
-
-        var defaults = [
-            ["destination", "./_site"],
-            ["plugins", "./_plugins"],
-            ["layouts", "./_layouts"],
-            ["data_source", "./_data"],
-            ["collections", []],
-
-            //Handling Reading
-            ["keep_files", [".git", ".svn"]],
-            ["encoding", "utf-8"],
-            ["markdown_ext", ["markdown","mkdown","mkdn","mkd","md"]],
-            ["watch", true],
-
-            //Filtering Content
-            ["show_drafts", false],
-            ["limit_posts", 0],
-            ["future", false],
-            ["unpublished", false],
-
-            //Conversion
-            ["markdown", "markdown"],
-            ["highlighter", "highlight.js"],
-            ["excerpt_separator", "\n\n"],
-
-            //Serving
-            ["detach", false],
-            ["port", 4000],
-            ["host", "127.0.0.1"],
-            ["baseurl", ""],
-
-            //Outputting
-            ["permalink", "date"],
-            ["paginate_path", "/page:num"],
-            ["timezone", null],
-
-            //Make too much noise while processing?
-            ["quiet", false]
-        ];
-        var setter = getValueSetter(siteConfig);
-        defaults.forEach(args => { var [prop, val] = args; setter(prop, val); }); //until jshint gets param destructuring
-
-        return siteConfig;
-    };
-
     console.log(`Source: ${config.source}`);
     console.log(`Destination: ${config.destination}`);
-
-    var siteConfig = yield* getSiteConfig();
 
     //Create a crankshaft build
     var build = crankshaft.create({ threads: 1 });
@@ -117,6 +57,7 @@ export default function*(config) {
     for (var fn of [generatePages, generatePosts]) {
         build.configure(yield* fn(config, siteConfig), config.source);
     }
+
     //build.configure(yield* generatePages(config, siteConfig), config.source);
     //build.configure(yield* generatePosts(config, siteConfig), config.source);
     //yield* generateCollections(config, siteConfig, build);

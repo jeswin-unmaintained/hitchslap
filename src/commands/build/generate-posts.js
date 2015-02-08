@@ -32,12 +32,9 @@ export default function*(config, siteConfig) {
         };
 
         return (
-            permalink === "pretty" ?
-                parsePlaceholders("/:categories/:year/:month/:day/:title/index.html") :
-            permalink === "date" ?
-                parsePlaceholders("/:categories/:year/:month/:day/:title.html") :
-            permalink === "none" ?
-                parsePlaceholders("/:categories/:title.html") :
+            permalink === "pretty" ? parsePlaceholders("/:categories/:year/:month/:day/:title/index.html") :
+            permalink === "date" ? parsePlaceholders("/:categories/:year/:month/:day/:title.html") :
+            permalink === "none" ? parsePlaceholders("/:categories/:title.html") :
             parsePlaceholders(permalink)
         );
     };

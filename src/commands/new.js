@@ -6,7 +6,7 @@ import path from "path";
 var exec = tools.process.exec({log: console.log});
 var argv = optimist.argv;
 
-export default function*(config) {
+export default function*(config, siteConfig) {
 
     var isEmpty = function*(dest) {
         if (fs.existsSync(dest)) {

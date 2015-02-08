@@ -1,4 +1,4 @@
-export default function*(config) {
+export default function*(config, siteConfig) {
     console.log(`
         hitchslap 0.0.1 -- hitchslap is a blog-aware, static site generator in NodeJS
 
