@@ -54,7 +54,7 @@ export default function*(siteConfig) {
     GLOBAL.site = {};
     yield* loadData("data");
 
-    for (var fn of [generatePages, generatePosts, generateCollections]) {
+    for (var fn of [generatePages, generatePosts, generateCollections, copyStaticFiles]) {
         build.configure(yield* fn(siteConfig), siteConfig.source);
     }
 

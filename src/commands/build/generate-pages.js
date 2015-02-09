@@ -18,23 +18,18 @@ export default function*(siteConfig) {
             path.join(dir, `${basename}.html`);
     };
 
-
     /*
         Pages are all markdown files residing outside
             a) directories starting with an underscore. eg: _layouts/*, _posts/* aren't pages
             b) directories outside collections
     */
     return function() {
-        var extensions = siteConfig.markdown_ext.map(ext => `*.${ext}`);
-        var excludedDirs = [
-            /^node_modules\//,
-            /^_/
-        ];
+        var extensions = siteConfig.markdown_ext.map(ext => `*.${ext}`)
+            .concat([{ exclude: "directory", dir: "node_modules" }, { exclude: "directory", regex: /^_/ }])
+            .concat(Object.keys(siteConfig.collections).map(name => { return { exclude: "directory", dir: name }; }));
         this.watch(extensions, function*(filePath, ev, matches) {
-            if (!excludedDirs.some(regex => regex.test(filePath))) {
-                var result = yield* processTemplate(filePath, "page", makePath, siteConfig);
-                GLOBAL.site.pages.push(result.page);
-            }
+            var result = yield* processTemplate(filePath, "page", makePath, siteConfig);
+            GLOBAL.site.pages.push(result.page);
         }, "build_pages");
     };
 }

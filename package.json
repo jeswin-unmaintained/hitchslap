@@ -31,6 +31,9 @@
         "node-markdown": "*",
         "mkdirp": "*",
         "koa": "*",
-        "koa-static": "*"
+        "koa-static": "*",
+        "generatorify": "*",
+        "extjs": "*",
+        "ncp": "*"
     }
 }

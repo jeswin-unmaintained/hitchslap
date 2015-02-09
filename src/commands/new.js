@@ -2,39 +2,40 @@ import tools from "crankshaft-tools";
 import fs from "fs";
 import optimist from "optimist";
 import path from "path";
+import extfs from "extfs";
+import generatorify from "nodefunc-generatorify";
+import _ncp from "ncp";
 
-var exec = tools.process.exec({log: console.log});
+var mkdir = generatorify(fs.mkdir);
+var ncp = generatorify(_ncp.ncp);
+
+var empty = generatorify(function(path, cb) {
+    extfs.isEmpty(path, function(result) {
+        cb(null, result);
+    });
+});
+
+var exists = generatorify(function(what, cb) {
+    fs.exists(what, function(exists) {
+        cb(null, exists);
+    });
+});
+
 var argv = optimist.argv;
 
 export default function*(siteConfig) {
 
-    var isEmpty = function*(dest) {
-        if (fs.existsSync(dest)) {
-            var files = yield* exec(`ls -A ${dest}`);
-            return files;
-        }
-    };
-
-    var createTemplate = function*(dest) {
-        yield* exec(`mkdir -p ${dest}`);
-        var files = yield* exec(`cp -rf ${GLOBAL.__libdir}/site_template/* ${dest}`);
-        yield* exec(`(cd ${dest} && npm install)`);
-        return files;
-    };
-
-    var dest = process.argv[3];
-
+    var dest = argv.source || argv.s || process.argv[3];
     if (!dest) {
         console.error("Error:  You must specify a path.");
         return;
     }
 
     var force = argv.force || false;
-    if (!force && yield* isEmpty(dest)) {
+    if (!force && !(yield* empty(dest))) {
         console.error(`Conflict: ${path.resolve(dest)} is not empty.`);
-        return;
+    } else {
+        yield* ncp(path.join(GLOBAL.__libdir, "site_template"), dest);
+        console.log(`New hitchslap site installed in ${path.resolve(dest)}.`);
     }
-
-    yield* createTemplate(dest);
-    console.log(`New hitchslap site installed in ${path.resolve(dest)}.`);
 }

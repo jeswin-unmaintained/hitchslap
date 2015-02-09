@@ -52,8 +52,8 @@ export default function*(siteConfig) {
     return function() {
         var extensions = siteConfig.markdown_ext.map(ext => `_posts/*.${ext}`);
         this.watch(extensions, function*(filePath, ev, matches) {
-            var { page } = yield* processTemplate(filePath, "default", makePath, siteConfig);
-            GLOBAL.site.posts.push(page);
+            var results = yield* processTemplate(filePath, "default", makePath, siteConfig);
+            GLOBAL.site.posts.push(results.page);
         }, "build_posts");
     };
 }

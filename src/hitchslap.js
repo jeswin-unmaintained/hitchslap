@@ -28,8 +28,7 @@ var getCommand = function() {
 var getSiteConfig = function*() {
 
     var source = path.resolve(argv.source || argv.s || "./");
-    var destination = argv.destination || argv.d ? path.resolve(argv.destination || argv.d) :
-        path.join(source, "_site");
+    var destination = argv.destination || argv.d || path.join(source, "_site");
 
     var getValueSetter = (config) => (prop, defaultValue) => {
         if (typeof argv[prop] !== "undefined" && argv[prop] !== null) {
