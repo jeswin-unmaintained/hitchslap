@@ -6,7 +6,9 @@ export default function*(siteConfig) {
 
     GLOBAL.site.posts = [];
 
-    var makePath = function(filePath, page, permalink) {
+    var makePath = function(filePath, page) {
+        var permalink = page.permalink || siteConfig.permalink;
+
         var dir = path.dirname(filePath);
         var extension = path.extname(filePath);
         var basename = path.basename(filePath, extension);
@@ -31,6 +33,9 @@ export default function*(siteConfig) {
             return permalink.replace(/^\/*/, "");
         };
 
+        if (/\/$/.test(permalink))
+            permalink += "index.html";
+
         return (
             permalink === "pretty" ? parsePlaceholders("/:categories/:year/:month/:day/:title/index.html") :
             permalink === "date" ? parsePlaceholders("/:categories/:year/:month/:day/:title.html") :
@@ -47,7 +52,7 @@ export default function*(siteConfig) {
     return function() {
         var extensions = siteConfig.markdown_ext.map(ext => `_posts/*.${ext}`);
         this.watch(extensions, function*(filePath, ev, matches) {
-            var { page } = yield* processTemplate(filePath, "page", makePath, siteConfig);
+            var { page } = yield* processTemplate(filePath, "default", makePath, siteConfig);
             GLOBAL.site.posts.push(page);
         }, "build_posts");
     };

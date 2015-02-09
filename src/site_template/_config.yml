@@ -12,3 +12,7 @@ github_username:  jeswin
 
 # Build settings
 markdown: kramdown
+
+collections:
+    music:
+        output: true

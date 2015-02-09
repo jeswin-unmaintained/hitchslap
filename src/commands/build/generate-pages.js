@@ -6,7 +6,9 @@ export default function*(siteConfig) {
 
     GLOBAL.site.pages = [];
 
-    var makePath = function(filePath, permalink) {
+    var makePath = function(filePath, page) {
+        var permalink = page.permalink || siteConfig.permalink;
+
         var dir = path.dirname(filePath);
         var extension = path.extname(filePath);
         var basename = path.basename(filePath, extension);
@@ -16,12 +18,12 @@ export default function*(siteConfig) {
             path.join(dir, `${basename}.html`);
     };
 
+
     /*
         Pages are all markdown files residing outside
             a) directories starting with an underscore. eg: _layouts/*, _posts/* aren't pages
             b) directories outside collections
     */
-
     return function() {
         var extensions = siteConfig.markdown_ext.map(ext => `*.${ext}`);
         var excludedDirs = [

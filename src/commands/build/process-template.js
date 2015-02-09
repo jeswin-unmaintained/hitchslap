@@ -17,16 +17,15 @@ var makePage = function(doc) {
 };
 
 export default function*(filePath, layout, makePath, siteConfig) {
-
     var page = makePage(frontMatter(fs.readFileSync(filePath).toString()));
-    var layoutFilePath = path.join(siteConfig.source, `${siteConfig.layouts}/${layout}`);
+    var layoutFilePath = path.join(siteConfig.source, `${siteConfig.layouts}/${page.layout || layout}`);
     var params = { page: page, content: page.content, site: siteConfig };
     var component = React.createFactory(require(layoutFilePath))(params);
     var html = `<!DOCTYPE html>` + React.renderToString(component);
 
     var outputPath = path.join(
         siteConfig.destination,
-        makePath(filePath, page, page.permalink || siteConfig.permalink)
+        makePath(filePath, page)
     );
     var outputDir = path.dirname(outputPath);
     if (!fs.existsSync(outputDir)) {
