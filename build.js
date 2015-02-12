@@ -6,8 +6,9 @@ var to5 = require("6to5");
 var generatorify = require("nodefunc-generatorify");
 var extfs = require('extfs');
 var _mkdirp = require("mkdirp");
-var ncp = generatorify(require("ncp"));
+var fse = require("fs.extra");
 
+var writeFile = generatorify(fs.writeFile);
 var mkdir = generatorify(fs.mkdir);
 var readFile = generatorify(fs.readFile);
 var rmdir = generatorify(extfs.remove);
@@ -17,7 +18,7 @@ var exists = generatorify(function(what, cb) {
         cb(null, exists);
     });
 });
-
+var copyRecursive = generatorify(fse.copyRecursive);
 var build = crankshaft.create();
 
 /*
@@ -28,20 +29,23 @@ build.onStart(function*() {
         yield* rmdir("lib");
 
     /*
-        Copy vendor libs
+        Copy directories that don't need any transpilation or processing.
+        ie, node_modules and vendor libs
     */
     yield* mkdirp("lib/site_template/node_modules");
-    yield* ncp("src/site_template/node_modules/", "lib/site_template/node_modules/");
+    yield* copyRecursive("src/site_template/node_modules", "lib/site_template/node_modules");
 
     yield* mkdirp("lib/site_template/vendor");
-    yield* ncp("src/site_template/vendor/", "lib/site_template/vendor/");
+    yield* copyRecursive("src/site_template/vendor", "lib/site_template/vendor");
+
 });
 
 build.configure(function() {
     /*
         Transpile js and jsx with 6to5.
     */
-    this.watch(["src/*.js", "src/*.jsx", "!src/site_template/node_modules/*.*", "!src/site_template/vendor/*.*"], function*(filePath, ev, match) {
+    this.watch(["src/*.js", "src/*.jsx", { dir: "node_modules", exclude: "directory" },
+            { dir: "src/site_template/vendor", exclude: "directory" }], function*(filePath, ev, match) {
         var outputPath = filePath.replace(/^src\//, "lib/").replace(/\.jsx$/, ".js");
         var outputDir = path.dirname(outputPath);
         if (!(yield* exists(outputDir))) {
@@ -49,13 +53,14 @@ build.configure(function() {
         }
         var contents = yield* readFile(filePath);
         var result = to5.transform(contents, { blacklist: "regenerator" });
-        fs.writeFile(outputPath, result.code);
+        yield* writeFile(outputPath, result.code);
     }, "to5_js_jsx");
 
     /*
         Copy everything except js and jsx.
     */
-    this.watch(["src/*.*", "!src/*.js", "!src/*.jsx", "!src/site_template/node_modules/*.*", "!src/site_template/vendor/*.*"], function*(filePath, ev, match) {
+    this.watch(["src/*.*", "!src/*.js", "!src/*.jsx", { dir: "node_modules", exclude: "directory" },
+                { dir: "src/site_template/vendor", exclude: "directory" }], function*(filePath, ev, match) {
         var outputPath = filePath.replace(/^src\//, "lib/");
         var outputDir = path.dirname(outputPath);
         if (!(yield* exists(outputDir))) {
@@ -66,4 +71,4 @@ build.configure(function() {
 
 }, ".");
 
-build.start();
+build.start().then(function(err) { console.log(err); console.log(err.stack); });

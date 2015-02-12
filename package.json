@@ -33,7 +33,7 @@
         "koa": "*",
         "koa-static": "*",
         "generatorify": "*",
-        "extjs": "*",
+        "extfs": "*",
         "ncp": "*"
     }
 }
