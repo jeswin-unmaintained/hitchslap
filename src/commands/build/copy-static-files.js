@@ -13,7 +13,6 @@ export default function*(siteConfig) {
             .concat([{ exclude: "directory", dir: "node_modules" }, { exclude: "directory", regex: /^_/ }]);
 
         this.watch(extensions, function*(filePath, ev, matches) {
-            console.log(filePath);
             var destPath = path.join(siteConfig.destination, filePath);
             fs.createReadStream(filePath).pipe(fs.createWriteStream(destPath));
         }, "copy_static_files");

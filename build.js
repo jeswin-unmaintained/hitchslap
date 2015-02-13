@@ -71,4 +71,8 @@ build.configure(function() {
 
 }, ".");
 
-build.start().then(function(err) { console.log(err); console.log(err.stack); });
+build.start()
+    .catch(function(err) {
+        console.log(err);
+        console.log(err.stack);
+    });
