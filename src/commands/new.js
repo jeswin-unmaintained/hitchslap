@@ -4,11 +4,9 @@ import optimist from "optimist";
 import path from "path";
 import extfs from "extfs";
 import generatorify from "nodefunc-generatorify";
-var fse = require("fs.extra");
+var wrench = require("wrench");
 
-var copyRecursive = generatorify(fse.copyRecursive);
-
-var mkdir = generatorify(fs.mkdir);
+var copyRecursive = generatorify(wrench.copyDirRecursive);
 
 var empty = generatorify(function(path, cb) {
     extfs.isEmpty(path, function(result) {
@@ -36,7 +34,7 @@ export default function*(siteConfig) {
     if (!force && !(yield* empty(dest))) {
         console.error(`Conflict: ${path.resolve(dest)} is not empty.`);
     } else {
-        yield* copyRecursive(path.join(GLOBAL.__libdir, "site_template"), dest);
+        yield* copyRecursive(path.join(GLOBAL.__libdir, "site_template"), dest, { forceDelete: true });
         console.log(`New hitchslap site installed in ${path.resolve(dest)}.`);
     }
 }
