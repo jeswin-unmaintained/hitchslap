@@ -6,7 +6,7 @@ import optimist from "optimist";
 import * as commands from "./commands";
 import yaml from "js-yaml";
 import path from "path";
-import fs from "fs";
+import fsutils from "./utils/fs";
 
 var argv = optimist.argv;
 
@@ -39,7 +39,7 @@ var getSiteConfig = function*() {
     };
 
     var configFilePath = path.join(source, (argv.config || "_config.yml"));
-    var siteConfig = yaml.safeLoad(fs.readFileSync(configFilePath));
+    var siteConfig = yaml.safeLoad(fsutils.readFile(configFilePath));
 
     var defaults = [
         ['source', source],

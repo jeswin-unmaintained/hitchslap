@@ -1,9 +1,8 @@
 import React from "react";
 import path from "path";
-import fs from "fs";
 import frontMatter from "front-matter";
 import markdown from "node-markdown";
-import mkdirp from "mkdirp";
+import fsutils from "../../utils/fs";
 
 var md = markdown.Markdown;
 
@@ -17,7 +16,7 @@ var makePage = function(doc) {
 };
 
 export default function*(filePath, layout, makePath, siteConfig) {
-    var page = makePage(frontMatter(fs.readFileSync(filePath).toString()));
+    var page = filePath ? makePage(frontMatter((yield* fsutils.readFile(filePath)).toString())) : {};
     var layoutFilePath = path.join(siteConfig.source, `${siteConfig.layouts}/${page.layout || layout}`);
     var params = { page: page, content: page.content, site: siteConfig };
     var component = React.createFactory(require(layoutFilePath))(params);
@@ -28,10 +27,10 @@ export default function*(filePath, layout, makePath, siteConfig) {
         makePath(filePath, page)
     );
     var outputDir = path.dirname(outputPath);
-    if (!fs.existsSync(outputDir)) {
-        mkdirp.sync(outputDir);
+    if (!yield* fsutils.exists(outputDir)) {
+        yield* fsutils.mkdirp(outputDir);
     }
-    fs.writeFileSync(outputPath, html);
+    yield* fsutils.writeFile(outputPath, html);
 
     return {
         page: makePage(page)

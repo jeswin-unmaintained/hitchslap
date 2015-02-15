@@ -2,6 +2,7 @@ import frontMatter from "front-matter";
 import yaml from "js-yaml";
 import path from "path";
 import fs from "fs";
+import fsutils from "../../utils/fs";
 import optimist from "optimist";
 import crankshaft from "crankshaft";
 
@@ -22,16 +23,17 @@ export default function*(siteConfig) {
         GLOBAL.site.data = {};
 
         var fullPath = path.join(siteConfig.source, `_${dir}`);
-        if (fs.existsSync(fullPath)) {
-            var files = fs.readdirSync(fullPath).map(file => path.join(fullPath, file));
-            files.forEach(file => {
+        if (yield* fsutils.exists(fullPath)) {
+            var dirEntries = yield* fsutils.readdir(fullPath);
+            var files = dirEntries.map(file => path.join(fullPath, file));
+            for(let file of files) {
                 //We support only yaml and json now
                 if ([".yaml", ".yml"].indexOf(path.extname(file).toLowerCase()) >= 0)
-                    GLOBAL.site[dir][path.basename(file).split(".")[0]] = yaml.safeLoad(fs.readFileSync(file));
+                    GLOBAL.site[dir][path.basename(file).split(".")[0]] = yaml.safeLoad(yield* fsutils.readFile(file));
 
                 if ([".json"].indexOf(path.extname(file).toLowerCase()) >= 0)
-                    GLOBAL.site[dir][path.basename(file).split(".")[0]] = JSON.parse(fs.readFileSync(file));
-            });
+                    GLOBAL.site[dir][path.basename(file).split(".")[0]] = JSON.parse(yield* fsutils.readFile(file));
+            }
         }
     };
 
@@ -59,5 +61,8 @@ export default function*(siteConfig) {
     }
 
     /* Start */
-    build.start(siteConfig.watch);
+    build.start(siteConfig.watch).catch(err => {
+        console.log(err);
+        console.log(err.stack);
+    });
 }

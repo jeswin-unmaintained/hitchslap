@@ -1,15 +1,6 @@
 import path from "path";
 import fs from "fs";
-import generatorify from "nodefunc-generatorify";
-import _mkdirp from "mkdirp";
-
-var exists = generatorify(function(what, cb) {
-    fs.exists(what, function(exists) {
-        cb(null, exists);
-    });
-});
-
-var mkdirp = generatorify(_mkdirp);
+import fsutils from "../../utils/fs";
 
 export default function*(siteConfig) {
     /*
@@ -25,8 +16,8 @@ export default function*(siteConfig) {
         this.watch(extensions, function*(filePath, ev, matches) {
             var destPath = path.join(siteConfig.destination, filePath);
             var outputDir = path.dirname(destPath);
-            if (!(yield* exists(outputDir))) {
-                yield* mkdirp(outputDir);
+            if (!(yield* fsutils.exists(outputDir))) {
+                yield* fsutils.mkdirp(outputDir);
             }
             fs.createReadStream(filePath).pipe(fs.createWriteStream(destPath));
         }, "copy_static_files");

@@ -1,24 +1,7 @@
 import tools from "crankshaft-tools";
-import fs from "fs";
 import optimist from "optimist";
 import path from "path";
-import extfs from "extfs";
-import generatorify from "nodefunc-generatorify";
-var wrench = require("wrench");
-
-var copyRecursive = generatorify(wrench.copyDirRecursive);
-
-var empty = generatorify(function(path, cb) {
-    extfs.isEmpty(path, function(result) {
-        cb(null, result);
-    });
-});
-
-var exists = generatorify(function(what, cb) {
-    fs.exists(what, function(exists) {
-        cb(null, exists);
-    });
-});
+import fsutils from "../utils/fs";
 
 var argv = optimist.argv;
 
@@ -31,10 +14,10 @@ export default function*(siteConfig) {
     }
 
     var force = argv.force || false;
-    if (!force && !(yield* empty(dest))) {
+    if (!force && !(yield* fsutils.empty(dest))) {
         console.error(`Conflict: ${path.resolve(dest)} is not empty.`);
     } else {
-        yield* copyRecursive(path.join(GLOBAL.__libdir, "site_template"), dest, { forceDelete: true });
+        yield* fsutils.copyRecursive(path.join(GLOBAL.__libdir, "site_template"), dest, { forceDelete: true });
         console.log(`New hitchslap site installed in ${path.resolve(dest)}.`);
     }
 }

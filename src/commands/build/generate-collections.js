@@ -1,6 +1,7 @@
 import path from "path";
 import frontMatter from "front-matter";
 import processTemplate from "./process-template";
+import fsutils from "../../utils/fs";
 
 export default function*(siteConfig) {
 
@@ -27,19 +28,19 @@ export default function*(siteConfig) {
             a) directories starting with an underscore. eg: _layouts/*, _posts/* aren't pages
             b) directories outside collections
     */
-
     return function() {
-        for(var collectionName in siteConfig.collections) {
-            let collection = siteConfig.collections[collectionName];
-            let makePath = getMakePath(collection);
-            if (collection.output) {
-                let extensions = siteConfig.markdown_ext.map(ext => `${collectionName}/*.${ext}`);
-                this.watch(extensions, function*(filePath, ev, matches) {
-                    var result = yield* processTemplate(filePath, collection.layout || "default", makePath, siteConfig);
-                    GLOBAL.site.pages.push(result.page);
-                }, `build_collection_${collectionName}`);
-            }
+        if (siteConfig.collection) {
+            Object.keys(siteConfig.collection).forEach(collectionName => {
+                let collection = siteConfig.collections[collectionName];
+                let makePath = getMakePath(collection);
+                if (collection.output) {
+                    let extensions = siteConfig.markdown_ext.map(ext => `${collectionName}/*.${ext}`);
+                    this.watch(extensions, function*(filePath, ev, matches) {
+                        var result = yield* processTemplate(filePath, collection.layout || "default", makePath, siteConfig);
+                        GLOBAL.site.pages.push(result.page);
+                    }, `build_collection_${collectionName}`);
+                }
+            });
         }
-
     };
 }
