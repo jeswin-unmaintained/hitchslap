@@ -5,6 +5,7 @@ import fs from "fs";
 import fsutils from "../../utils/fs";
 import optimist from "optimist";
 import crankshaft from "crankshaft";
+import React from "react";
 
 import transpile from "./transpile";
 import generatePages from "./generate-pages";
@@ -16,6 +17,10 @@ import copyStaticFiles from "./copy-static-files";
 var argv = optimist.argv;
 
 export default function*(siteConfig) {
+
+    //Templates don't have to import react.
+    //More importantly, we don't have to stash node_modules in every website.
+    GLOBAL.React = React;
 
     /*
         _data directory contains a set of yaml files.

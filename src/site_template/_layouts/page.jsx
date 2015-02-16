@@ -1,4 +1,3 @@
-import React from "react";
 import Default from "./default";
 
 export default class Page extends React.Component {

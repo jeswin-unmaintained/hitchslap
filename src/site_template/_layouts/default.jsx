@@ -1,4 +1,3 @@
-import React from "react";
 import Head from "../_includes/head";
 import Header from "../_includes/header";
 import Footer from "../_includes/footer";
