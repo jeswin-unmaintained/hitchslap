@@ -10,7 +10,7 @@ export default function(siteConfig) {
         var extensions = ["*.*"]
             //add exclusions
             .concat(siteConfig.markdown_ext.map(ext => `!*.${ext}`))
-            .concat(["!*.yml", "!*.yaml"])
+            .concat(["!*.yml", "!*.yaml", "!*.jsx"])
             .concat([{ exclude: "directory", dir: "node_modules" }, { exclude: "directory", regex: /^_/ }]);
 
         this.watch(extensions, function*(filePath, ev, matches) {

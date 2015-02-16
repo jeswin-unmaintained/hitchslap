@@ -1,6 +1,6 @@
 import React from "react";
 
-export class Index extends React.Component {
+export default class Index extends React.Component {
 
     constructor(props) {
         super(props);
@@ -12,7 +12,6 @@ export class Index extends React.Component {
                 <div className="container-fluid">
                     <div className="row fitted">
                         <div className="col-md-2 index-pane">
-                            <Nav />
                         </div>
                         <div className="col-md-4 left-pane">
                             <section className="content-area list">

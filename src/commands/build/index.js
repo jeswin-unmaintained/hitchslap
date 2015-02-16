@@ -58,14 +58,20 @@ export default function*(siteConfig) {
     GLOBAL.site = {};
     yield* loadData("data");
 
-
-    for (var fn of [transpile, generatePages, generatePosts, generateCollections, generateTemplates, copyStaticFiles]) {
+    var codegens = [transpile, generatePages, generatePosts, generateCollections, generateTemplates, copyStaticFiles];
+    for (var fn of codegens) {
         build.configure(fn(siteConfig), siteConfig.source);
     }
 
     /* Start */
+    var startTime = Date.now();
     build.start(siteConfig.watch).catch(err => {
         console.log(err);
         console.log(err.stack);
+    });
+
+    build.onComplete(function*() {
+        var endTime = Date.now();
+        console.log(`Build took ${(endTime - startTime)/1000} seconds.`);
     });
 }

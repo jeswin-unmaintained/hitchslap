@@ -21,17 +21,17 @@ export default function*(sourcePath, layout, makePath, siteConfig) {
     //Source path and layout are the same only when generating plain JSX templates (without frontmatter)
     if (sourcePath !== layout) {
         page = makePage(frontMatter((yield* fsutils.readFile(sourcePath)).toString()));
-        layoutsourcePath = path.join(siteConfig.destination, `${siteConfig.layouts}/${page.layout || layout}`);
+        layoutsourcePath = path.resolve(siteConfig.destination, `${siteConfig.layouts}/${page.layout || layout}`);
         params = { page: page, content: page.content, site: siteConfig };
     } else {
         page = {};
-        layoutsourcePath = path.join(siteConfig.destination, layout);
+        layoutsourcePath = path.resolve(siteConfig.destination, layout);
         params = { page: page, content: "", site: siteConfig };
     }
     component = React.createFactory(require(layoutsourcePath))(params);
     var html = `<!DOCTYPE html>` + React.renderToString(component);
 
-    var outputPath = path.join(
+    var outputPath = path.resolve(
         siteConfig.destination,
         makePath(sourcePath, page)
     );
