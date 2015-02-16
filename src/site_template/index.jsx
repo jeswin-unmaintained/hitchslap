@@ -1,5 +1,4 @@
 import React from "react";
-import Nav from "./_includes/nav.js";
 
 export class Index extends React.Component {
 

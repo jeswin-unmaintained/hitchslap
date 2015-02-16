@@ -1,9 +1,9 @@
 import path from "path";
 import frontMatter from "front-matter";
-import processTemplate from "./process-template";
+import doLayout from "./do-layout";
 import fsutils from "../../utils/fs";
 
-export default function*(siteConfig) {
+export default function(siteConfig) {
 
     GLOBAL.site.pages = [];
 
@@ -29,7 +29,7 @@ export default function*(siteConfig) {
             .concat([{ exclude: "directory", dir: "node_modules" }, { exclude: "directory", regex: /^_/ }])
             .concat(Object.keys(siteConfig.collections).map(name => { return { exclude: "directory", dir: name }; }));
         this.watch(extensions, function*(filePath, ev, matches) {
-            var result = yield* processTemplate(filePath, "page", makePath, siteConfig);
+            var result = yield* doLayout(filePath, "page", makePath, siteConfig);
             GLOBAL.site.pages.push(result.page);
         }, "build_pages");
     };

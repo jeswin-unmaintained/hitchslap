@@ -1,9 +1,9 @@
 import path from "path";
 import frontMatter from "front-matter";
-import processTemplate from "./process-template";
+import doLayout from "./do-layout";
 import fsutils from "../../utils/fs";
 
-export default function*(siteConfig) {
+export default function(siteConfig) {
 
     GLOBAL.site.collections = [];
 
@@ -36,7 +36,7 @@ export default function*(siteConfig) {
                 if (collection.output) {
                     let extensions = siteConfig.markdown_ext.map(ext => `${collectionName}/*.${ext}`);
                     this.watch(extensions, function*(filePath, ev, matches) {
-                        var result = yield* processTemplate(filePath, collection.layout || "default", makePath, siteConfig);
+                        var result = yield* doLayout(filePath, collection.layout || "default", makePath, siteConfig);
                         GLOBAL.site.pages.push(result.page);
                     }, `build_collection_${collectionName}`);
                 }

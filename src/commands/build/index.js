@@ -6,9 +6,11 @@ import fsutils from "../../utils/fs";
 import optimist from "optimist";
 import crankshaft from "crankshaft";
 
+import transpile from "./transpile";
 import generatePages from "./generate-pages";
 import generatePosts from "./generate-posts";
 import generateCollections from "./generate-collections";
+import generateTemplates from "./generate-templates";
 import copyStaticFiles from "./copy-static-files";
 
 var argv = optimist.argv;
@@ -56,8 +58,9 @@ export default function*(siteConfig) {
     GLOBAL.site = {};
     yield* loadData("data");
 
-    for (var fn of [generatePages, generatePosts, generateCollections, copyStaticFiles]) {
-        build.configure(yield* fn(siteConfig), siteConfig.source);
+
+    for (var fn of [transpile, generatePages, generatePosts, generateCollections, generateTemplates, copyStaticFiles]) {
+        build.configure(fn(siteConfig), siteConfig.source);
     }
 
     /* Start */

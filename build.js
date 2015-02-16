@@ -11,26 +11,23 @@ var build = crankshaft.create();
 */
 build.onStart(function*() {
     if (yield* fsutils.exists("lib"))
-        fsutils.remove("lib");
+        yield* fsutils.remove("lib");
 
     /*
         Copy directories that don't need any transpilation or processing.
-        ie, node_modules and vendor libs
+        ie, everything inside the default site_template
     */
-    yield* fsutils.mkdirp("lib/site_template/node_modules");
-    yield* fsutils.copyRecursive("src/site_template/node_modules", "lib/site_template/node_modules", { forceDelete: true });
-
-    yield* fsutils.mkdirp("lib/site_template/vendor");
-    yield* fsutils.copyRecursive("src/site_template/vendor", "lib/site_template/vendor", { forceDelete: true });
-
+    yield* fsutils.mkdirp("lib/site_template");
+    yield* fsutils.copyRecursive("src/site_template", "lib/site_template", { forceDelete: true });
 });
 
 build.configure(function() {
+    var excluded = [{ dir: "node_modules", exclude: "directory" }, { dir: "src/site_template", exclude: "directory" }];
+
     /*
         Transpile js and jsx with 6to5.
     */
-    this.watch(["src/*.js", "src/*.jsx", { dir: "node_modules", exclude: "directory" },
-            { dir: "src/site_template/vendor", exclude: "directory" }], function*(filePath, ev, match) {
+    this.watch(["src/*.js"].concat(excluded), function*(filePath, ev, match) {
         var outputPath = filePath.replace(/^src\//, "lib/").replace(/\.jsx$/, ".js");
         var outputDir = path.dirname(outputPath);
         if (!(yield* fsutils.exists(outputDir))) {
@@ -41,11 +38,8 @@ build.configure(function() {
         yield* fsutils.writeFile(outputPath, result.code);
     }, "to5_js_jsx");
 
-    /*
-        Copy everything except js and jsx.
-    */
-    this.watch(["src/*.*", "!src/*.js", "!src/*.jsx", { dir: "node_modules", exclude: "directory" },
-                { dir: "src/site_template/vendor", exclude: "directory" }], function*(filePath, ev, match) {
+
+    this.watch(["src/*.*", "!src/*.js"].concat(excluded), function*(filePath, ev, match) {
         var outputPath = filePath.replace(/^src\//, "lib/");
         var outputDir = path.dirname(outputPath);
         if (!(yield* fsutils.exists(outputDir))) {

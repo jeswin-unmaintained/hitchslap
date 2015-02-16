@@ -13,11 +13,15 @@ export default function*(siteConfig) {
         return;
     }
 
-    var force = argv.force || false;
-    if (!force && !(yield* fsutils.empty(dest))) {
+    if (!argv.force && !argv.recreate && !(yield* fsutils.empty(dest))) {
         console.error(`Conflict: ${path.resolve(dest)} is not empty.`);
     } else {
+        if (argv.recreate) {
+            if (yield* fsutils.exists(dest))
+                yield* fsutils.remove(dest);
+        }
         yield* fsutils.copyRecursive(path.join(GLOBAL.__libdir, "site_template"), dest, { forceDelete: true });
         console.log(`New hitchslap site installed in ${path.resolve(dest)}.`);
     }
+
 }

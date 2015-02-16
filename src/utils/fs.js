@@ -3,6 +3,7 @@ var generatorify = require("nodefunc-generatorify");
 var extfs = require('extfs');
 var _mkdirp = require("mkdirp");
 var wrench = require("wrench");
+var rimraf = require("rimraf");
 
 var exists = generatorify(function(what, cb) {
     fs.exists(what, function(exists) {
@@ -23,6 +24,6 @@ module.exports = {
     copyRecursive: generatorify(wrench.copyDirRecursive),
     exists: exists,
     empty: empty,
-    remove: generatorify(extfs.remove),
+    remove: generatorify(rimraf),
     readdir: generatorify(fs.readdir)
 };

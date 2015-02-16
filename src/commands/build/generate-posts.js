@@ -1,9 +1,9 @@
 import path from "path";
 import frontMatter from "front-matter";
-import processTemplate from "./process-template";
+import doLayout from "./do-layout";
 import fsutils from "../../utils/fs";
 
-export default function*(siteConfig) {
+export default function(siteConfig) {
 
     GLOBAL.site.posts = [];
 
@@ -53,7 +53,7 @@ export default function*(siteConfig) {
     return function() {
         var extensions = siteConfig.markdown_ext.map(ext => `_posts/*.${ext}`);
         this.watch(extensions, function*(filePath, ev, matches) {
-            var results = yield* processTemplate(filePath, "default", makePath, siteConfig);
+            var results = yield* doLayout(filePath, "default", makePath, siteConfig);
             GLOBAL.site.posts.push(results.page);
         }, "build_posts");
     };

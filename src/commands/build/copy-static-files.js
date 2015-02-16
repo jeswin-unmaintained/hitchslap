@@ -2,7 +2,7 @@ import path from "path";
 import fs from "fs";
 import fsutils from "../../utils/fs";
 
-export default function*(siteConfig) {
+export default function(siteConfig) {
     /*
         Copy everything that is not a markdown, jsx or yml file.
     */
