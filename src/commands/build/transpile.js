@@ -1,4 +1,4 @@
-import to5 from "6to5";
+import babel from "babel";
 import fsutils from "../../utils/fs";
 import optimist from "optimist";
 import path from "path";
@@ -9,7 +9,7 @@ export default function(siteConfig) {
     var blacklist = argv["transpiler-blacklist"] ? [].concat(argv["transpiler-blacklist"]) : [];
 
     return function() {
-        var excluded = ["vendor", "node_modules", "_site"]
+        var excluded = ["node_modules", "_vendor", "_site"]
             .map(dir => { return { dir, exclude: "directory" }; });
 
         this.watch(["*.js", "*.jsx"].concat(excluded), function*(filePath, ev, match) {
@@ -19,8 +19,8 @@ export default function(siteConfig) {
                 yield* fsutils.mkdirp(outputDir);
             }
             var contents = yield* fsutils.readFile(filePath);
-            var result = to5.transform(contents, { blacklist });
+            var result = babel.transform(contents, { blacklist });
             yield* fsutils.writeFile(outputPath, result.code);
-        }, "to5_js_jsx");
+        }, "babel_js_jsx");
     };
 }

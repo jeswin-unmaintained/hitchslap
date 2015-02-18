@@ -13,6 +13,7 @@ import generatePosts from "./generate-posts";
 import generateCollections from "./generate-collections";
 import generateTemplates from "./generate-templates";
 import copyStaticFiles from "./copy-static-files";
+import webpack from "./webpack";
 
 var argv = optimist.argv;
 
@@ -21,7 +22,7 @@ export default function*(siteConfig) {
     //Templates don't have to import react.
     //More importantly, we don't have to stash node_modules in every website.
     GLOBAL.React = React;
-
+    
     /*
         _data directory contains a set of yaml files.
         Available as site.data.filename. eg: site.data.songs
@@ -63,7 +64,7 @@ export default function*(siteConfig) {
     GLOBAL.site = {};
     yield* loadData("data");
 
-    var codegens = [transpile, generatePages, generatePosts, generateCollections, generateTemplates, copyStaticFiles];
+    var codegens = [transpile, generatePages, generatePosts, generateCollections, generateTemplates, copyStaticFiles, webpack];
     for (var fn of codegens) {
         build.configure(fn(siteConfig), siteConfig.source);
     }

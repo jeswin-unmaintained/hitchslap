@@ -1,4 +1,4 @@
-import Default from "./default";
+import Container from "../_includes/container";
 
 export default class Page extends React.Component {
     constructor(props) {
@@ -6,9 +6,8 @@ export default class Page extends React.Component {
     }
 
     render() {
-
         return (
-            <Default title={this.props.page.title}>
+            <Container title={this.props.page.title}>
                 <div className="post">
 
                     <header className="post-header">
@@ -20,7 +19,7 @@ export default class Page extends React.Component {
                     </article>
 
                 </div>
-            </Default>
+            </Container>
         );
     }
 }

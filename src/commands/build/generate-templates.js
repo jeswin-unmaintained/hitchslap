@@ -21,7 +21,7 @@ export default function(siteConfig) {
         var extensions = [`${siteConfig.destination}/*.js`]
             //exclude these directories.
             .concat(
-                ["_layouts", "_includes", "_site", "vendor", "node_modules"]
+                ["_layouts", "_includes", "_site", "_vendor", "node_modules"]
                     .map(dir => { return { exclude: "directory", dir }; })
             );
         this.watch(extensions, function*(filePath, ev, matches) {

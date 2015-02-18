@@ -3,7 +3,7 @@ var path = require("path");
 var fs = require("fs");
 var fsutils = require("./src/utils/fs");
 var tools = require("crankshaft-tools");
-var to5 = require("6to5");
+var babel = require("babel");
 var build = crankshaft.create();
 
 /*
@@ -25,7 +25,7 @@ build.configure(function() {
     var excluded = [{ dir: "node_modules", exclude: "directory" }, { dir: "src/site_template", exclude: "directory" }];
 
     /*
-        Transpile js and jsx with 6to5.
+        Transpile js and jsx with babel.
     */
     this.watch(["src/*.js"].concat(excluded), function*(filePath, ev, match) {
         var outputPath = filePath.replace(/^src\//, "lib/").replace(/\.jsx$/, ".js");
@@ -34,9 +34,9 @@ build.configure(function() {
             yield* fsutils.mkdirp(outputDir);
         }
         var contents = yield* fsutils.readFile(filePath);
-        var result = to5.transform(contents, { blacklist: "regenerator" });
+        var result = babel.transform(contents, { blacklist: "regenerator" });
         yield* fsutils.writeFile(outputPath, result.code);
-    }, "to5_js_jsx");
+    }, "babel_js_jsx");
 
 
     this.watch(["src/*.*", "!src/*.js"].concat(excluded), function*(filePath, ev, match) {

@@ -27,13 +27,14 @@
         "front-matter": "*",
         "js-yaml": "*",
         "react": "0.13.0-beta.1",
-        "6to5": "*",
+        "babel": "*",
         "node-markdown": "*",
         "mkdirp": "*",
         "koa": "*",
         "koa-static": "*",
         "generatorify": "*",
         "extfs": "*",
-        "fs.extra": "*"
+        "fs.extra": "*",
+        "webpack": "*"
     }
 }

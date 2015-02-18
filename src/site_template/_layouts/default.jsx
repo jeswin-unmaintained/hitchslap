@@ -1,6 +1,4 @@
-import Head from "../_includes/head";
-import Header from "../_includes/header";
-import Footer from "../_includes/footer";
+import Container from "../_includes/container";
 
 export default class Default extends React.Component {
     constructor(props) {
@@ -8,24 +6,21 @@ export default class Default extends React.Component {
     }
 
     render() {
+
         return (
-            <html>
-                <Head title={this.props.title} />
-                <body>
+            <Container title={this.props.page.title}>
+                <div className="post">
 
-                    <Header />
+                    <header className="post-header">
+                        <h1 className="post-title">{ this.props.page.title }</h1>
+                    </header>
 
-                    <div className="page-content">
-                        <div className="wrapper">
-                            {this.props.children}
-                        </div>
-                    </div>
+                    <article className="post-content">
+                        <div dangerouslySetInnerHTML={{__html: this.props.content}}></div>
+                    </article>
 
-                    <Footer />
-
-                </body>
-
-            </html>
+                </div>
+            </Container>
         );
     }
 }

@@ -1,5 +1,5 @@
 //This polyfill is needed on ES5
-require("6to5/polyfill");
+require("babel/polyfill");
 
 import co from "co";
 import optimist from "optimist";
