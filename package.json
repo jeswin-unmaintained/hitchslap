@@ -14,7 +14,10 @@
         "type": "git",
         "url": "https://github.com/jeswin/hitchslap"
     },
-    "author": "",
+    "author": {
+      "name": "Jeswin Kumar",
+      "email": "jeswinpk@agilehead.com"
+    },
     "license": "GNU GPL",
     "bugs": {
         "url": "https://github.com/jeswin/hitchslap/issues"
