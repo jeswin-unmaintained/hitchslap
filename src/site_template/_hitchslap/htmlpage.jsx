@@ -4,7 +4,7 @@
 */
 var joinPath = function(baseurl) {
     return function(url) {
-        return (/\/$/).test(baseurl) ? baseurl + url : baseurl + "/" + url;
+        return (/\/$/).test(baseurl) || (/^\//).test(url) ? baseurl + url : baseurl + "/" + url;
     };
 };
 
@@ -14,8 +14,10 @@ export default class Container extends React.Component {
     }
 
     render() {
-        var css = this.props.css ? this.props.css.map(joinPath(this.props.site.baseurl)) : [];
-        var scripts = this.props.scripts ? this.props.scripts.map(joinPath(this.props.site.baseurl)) : [];
+        var _joinPath = joinPath(this.props.site.baseurl);
+        var css = this.props.css ? this.props.css.map(_joinPath) : [];
+        var scripts = this.props.scripts ?
+            ["/_vendor/react.min.js", "/_vendor/jquery.min.js"].concat(this.props.scripts).map(_joinPath) : [];
         return (
             <html>
                 <head>
@@ -24,7 +26,8 @@ export default class Container extends React.Component {
                     <meta httpEquiv="X-UA-Compatible" content="IE=edge" />
                     <meta name="viewport" content="width=device-width, initial-scale=1" />
                     {css.map(css => <link type="text/css" href={css}></link>)}
-                    {scripts.map(script => <script href={script}></script>)}
+                    {scripts.map(script => <script src={script}></script>)}
+                    <script>if(window.__initApp) window.__initApp();</script>
                 </head>
                 {this.props.children}
             </html>

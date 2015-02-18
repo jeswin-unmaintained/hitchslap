@@ -26,16 +26,18 @@
         "crankshaft-tools": "*",
         "front-matter": "*",
         "js-yaml": "*",
-        "react": "0.13.0-beta.1",
+        "react": "0.13.0-beta.2",
         "babel": "*",
         "node-markdown": "*",
         "mkdirp": "*",
         "koa": "*",
         "koa-static": "*",
-        "generatorify": "*",
+        "nodefunc-generatorify": "*",
         "extfs": "*",
         "fs.extra": "*",
         "webpack": "*",
-        "pretty": "*"
+        "pretty": "*",
+        "wrench": "*",
+        "rimraf": "*"
     }
 }

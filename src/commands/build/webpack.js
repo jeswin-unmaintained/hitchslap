@@ -32,7 +32,7 @@ export default function(siteConfig) {
         */
         this.job(function*() {
             var config = {
-                entry: files,
+                entry: files.concat(path.resolve(siteConfig.destination, "_hitchslap/app.js")),
                 output: {
                     filename: path.join(siteConfig.destination, "app.bundle.js")
                 }
