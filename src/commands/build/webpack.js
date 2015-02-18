@@ -17,7 +17,7 @@ export default function(siteConfig) {
             //exclude these directories.
             //We exclude layouts because webpack needs only the entry point.
             .concat(
-                ["_includes", "_site", "_vendor", "node_modules"]
+                ["_includes", "_hitchslap", "_site", "_vendor", "node_modules"]
                     .map(dir => { return { exclude: "directory", dir }; })
             );
 

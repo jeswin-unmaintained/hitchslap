@@ -8,7 +8,7 @@ export default class Index extends React.Component {
 
     render() {
         return (
-            <Container>
+            <Container {...this.props}>
                 <div className="home">
                     <div className="container-fluid">
                         <div className="row fitted">

@@ -76,6 +76,7 @@ var getSiteConfig = function*() {
         ["permalink", "date"],
         ["paginate_path", "/page:num"],
         ["timezone", null],
+        ["beautify", true], //beautify html output?
 
         //Make too much noise while processing?
         ["quiet", false]

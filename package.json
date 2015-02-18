@@ -35,6 +35,7 @@
         "generatorify": "*",
         "extfs": "*",
         "fs.extra": "*",
-        "webpack": "*"
+        "webpack": "*",
+        "pretty": "*"
     }
 }

@@ -1,6 +1,16 @@
-import HtmlPage from "../_hitchslap/htmlpage"
+import HtmlPage from "../_hitchslap/htmlpage";
 import Header from "./header";
 import Footer from "./footer";
+
+var cssFiles = [
+    "/_vendor/bootstrap/css/bootstrap.min.css",
+    "/css/main.css"
+];
+
+var jsFiles = [
+    "/_vendor/bootstrap/js/bootstrap.min.js",
+    "/app.bundle.js"
+];
 
 export default class Container extends React.Component {
     constructor(props) {
@@ -9,7 +19,7 @@ export default class Container extends React.Component {
 
     render() {
         return (
-            <HtmlPage title={this.props.title} scripts={["abcd.js"]} css={["hello.js"]}>
+            <HtmlPage {...this.props} css={cssFiles} scripts={jsFiles}>
                 <body>
                     <Header />
 

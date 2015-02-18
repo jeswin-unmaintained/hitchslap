@@ -7,7 +7,7 @@ export default class Page extends React.Component {
 
     render() {
         return (
-            <Container title={this.props.page.title}>
+            <Container {...this.props}>
                 <div className="post">
 
                     <header className="post-header">
