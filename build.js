@@ -50,7 +50,7 @@ build.configure(function() {
 
 }, ".");
 
-build.start()
+crankshaft.run(build)
     .catch(function(err) {
         console.log(err);
         console.log(err.stack);

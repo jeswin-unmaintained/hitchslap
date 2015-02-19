@@ -39,8 +39,7 @@ var getSiteConfig = function*() {
     };
 
     var configFilePath = path.join(source, (argv.config || "_config.yml"));
-    var siteConfig = yaml.safeLoad(fsutils.readFile(configFilePath));
-
+    var siteConfig = yaml.safeLoad(yield* fsutils.readFile(configFilePath));
     var defaults = [
         ['source', source],
         ['destination', destination],
@@ -87,7 +86,9 @@ var getSiteConfig = function*() {
         ["quiet", false],
 
         //do not copy these extensions as static files. They aren't.
-        ["skip_copying_extensions", ["markdown","mkdown","mkdn","mkd","md", "yml", "yaml", "jsx", "less"]]
+        ["skip_copying_extensions", ["markdown","mkdown","mkdn","mkd","md", "yml", "yaml", "jsx", "less"]],
+
+        ["disabled_plugins", []]
     ];
     var setter = getValueSetter(siteConfig);
     defaults.forEach(args => { var [prop, val] = args; setter(prop, val); }); //until jshint gets param destructuring

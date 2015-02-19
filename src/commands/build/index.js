@@ -28,59 +28,81 @@ export default function*(siteConfig) {
         _data directory contains a set of yaml files.
         Available as site.data.filename. eg: site.data.songs
     */
-    var loadData = function*(dir) {
+    var loadData = function*() {
         GLOBAL.site.data = {};
 
-        var fullPath = path.join(siteConfig.source, `_${dir}`);
+        var fullPath = path.resolve(siteConfig.source, siteConfig.dir_data);
         if (yield* fsutils.exists(fullPath)) {
             var dirEntries = yield* fsutils.readdir(fullPath);
             var files = dirEntries.map(file => path.join(fullPath, file));
             for(let file of files) {
                 //We support only yaml and json now
                 if ([".yaml", ".yml"].indexOf(path.extname(file).toLowerCase()) >= 0)
-                    GLOBAL.site[dir][path.basename(file).split(".")[0]] = yaml.safeLoad(yield* fsutils.readFile(file));
+                    GLOBAL.site.data[path.basename(file).split(".")[0]] = yaml.safeLoad(yield* fsutils.readFile(file));
 
                 if ([".json"].indexOf(path.extname(file).toLowerCase()) >= 0)
-                    GLOBAL.site[dir][path.basename(file).split(".")[0]] = JSON.parse(yield* fsutils.readFile(file));
+                    GLOBAL.site.data[path.basename(file).split(".")[0]] = JSON.parse(yield* fsutils.readFile(file));
             }
         }
     };
 
 
+    var getPlugins = function*() {
+        var fullPath = path.resolve(siteConfig.destination, siteConfig.dir_plugins);
+        if (yield* fsutils.exists(fullPath)) {
+            var dirEntries = yield* fsutils.readdir(fullPath);
+            var files = dirEntries
+                .map(file => path.join(fullPath, file))
+                .filter(file => siteConfig.disabled_plugins.indexOf(path.basename(file, path.extname(file))) === -1);
+            return files.map(f => require(f));
+        } else {
+            return [];
+        }
+    };
+
     var getBuildOptions = function*() {
         var options = {};
-
         options.drafts = argv.drafts === true;
         options.future = argv.future === true;
         options.watch = argv.watch === true;
         return options;
     };
 
+
     console.log(`Source: ${siteConfig.source}`);
     console.log(`Destination: ${siteConfig.destination}`);
 
-    //Create a crankshaft build
-    var build = crankshaft.create({ threads: 1 });
-
-    GLOBAL.site = {};
-    yield* loadData("data");
-
-    var codegens = [transpile, generatePages, generatePosts, generateCollections,
-            generateTemplates, webpack, less, copyStaticFiles];
-
-    for (var fn of codegens) {
-        build.configure(fn(siteConfig), siteConfig.source);
-    }
 
     /* Start */
     var startTime = Date.now();
-    build.start(siteConfig.watch).catch(err => {
-        console.log(err);
-        console.log(err.stack);
-    });
+
+    GLOBAL.site = {};
+    yield* loadData();
+
+    //Transpile everything first.
+    var transpiler = crankshaft.create();
+    transpiler.configure(transpile(siteConfig), siteConfig.source);
+    yield* transpiler.start(false);
+
+    //Create a crankshaft build
+    var build = crankshaft.create();
+    var codegens = [generatePages, generatePosts, generateCollections,
+            generateTemplates, webpack, less, copyStaticFiles];
+    var plugins = yield* getPlugins();
+
+    for (var fn of codegens.concat(plugins)) {
+        build.configure(fn(siteConfig), siteConfig.source);
+    }
 
     build.onComplete(function*() {
         var endTime = Date.now();
         console.log(`Build took ${(endTime - startTime)/1000} seconds.`);
     });
+
+    try {
+        yield* build.start(siteConfig.watch);
+    } catch(err) {
+        console.log(err);
+        console.log(err.stack);
+    }
 }
