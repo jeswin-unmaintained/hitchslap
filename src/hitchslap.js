@@ -43,7 +43,7 @@ var getSiteConfig = function*() {
 
     var defaults = [
         ['source', source],
-        ['destination', path.join(source, destination)],
+        ['destination', destination],
         ["dir_data", "_data"],
         ["dir_hitchslap", "_hitchslap"],
         ["dir_includes", "_includes"],
@@ -91,6 +91,9 @@ var getSiteConfig = function*() {
     ];
     var setter = getValueSetter(siteConfig);
     defaults.forEach(args => { var [prop, val] = args; setter(prop, val); }); //until jshint gets param destructuring
+
+    siteConfig.source = path.resolve(siteConfig.source);
+    siteConfig.destination = path.resolve(siteConfig.source, siteConfig.destination);
 
     return siteConfig;
 };
