@@ -9,8 +9,10 @@ export default function(siteConfig) {
     var blacklist = argv["transpiler-blacklist"] ? [].concat(argv["transpiler-blacklist"]) : [];
 
     return function() {
-        var excluded = ["node_modules", "_vendor", "_site"]
-            .map(dir => { return { dir, exclude: "directory" }; });
+        var excluded = ["destination", "dir_client_js"]
+            .map(k => siteConfig[k])
+            .concat("node_modules")
+            .map(dir => { return { exclude: "directory", dir }; });
 
         this.watch(["*.js", "*.jsx"].concat(excluded), function*(filePath, ev, match) {
             var outputPath = path.join(siteConfig.destination, filePath).replace(/\.jsx$/, ".js");

@@ -9,9 +9,12 @@ export default function(siteConfig) {
     return function() {
         var extensions = ["*.*"]
             //add exclusions
-            .concat(siteConfig.markdown_ext.map(ext => `!*.${ext}`))
-            .concat(["!*.yml", "!*.yaml", "!*.jsx"])
-            .concat(["node_modules"].map(dir => { return { exclude: "directory", dir }; }));
+            .concat(siteConfig.markdown_ext
+                .map(ext => `!*.${ext}`))
+            .concat(siteConfig.skip_copying_extensions
+                .map(ext => `!*.${ext}`))
+            .concat([siteConfig.destination, "node_modules"]
+                .map(dir => { return { exclude: "directory", dir }; }));
 
         this.watch(extensions, function*(filePath, ev, matches) {
             var destPath = path.join(siteConfig.destination, filePath);
@@ -19,6 +22,7 @@ export default function(siteConfig) {
             if (!(yield* fsutils.exists(outputDir))) {
                 yield* fsutils.mkdirp(outputDir);
             }
+
             fs.createReadStream(filePath).pipe(fs.createWriteStream(destPath));
         }, "copy_static_files");
     };

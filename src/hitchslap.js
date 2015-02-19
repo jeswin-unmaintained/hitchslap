@@ -27,8 +27,8 @@ var getCommand = function() {
 
 var getSiteConfig = function*() {
 
-    var source = path.resolve(argv.source || argv.s || "./");
-    var destination = argv.destination || argv.d || path.join(source, "_site");
+    var source = argv.source || argv.s || "./";
+    var destination = argv.destination || argv.d || "_site";
 
     var getValueSetter = (config) => (prop, defaultValue) => {
         if (typeof argv[prop] !== "undefined" && argv[prop] !== null) {
@@ -43,10 +43,15 @@ var getSiteConfig = function*() {
 
     var defaults = [
         ['source', source],
-        ['destination', destination],
-        ["plugins", "./_plugins"],
-        ["layouts", "./_layouts"],
-        ["data_source", "./_data"],
+        ['destination', path.join(source, destination)],
+        ["dir_data", "_data"],
+        ["dir_hitchslap", "_hitchslap"],
+        ["dir_includes", "_includes"],
+        ["dir_layouts", "_layouts"],
+        ["dir_plugins", "_plugins"],
+        ["dir_posts", "_posts"],
+        ["dir_css", "css"],
+        ["dir_client_js", "vendor"],
         ["collections", []],
 
         //Handling Reading
@@ -79,7 +84,10 @@ var getSiteConfig = function*() {
         ["beautify", true], //beautify html output?
 
         //Make too much noise while processing?
-        ["quiet", false]
+        ["quiet", false],
+
+        //do not copy these extensions as static files. They aren't.
+        ["skip_copying_extensions", ["markdown","mkdown","mkdn","mkd","md", "yml", "yaml", "jsx", "less"]]
     ];
     var setter = getValueSetter(siteConfig);
     defaults.forEach(args => { var [prop, val] = args; setter(prop, val); }); //until jshint gets param destructuring

@@ -22,8 +22,8 @@ export default function*(sourcePath, layout, makePath, siteConfig) {
 
         //Source path and layout are the same only when generating plain JSX templates (without frontmatter)
         if (sourcePath !== layout) {
-            page = makePage(frontMatter((yield* fsutils.readFile(sourcePath)).toString()));
-            layoutsourcePath = path.resolve(siteConfig.destination, `${siteConfig.layouts}/${page.layout || layout}`);
+            page = makePage(frontMatter(yield* fsutils.readFile(sourcePath)));
+            layoutsourcePath = path.resolve(siteConfig.destination, `${siteConfig.dir_layouts}/${page.layout || layout}`);
             params = { page: page, content: page.content, site: siteConfig };
         } else {
             page = {};
@@ -43,6 +43,10 @@ export default function*(sourcePath, layout, makePath, siteConfig) {
         if (!yield* fsutils.exists(outputDir)) {
             yield* fsutils.mkdirp(outputDir);
         }
+
+        if (!siteConfig.quiet)
+            console.log(`Generating ${sourcePath} -> ${outputPath}`);
+
         yield* fsutils.writeFile(outputPath, html);
 
         return { page };

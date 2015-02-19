@@ -18,10 +18,13 @@ export default function(siteConfig) {
         Templates are JSX files outside the _layouts directory
     */
     return function() {
-        var extensions = [`${siteConfig.destination}/*.js`, "!app.bundle.js"]
+        var extensions = [`${path.resolve(siteConfig.destination)}/*.js`, "!app.bundle.js"]
             //exclude these directories.
             .concat(
-                ["_layouts", "_includes", "_site", "_vendor", "_hitchslap", "node_modules"]
+                ["dir_hitchslap", "dir_includes", "dir_layouts",
+                        "dir_plugins", "dir_posts",  "dir_css",  "dir_client_js"]
+                    .map(k => siteConfig[k])
+                    .concat("node_modules")
                     .map(dir => { return { exclude: "directory", dir }; })
             );
         this.watch(extensions, function*(filePath, ev, matches) {

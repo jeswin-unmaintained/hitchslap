@@ -13,11 +13,14 @@ export default function(siteConfig) {
             b) All templates in _layouts
     */
     return function() {
-        var extensions = [`${siteConfig.destination}/*.js`]
+        var extensions = [`${path.resolve(siteConfig.destination)}/*.js`]
             //exclude these directories.
             //We exclude layouts because webpack needs only the entry point.
             .concat(
-                ["_includes", "_hitchslap", "_site", "_vendor", "node_modules"]
+                ["dir_data", "dir_hitchslap", "dir_includes", "dir_layouts",
+                        "dir_plugins", "dir_posts",  "dir_css",  "dir_client_js"]
+                    .map(k => siteConfig[k])
+                    .concat("node_modules")
                     .map(dir => { return { exclude: "directory", dir }; })
             );
 

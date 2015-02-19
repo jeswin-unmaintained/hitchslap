@@ -17,9 +17,14 @@ var empty = generatorify(function(path, cb) {
     });
 });
 
+var readFile = function*() {
+    var fn = generatorify(fs.readFile);
+    return (yield* fn.apply(null, arguments)).toString();
+};
+
 module.exports = {
     writeFile: generatorify(fs.writeFile),
-    readFile: generatorify(fs.readFile),
+    readFile: readFile,
     mkdirp: generatorify(_mkdirp),
     copyRecursive: generatorify(wrench.copyDirRecursive),
     exists: exists,

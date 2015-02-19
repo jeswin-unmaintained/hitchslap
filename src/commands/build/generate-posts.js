@@ -51,7 +51,7 @@ export default function(siteConfig) {
             b) collections
     */
     return function() {
-        var extensions = siteConfig.markdown_ext.map(ext => `_posts/*.${ext}`);
+        var extensions = siteConfig.markdown_ext.map(ext => `${siteConfig.dir_posts}/*.${ext}`);
         this.watch(extensions, function*(filePath, ev, matches) {
             var results = yield* doLayout(filePath, "default", makePath, siteConfig);
             GLOBAL.site.posts.push(results.page);

@@ -26,8 +26,14 @@ export default function(siteConfig) {
     */
     return function() {
         var extensions = siteConfig.markdown_ext.map(ext => `*.${ext}`)
-            .concat([{ exclude: "directory", dir: "node_modules" }, { exclude: "directory", regex: /^_/ }])
-            .concat(Object.keys(siteConfig.collections).map(name => { return { exclude: "directory", dir: name }; }));
+            .concat(
+                ["dir_data", "dir_hitchslap", "dir_includes", "dir_layouts",
+                        "dir_plugins", "dir_posts",  "dir_css",  "dir_client_js"]
+                    .map(k => siteConfig[k])
+                    .concat("node_modules")
+                    .concat(Object.keys(siteConfig.collections))
+                    .map(dir => { return { exclude: "directory", dir }; })
+            );
         this.watch(extensions, function*(filePath, ev, matches) {
             var result = yield* doLayout(filePath, "page", makePath, siteConfig);
             GLOBAL.site.pages.push(result.page);

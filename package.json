@@ -41,6 +41,7 @@
         "webpack": "*",
         "pretty": "*",
         "wrench": "*",
-        "rimraf": "*"
+        "rimraf": "*",
+        "less": "*"
     }
 }
