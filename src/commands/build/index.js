@@ -20,13 +20,16 @@ var argv = optimist.argv;
 
 export default function*(siteConfig) {
 
-    //Templates don't have to import react.
-    //More importantly, we don't have to stash node_modules in every website.
+    /*
+        Templates don't have to import react.
+        Pre-load it into GLOBAL.
+    */
     GLOBAL.React = React;
 
+
     /*
-        _data directory contains a set of yaml files.
-        Available as site.data.filename. eg: site.data.songs
+        config.dir_data directory contains a set of yaml files.
+        Yaml is loaded into site.data.filename. eg: site.data.songs
     */
     var loadData = function*() {
         GLOBAL.site.data = {};
@@ -47,6 +50,10 @@ export default function*(siteConfig) {
     };
 
 
+    /*
+        Load plugins from the config.dir_plugins directory.
+        Plugins are no different from the build plugins under src/commands/build
+    */
     var getPlugins = function*() {
         var fullPath = path.resolve(siteConfig.destination, siteConfig.dir_plugins);
         if (yield* fsutils.exists(fullPath)) {
@@ -59,6 +66,7 @@ export default function*(siteConfig) {
             return [];
         }
     };
+
 
     var getBuildOptions = function*() {
         var options = {};
@@ -79,22 +87,34 @@ export default function*(siteConfig) {
     GLOBAL.site = {};
     yield* loadData();
 
-    //Transpile everything first.
+    /*
+        Transpile everything first.
+        We need to do this separately because custom plugins need to be transpiled before they can be loaded.
+        So create a build for it.
+    */
     var transpiler = crankshaft.create();
     transpiler.configure(transpile(siteConfig), siteConfig.source);
     yield* transpiler.start(false);
 
-    //Create a crankshaft build
+    /*
+        Add built-in codegens/plugins and custom plugins.
+        Custom plugins will be loaded from {config.destination}/{config.dir_plugins} directory.
+        This directory will be deleted once all plugins have been run.
+    */
     var build = crankshaft.create();
     var codegens = [generatePages, generatePosts, generateCollections,
             generateTemplates, webpack, less, copyStaticFiles];
     var plugins = yield* getPlugins();
-
     for (var fn of codegens.concat(plugins)) {
         build.configure(fn(siteConfig), siteConfig.source);
     }
 
     build.onComplete(function*() {
+        //We can remove the custom plugins directory
+        var pluginsPath = path.resolve(siteConfig.destination, siteConfig.dir_plugins);
+        if (yield* fsutils.exists(pluginsPath))
+            yield* fsutils.remove(pluginsPath);
+
         var endTime = Date.now();
         console.log(`Build took ${(endTime - startTime)/1000} seconds.`);
     });

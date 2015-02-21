@@ -3,12 +3,12 @@ import Header from "./header";
 import Footer from "./footer";
 
 var cssFiles = [
-    "/_vendor/bootstrap/css/bootstrap.min.css",
+    "/vendor/bootstrap/css/bootstrap.min.css",
     "/css/main.css"
 ];
 
 var jsFiles = [
-    "/_vendor/bootstrap/js/bootstrap.min.js",
+    "/vendor/bootstrap/js/bootstrap.min.js",
     "/app.bundle.js"
 ];
 
