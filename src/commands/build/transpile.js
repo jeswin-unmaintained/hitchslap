@@ -12,7 +12,7 @@ export default function(siteConfig) {
         var excluded = ["destination", "dir_client_js"]
             .map(k => siteConfig[k])
             .concat("node_modules")
-            .map(dir => { return { exclude: "directory", dir }; });
+            .map(dir => `!${dir}/`);
 
         this.watch(["*.js", "*.jsx"].concat(excluded), function*(filePath, ev, match) {
             var outputPath = path.join(siteConfig.destination, filePath).replace(/\.jsx$/, ".js");

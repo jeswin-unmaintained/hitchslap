@@ -21,7 +21,7 @@ export default function(siteConfig) {
                         "dir_plugins", "dir_posts",  "dir_css",  "dir_client_js"]
                     .map(k => siteConfig[k])
                     .concat("node_modules")
-                    .map(dir => { return { exclude: "directory", dir }; })
+                    .map(dir => `!${dir}/`)
             );
 
         var files = [];

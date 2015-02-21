@@ -22,7 +22,7 @@ build.onStart(function*() {
 });
 
 build.configure(function() {
-    var excluded = [{ dir: "node_modules", exclude: "directory" }, { dir: "src/site_template", exclude: "directory" }];
+    var excluded = [ "!node_modules/", "!src/site_template/"];
 
     /*
         Transpile js and jsx with babel.

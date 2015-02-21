@@ -32,7 +32,7 @@ export default function(siteConfig) {
                     .map(k => siteConfig[k])
                     .concat("node_modules")
                     .concat(Object.keys(siteConfig.collections))
-                    .map(dir => { return { exclude: "directory", dir }; })
+                    .map(dir => `!${dir}/`)
             );
         this.watch(extensions, function*(filePath, ev, matches) {
             var result = yield* doLayout(filePath, "page", makePath, siteConfig);

@@ -14,7 +14,7 @@ export default function(siteConfig) {
             .concat(siteConfig.skip_copying_extensions
                 .map(ext => `!*.${ext}`))
             .concat([siteConfig.destination, "node_modules"]
-                .map(dir => { return { exclude: "directory", dir }; }));
+                .map(dir => `!${dir}/`));
 
         this.watch(extensions, function*(filePath, ev, matches) {
             var destPath = path.join(siteConfig.destination, filePath);

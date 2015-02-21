@@ -42,6 +42,8 @@
         "pretty": "*",
         "wrench": "*",
         "rimraf": "*",
-        "less": "*"
+        "less": "*",
+        "minimongo": "*",
+        "ceramic-backend-mongodb": "*"
     }
 }

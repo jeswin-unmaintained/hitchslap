@@ -6,6 +6,13 @@ export default class Index extends React.Component {
         super(props);
     }
 
+    static *loadData() {
+        return {
+            posts: (yield* db.posts.find("posts", { limit: 5 })),
+            projects: (yield* db.find("projects", { limit: 5 }))
+        };
+    }
+
     render() {
         return (
             <Container {...this.props}>
