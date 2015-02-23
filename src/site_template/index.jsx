@@ -1,4 +1,5 @@
 import Container from "./_includes/container";
+import db from "./db";
 
 export default class Index extends React.Component {
 
@@ -8,8 +9,8 @@ export default class Index extends React.Component {
 
     static *loadData() {
         return {
-            posts: (yield* db.posts.find("posts", { limit: 5 })),
-            projects: (yield* db.find("projects", { limit: 5 }))
+            posts: yield* db.posts.find({}, { limit: 5 }),
+            projects: yield* db.find({}, { limit: 5 })
         };
     }
 
