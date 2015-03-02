@@ -1,5 +1,4 @@
 import Container from "./_includes/container";
-import db from "./db";
 
 export default class Index extends React.Component {
 

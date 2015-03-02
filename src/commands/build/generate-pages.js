@@ -28,7 +28,7 @@ export default function(siteConfig) {
         var extensions = siteConfig.markdown_ext.map(ext => `*.${ext}`)
             .concat(
                 ["dir_data", "dir_hitchslap", "dir_includes", "dir_layouts",
-                        "dir_plugins", "dir_posts",  "dir_css",  "dir_client_js"]
+                        "dir_build_plugins", "dir_posts",  "dir_css",  "dir_client_js"]
                     .map(k => siteConfig[k])
                     .concat("node_modules")
                     .concat(Object.keys(siteConfig.collections))

@@ -22,7 +22,7 @@ export default function(siteConfig) {
             //exclude these directories.
             .concat(
                 ["dir_hitchslap", "dir_includes", "dir_layouts",
-                        "dir_plugins", "dir_posts",  "dir_css",  "dir_client_js"]
+                        "dir_build_plugins", "dir_posts",  "dir_css",  "dir_client_js"]
                     .map(k => siteConfig[k])
                     .concat("node_modules")
                     .map(dir => `!${dir}/`)

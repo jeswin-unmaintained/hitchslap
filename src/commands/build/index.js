@@ -34,37 +34,41 @@ export default function*(siteConfig) {
     var loadData = function*() {
         GLOBAL.site.data = {};
 
-        var fullPath = path.resolve(siteConfig.source, siteConfig.dir_data);
-        if (yield* fsutils.exists(fullPath)) {
-            var dirEntries = yield* fsutils.readdir(fullPath);
-            var files = dirEntries.map(file => path.join(fullPath, file));
-            for(let file of files) {
-                //We support only yaml and json now
-                if ([".yaml", ".yml"].indexOf(path.extname(file).toLowerCase()) >= 0)
-                    GLOBAL.site.data[path.basename(file).split(".")[0]] = yaml.safeLoad(yield* fsutils.readFile(file));
+        for (let dataDir of siteConfig.dir_data) {
+            var fullPath = path.resolve(siteConfig.source, dataDir);
+            if (yield* fsutils.exists(fullPath)) {
+                var dirEntries = yield* fsutils.readdir(fullPath);
+                var files = dirEntries.map(file => path.join(fullPath, file));
+                for (let file of files) {
+                    //We support only yaml and json now
+                    if ([".yaml", ".yml"].indexOf(path.extname(file).toLowerCase()) >= 0)
+                        GLOBAL.site.data[path.basename(file).split(".")[0]] = yaml.safeLoad(yield* fsutils.readFile(file));
 
-                if ([".json"].indexOf(path.extname(file).toLowerCase()) >= 0)
-                    GLOBAL.site.data[path.basename(file).split(".")[0]] = JSON.parse(yield* fsutils.readFile(file));
+                    if ([".json"].indexOf(path.extname(file).toLowerCase()) >= 0)
+                        GLOBAL.site.data[path.basename(file).split(".")[0]] = JSON.parse(yield* fsutils.readFile(file));
+                }
             }
         }
     };
 
 
     /*
-        Load plugins from the config.dir_plugins directory.
+        Load plugins from the config.dir_build_plugins directory.
         Plugins are no different from the build plugins under src/commands/build
     */
     var getPlugins = function*() {
-        var fullPath = path.resolve(siteConfig.destination, siteConfig.dir_plugins);
-        if (yield* fsutils.exists(fullPath)) {
-            var dirEntries = yield* fsutils.readdir(fullPath);
-            var files = dirEntries
-                .map(file => path.join(fullPath, file))
-                .filter(file => siteConfig.disabled_plugins.indexOf(path.basename(file, path.extname(file))) === -1);
-            return files.map(f => require(f));
-        } else {
-            return [];
+        var plugins = [];
+        for (var pluginDir of siteConfig.dir_build_plugins) {
+            var fullPath = path.resolve(siteConfig.destination, pluginDir);
+            if (yield* fsutils.exists(fullPath)) {
+                var dirEntries = yield* fsutils.readdir(fullPath);
+                var files = dirEntries
+                    .map(file => path.join(fullPath, file))
+                    .filter(file => siteConfig.disabled_plugins.indexOf(path.basename(file, path.extname(file))) === -1);
+                plugins = plugins.concat(files.map(f => require(f)));
+            }
         }
+        return plugins;
     };
 
 
@@ -98,12 +102,25 @@ export default function*(siteConfig) {
 
     /*
         Add built-in codegens/plugins and custom plugins.
-        Custom plugins will be loaded from {config.destination}/{config.dir_plugins} directory.
+        Custom plugins will be loaded from {config.destination}/{config.dir_build_plugins} directory.
         This directory will be deleted once all plugins have been run.
     */
     var build = crankshaft.create();
-    var codegens = [generatePages, generatePosts, generateCollections,
-            generateTemplates, webpack, less, copyStaticFiles];
+
+    var codeGens = {
+        "generate-pages": generatePages,
+        "generate-posts": generatePosts,
+        "generate-collections": generateCollections,
+        "generate-templates": generateTemplates,
+        "webpack": webpack,
+        "less": less,
+        "copy-static-files": copyStaticFiles
+    };
+
+    var codegens = Object.keys(codeGens)
+        .filter(key => siteConfig.disabled_plugins.indexOf(key) === -1)
+        .map(key => codeGens[key]);
+
     var plugins = yield* getPlugins();
     for (var fn of codegens.concat(plugins)) {
         build.configure(fn(siteConfig), siteConfig.source);
@@ -111,9 +128,11 @@ export default function*(siteConfig) {
 
     build.onComplete(function*() {
         //We can remove the custom plugins directory
-        var pluginsPath = path.resolve(siteConfig.destination, siteConfig.dir_plugins);
-        if (yield* fsutils.exists(pluginsPath))
-            yield* fsutils.remove(pluginsPath);
+        for (var pluginDir of siteConfig.dir_build_plugins) {
+            var pluginsPath = path.resolve(siteConfig.destination, pluginDir);
+            if (yield* fsutils.exists(pluginsPath))
+                yield* fsutils.remove(pluginsPath);
+        }
 
         var endTime = Date.now();
         console.log(`Build took ${(endTime - startTime)/1000} seconds.`);
