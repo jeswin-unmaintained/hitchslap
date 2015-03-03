@@ -1,7 +1,7 @@
 import path from "path";
 import frontMatter from "front-matter";
+import yaml from "js-yaml";
 import fsutils from "../../../../utils/fs";
-
 /*
     config.dir_data directory contains a set of yaml files.
     Yaml is loaded into site.data.filename. eg: site.data.songs
@@ -16,7 +16,9 @@ export default function(siteConfig) {
         }
 
         this.watch(
-            [].concat.apply([], ["yaml", "yml", "json"].map(ext => Object.keys(siteConfig.collections).map(dir => `${dir}/*.${ext}`))),
+            ["yaml", "yml", "json"]
+                .map(ext => Object.keys(siteConfig.collections).map(dir => `${dir}/*.${ext}`))
+                .reduce((a,b) => a.concat(b)),
             function*(filePath) {
                 var collection = filePath.split("/")[0];
                 var extension = path.extname(filePath);
@@ -33,9 +35,10 @@ export default function(siteConfig) {
         );
 
         this.watch(
-            [].concat.apply([], ["yaml", "yml", "json"].map(ext => Object.keys(siteConfig.dir_data).map(dir => `${dir}/*.${ext}`))),
+            ["yaml", "yml", "json"]
+                .map(ext => siteConfig.dir_data.map(dir => `${dir}/*.${ext}`))
+                .reduce((a,b) => a.concat(b)),
             function*(filePath) {
-                var collection = filePath.split("/")[0];
                 var extension = path.extname(filePath);
 
                 var record;
@@ -46,7 +49,7 @@ export default function(siteConfig) {
                     record = JSON.parse(yield* fsutils.readFile(filePath));
 
                 var filename = path.basename(filePath, extension);
-                GLOBAL.site.data[filename].push(record);
+                GLOBAL.site.data[filename] = record;
             }
         );
     };
