@@ -2,6 +2,9 @@
     You don't need to edit this file.
     Unless you need to.
 */
+
+import React from "react";
+
 var joinPath = function(baseurl) {
     return function(url) {
         return (/\/$/).test(baseurl) || (/^\//).test(url) ? baseurl + url : baseurl + "/" + url;

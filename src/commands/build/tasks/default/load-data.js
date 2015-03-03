@@ -12,25 +12,33 @@ export default function(siteConfig) {
         GLOBAL.site.data = {};
 
         for (let collection in siteConfig.collections) {
-            GLOBAL.site.data[collection] = collection;
+            GLOBAL.site.data[collection] = [];
         }
 
         this.watch(
-            ["yaml", "yml", "json"]
+            siteConfig.markdown_ext.concat(["json"])
                 .map(ext => Object.keys(siteConfig.collections).map(dir => `${dir}/*.${ext}`))
                 .reduce((a,b) => a.concat(b)),
             function*(filePath) {
                 var collection = filePath.split("/")[0];
+                var fileContents = yield* fsutils.readFile(filePath);
                 var extension = path.extname(filePath);
 
                 var record;
-                if ([".yaml", ".yml"].indexOf(extension) > -1)
-                    record = yaml.safeLoad(yield* fsutils.readFile(filePath));
+                try {
+                    if (siteConfig.markdown_ext.map(ext => `.${ext}`).indexOf(extension) > -1) {
+                        record = yaml.safeLoad(fileContents);
+                    }
 
-                if ([".json"].indexOf(extension) > -1)
-                    record = JSON.parse(yield* fsutils.readFile(filePath));
+                    if ([".json"].indexOf(extension) > -1) {
+                        record = JSON.parse(fileContents);
+                    }
+                } catch (ex) {
+                    console.log(ex);
+                }
 
-                GLOBAL.site.data[collection].push(record);
+                if (record)
+                    GLOBAL.site.data[collection].push(record);
             }
         );
 
@@ -40,16 +48,25 @@ export default function(siteConfig) {
                 .reduce((a,b) => a.concat(b)),
             function*(filePath) {
                 var extension = path.extname(filePath);
+                var fileContents = yield* fsutils.readFile(filePath);
 
                 var record;
-                if ([".yaml", ".yml"].indexOf(extension) > -1)
-                    record = yaml.safeLoad(yield* fsutils.readFile(filePath));
+                try {
+                    if (["yaml", "yml"].map(ext => `.${ext}`).indexOf(extension) > -1) {
+                        record = yaml.safeLoad(fileContents);
+                    }
 
-                if ([".json"].indexOf(extension) > -1)
-                    record = JSON.parse(yield* fsutils.readFile(filePath));
+                    if ([".json"].indexOf(extension) > -1) {
+                        record = JSON.parse(fileContents);
+                    }
+                } catch (ex) {
+                    console.log(ex);
+                }
 
                 var filename = path.basename(filePath, extension);
-                GLOBAL.site.data[filename] = record;
+
+                if (record)
+                    GLOBAL.site.data[filename] = record;
             }
         );
     };

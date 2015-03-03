@@ -1,3 +1,4 @@
+import React from "react";
 import Container from "../_includes/container";
 
 export default class Default extends React.Component {

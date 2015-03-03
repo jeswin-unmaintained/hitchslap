@@ -1,3 +1,4 @@
+import React from "react";
 import HtmlPage from "../_hitchslap/htmlpage";
 import Header from "./header";
 import Footer from "./footer";

@@ -20,7 +20,20 @@ export default function*(siteConfig) {
             if (yield* fsutils.exists(dest))
                 yield* fsutils.remove(dest);
         }
+
+        //Copy site_template
         yield* fsutils.copyRecursive(path.join(GLOBAL.__libdir, "site_template"), dest, { forceDelete: true });
+
+        //Create node_modules
+        var node_modules_path = path.resolve(GLOBAL.__libdir, "../node_modules");
+        var dest_node_modules_path = path.resolve(dest, "node_modules");
+        yield* fsutils.mkdirp(dest_node_modules_path);
+
+        //Copy react
+        for (let node_module of siteConfig.node_modules) {
+            yield* fsutils.copyRecursive(path.join(node_modules_path, node_module), path.join(dest_node_modules_path, node_module), { forceDelete: true });
+        }
+
         console.log(`New hitchslap site installed in ${path.resolve(dest)}.`);
     }
 
