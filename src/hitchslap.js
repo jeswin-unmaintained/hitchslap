@@ -61,7 +61,7 @@ var getSiteConfig = function*() {
         ["dir_hitchslap", "_hitchslap"],
         ["dir_includes", "_includes"],
         ["dir_layouts", "_layouts"],
-        ["dir_build_plugins", "_plugins"],
+        ["dir_custom_tasks", "_custom_tasks"],
         ["dir_css", "css"],
         ["dir_client_js", "vendor"],
 
@@ -88,7 +88,7 @@ var getSiteConfig = function*() {
         //do not copy these extensions as static files. They aren't.
         ["skip_copying_extensions", ["markdown","mkdown","mkdn","mkd","md", "yml", "yaml", "jsx", "less", "json"]],
 
-        ["disabled_plugins", []]
+        ["disabled_tasks", []]
     ];
 
     if (siteConfig.mode === "jekyll") {

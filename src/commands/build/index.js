@@ -7,64 +7,35 @@ import optimist from "optimist";
 import crankshaft from "crankshaft";
 import React from "react";
 
-import transpile from "./transpile";
-import generatePages from "./generate-pages";
-import generatePosts from "./generate-posts";
-import generateCollections from "./generate-collections";
-import generateTemplates from "./generate-templates";
-import copyStaticFiles from "./copy-static-files";
-import webpack from "./webpack";
-import less from "./less";
+import loadData from "./tasks/load-data";
+import transpile from "./tasks/transpile";
+import generatePages from "./tasks/generate-pages";
+import generatePosts from "./tasks/generate-posts";
+import generateCollections from "./tasks/generate-collections";
+import generateTemplates from "./tasks/generate-templates";
+import copyStaticFiles from "./tasks/copy-static-files";
+import webpack from "./tasks/webpack";
+import less from "./tasks/less";
 
 var argv = optimist.argv;
 
 export default function*(siteConfig) {
 
-    /*
-        Templates don't have to import react.
-        Pre-load it into GLOBAL.
-    */
-    GLOBAL.React = React;
-
+    GLOBAL.site = {};
 
     /*
-        config.dir_data directory contains a set of yaml files.
-        Yaml is loaded into site.data.filename. eg: site.data.songs
-    */
-    var loadData = function*() {
-        GLOBAL.site.data = {};
-
-        for (let dataDir of siteConfig.dir_data) {
-            var fullPath = path.resolve(siteConfig.source, dataDir);
-            if (yield* fsutils.exists(fullPath)) {
-                var dirEntries = yield* fsutils.readdir(fullPath);
-                var files = dirEntries.map(file => path.join(fullPath, file));
-                for (let file of files) {
-                    //We support only yaml and json now
-                    if ([".yaml", ".yml"].indexOf(path.extname(file).toLowerCase()) >= 0)
-                        GLOBAL.site.data[path.basename(file).split(".")[0]] = yaml.safeLoad(yield* fsutils.readFile(file));
-
-                    if ([".json"].indexOf(path.extname(file).toLowerCase()) >= 0)
-                        GLOBAL.site.data[path.basename(file).split(".")[0]] = JSON.parse(yield* fsutils.readFile(file));
-                }
-            }
-        }
-    };
-
-
-    /*
-        Load plugins from the config.dir_build_plugins directory.
+        Load plugins from the config.dir_custom_tasks directory.
         Plugins are no different from the build plugins under src/commands/build
     */
     var getPlugins = function*() {
         var plugins = [];
-        for (var pluginDir of siteConfig.dir_build_plugins) {
+        for (var pluginDir of siteConfig.dir_custom_tasks) {
             var fullPath = path.resolve(siteConfig.destination, pluginDir);
             if (yield* fsutils.exists(fullPath)) {
                 var dirEntries = yield* fsutils.readdir(fullPath);
                 var files = dirEntries
                     .map(file => path.join(fullPath, file))
-                    .filter(file => siteConfig.disabled_plugins.indexOf(path.basename(file, path.extname(file))) === -1);
+                    .filter(file => siteConfig.disabled_tasks.indexOf(path.basename(file, path.extname(file))) === -1);
                 plugins = plugins.concat(files.map(f => require(f)));
             }
         }
@@ -84,41 +55,62 @@ export default function*(siteConfig) {
     console.log(`Source: ${siteConfig.source}`);
     console.log(`Destination: ${siteConfig.destination}`);
 
-
     /* Start */
     var startTime = Date.now();
 
-    GLOBAL.site = {};
-    yield* loadData();
-
     /*
         Transpile everything first.
-        We need to do this separately because custom plugins need to be transpiled before they can be loaded.
-        So create a build for it.
     */
     var transpiler = crankshaft.create();
     transpiler.configure(transpile(siteConfig), siteConfig.source);
     yield* transpiler.start(false);
 
+    if (!siteConfig.db) {
+        yield* loadData(siteConfig);
+    }
+
+    if (siteConfig.generateStaticPages) {
+        //Create html files for all paths
+
+
+    } else {
+        //We need to write out the routing table since individual html files
+        //dont exist.
+        if (siteConfig.mode === "jekyll") {
+
+        }
+    }
+
+
+
     /*
         Add built-in codegens/plugins and custom plugins.
-        Custom plugins will be loaded from {config.destination}/{config.dir_build_plugins} directory.
+        Custom plugins will be loaded from {config.destination}/{config.dir_custom_tasks} directory.
         This directory will be deleted once all plugins have been run.
     */
     var build = crankshaft.create();
 
-    var codeGens = {
-        "generate-pages": generatePages,
-        "generate-posts": generatePosts,
-        "generate-collections": generateCollections,
-        "generate-templates": generateTemplates,
-        "webpack": webpack,
-        "less": less,
-        "copy-static-files": copyStaticFiles
-    };
+    var codeGens = siteConfig.mode === "jekyll" ?
+        {
+            "generate-pages": generatePages,
+            "generate-posts": generatePosts,
+            "generate-collections": generateCollections,
+            "generate-templates": generateTemplates,
+            "webpack": webpack,
+            "less": less,
+            "copy-static-files": copyStaticFiles
+        } :
+        {
+            "generate-pages": generatePages,
+            "generate-collections": generateCollections,
+            "generate-templates": generateTemplates,
+            "webpack": webpack,
+            "less": less,
+            "copy-static-files": copyStaticFiles
+        };
 
     var codegens = Object.keys(codeGens)
-        .filter(key => siteConfig.disabled_plugins.indexOf(key) === -1)
+        .filter(key => siteConfig.disabled_tasks.indexOf(key) === -1)
         .map(key => codeGens[key]);
 
     var plugins = yield* getPlugins();
@@ -128,7 +120,7 @@ export default function*(siteConfig) {
 
     build.onComplete(function*() {
         //We can remove the custom plugins directory
-        for (var pluginDir of siteConfig.dir_build_plugins) {
+        for (var pluginDir of siteConfig.dir_custom_tasks) {
             var pluginsPath = path.resolve(siteConfig.destination, pluginDir);
             if (yield* fsutils.exists(pluginsPath))
                 yield* fsutils.remove(pluginsPath);

@@ -17,5 +17,5 @@ collections:
     music:
         output: true
 
-disabled_plugins:
+disabled_tasks:
     - example
