@@ -7,15 +7,15 @@ import optimist from "optimist";
 import crankshaft from "crankshaft";
 import React from "react";
 
-import loadData from "./tasks/load-data";
-import transpile from "./tasks/transpile";
-import generatePages from "./tasks/generate-pages";
-import generatePosts from "./tasks/generate-posts";
-import generateCollections from "./tasks/generate-collections";
-import generateTemplates from "./tasks/generate-templates";
-import copyStaticFiles from "./tasks/copy-static-files";
-import webpack from "./tasks/webpack";
-import less from "./tasks/less";
+import transpile from "./tasks/default/transpile";
+import loadData from "./tasks/default/load-data";
+import generatePages from "./tasks/jekyll/generate-pages";
+import generatePosts from "./tasks/jekyll/generate-posts";
+import generateCollections from "./tasks/jekyll/generate-collections";
+import generateTemplates from "./tasks/jekyll/generate-templates";
+import copyStaticFiles from "./tasks/default/copy-static-files";
+import webpack from "./tasks/default/webpack";
+import less from "./tasks/default/less";
 
 var argv = optimist.argv;
 
@@ -66,7 +66,9 @@ export default function*(siteConfig) {
     yield* transpiler.start(false);
 
     if (!siteConfig.db) {
-        yield* loadData(siteConfig);
+        var dataLoader = crankshaft.create();
+        dataLoader.configure(loadData(siteConfig), siteConfig.source);
+        yield* dataLoader.start(false);
     }
 
     if (siteConfig.generateStaticPages) {
@@ -84,13 +86,13 @@ export default function*(siteConfig) {
 
 
     /*
-        Add built-in codegens/plugins and custom plugins.
+        Add built-in tasks and custom tasks.
         Custom plugins will be loaded from {config.destination}/{config.dir_custom_tasks} directory.
         This directory will be deleted once all plugins have been run.
     */
     var build = crankshaft.create();
 
-    var codeGens = siteConfig.mode === "jekyll" ?
+    var taskLib = siteConfig.mode === "jekyll" ?
         {
             "generate-pages": generatePages,
             "generate-posts": generatePosts,
@@ -109,12 +111,12 @@ export default function*(siteConfig) {
             "copy-static-files": copyStaticFiles
         };
 
-    var codegens = Object.keys(codeGens)
+    var tasks = Object.keys(taskLib)
         .filter(key => siteConfig.disabled_tasks.indexOf(key) === -1)
-        .map(key => codeGens[key]);
+        .map(key => taskLib[key]);
 
     var plugins = yield* getPlugins();
-    for (var fn of codegens.concat(plugins)) {
+    for (var fn of tasks.concat(plugins)) {
         build.configure(fn(siteConfig), siteConfig.source);
     }
 

@@ -1,6 +1,6 @@
 import path from "path";
 import doLayout from "./do-layout";
-import fsutils from "../../../utils/fs";
+import fsutils from "../../../../utils/fs";
 
 export default function(siteConfig) {
 

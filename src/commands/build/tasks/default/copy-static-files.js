@@ -1,7 +1,7 @@
 import path from "path";
 import fs from "fs";
-import fsutils from "../../../utils/fs";
-import configutils from  "../../../utils/config";
+import fsutils from "../../../../utils/fs";
+import configutils from  "../../../../utils/config";
 
 export default function(siteConfig) {
     /*

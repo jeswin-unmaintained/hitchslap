@@ -1,7 +1,7 @@
 import path from "path";
 import frontMatter from "front-matter";
 import doLayout from "./do-layout";
-import fsutils from "../../../utils/fs";
+import fsutils from "../../../../utils/fs";
 
 export default function(siteConfig) {
 

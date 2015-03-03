@@ -2,7 +2,7 @@ import React from "react";
 import path from "path";
 import frontMatter from "front-matter";
 import markdown from "node-markdown";
-import fsutils from "../../../utils/fs";
+import fsutils from "../../../../utils/fs";
 import pretty from "pretty";
 
 var md = markdown.Markdown;

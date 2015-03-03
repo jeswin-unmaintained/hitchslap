@@ -1,7 +1,6 @@
 import path from "path";
 import frontMatter from "front-matter";
-import doLayout from "./do-layout";
-import fsutils from "../../../utils/fs";
+import fsutils from "../../../../utils/fs";
 
 /*
     config.dir_data directory contains a set of yaml files.
