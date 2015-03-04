@@ -69,6 +69,7 @@ export default function*(siteConfig) {
         var dataLoader = crankshaft.create();
         dataLoader.configure(loadData(siteConfig), siteConfig.source);
         yield* dataLoader.start(false);
+        console.log(site.data);
     }
 
     if (siteConfig.generateStaticPages) {

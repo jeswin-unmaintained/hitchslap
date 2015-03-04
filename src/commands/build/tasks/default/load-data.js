@@ -11,11 +11,6 @@ export default function(siteConfig) {
     return function() {
         GLOBAL.site.data = {};
 
-        for (let collection in siteConfig.collections) {
-            GLOBAL.site.data[collection] = [];
-        }
-
-
         this.watch(
             ["yaml", "yml", "json"]
                 .map(ext => siteConfig.dir_data.map(dir => `${dir}/*.${ext}`))
@@ -36,8 +31,9 @@ export default function(siteConfig) {
 
                     var filename = path.basename(filePath, extension);
 
-                    if (records && records.length)
-                        GLOBAL.site.data[filename] = GLOBAL.site.data[filename].concat(records);
+                    if (records && records.length) {
+                        GLOBAL.site.data[filename] = GLOBAL.site.data[filename] ? GLOBAL.site.data[filename].concat(records) : records;
+                    }
                 } catch (ex) {
                     console.log(ex);
                 }
@@ -71,6 +67,7 @@ export default function(siteConfig) {
         };
 
         for (let collection in siteConfig.collections) {
+            GLOBAL.site.data[collection] = [];
             //Check the collection directories
             this.watch(
                 siteConfig.markdown_ext.concat(["json"]).map(ext => `${siteConfig.collections[collection].dir}/*.${ext}`),
