@@ -1,7 +1,7 @@
 import babel from "babel";
 import optimist from "optimist";
 import path from "path";
-import fsutils from "../../../../utils/fs";
+import fsutils from "../../../utils/fs";
 
 var argv = optimist.argv;
 

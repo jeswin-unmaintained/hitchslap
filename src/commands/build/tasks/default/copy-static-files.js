@@ -22,11 +22,14 @@ export default function(siteConfig) {
         this.watch(extensions, function*(filePath, ev, matches) {
             var destPath = path.join(siteConfig.destination, filePath);
             var outputDir = path.dirname(destPath);
+
             if (!(yield* fsutils.exists(outputDir))) {
                 yield* fsutils.mkdirp(outputDir);
             }
 
-            fs.createReadStream(filePath).pipe(fs.createWriteStream(destPath));
+            if (!(yield* fsutils.exists(destPath))) {                
+                fs.createReadStream(filePath).pipe(fs.createWriteStream(destPath));
+            }
         }, "copy_static_files");
     };
 }

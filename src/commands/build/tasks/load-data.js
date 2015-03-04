@@ -1,7 +1,7 @@
 import path from "path";
 import frontMatter from "front-matter";
 import yaml from "js-yaml";
-import fsutils from "../../../../utils/fs";
+import fsutils from "../../../utils/fs";
 /*
     config.dir_data directory contains a set of yaml files.
     Yaml is loaded into site.data.filename. eg: site.data.songs
@@ -32,7 +32,7 @@ export default function(siteConfig) {
                     var filename = path.basename(filePath, extension);
 
                     if (records && records.length) {
-                        GLOBAL.site.data[filename] = GLOBAL.site.data[filename] ? GLOBAL.site.data[filename].concat(records) : records;
+                        GLOBAL.site.data[filename] = GLOBAL.site.data[filename] ? GLOBAL.site.data[filename].concat(records) : records  ;
                     }
                 } catch (ex) {
                     console.log(ex);
@@ -58,6 +58,8 @@ export default function(siteConfig) {
                         record = JSON.parse(fileContents);
                     }
 
+                    record.__filename = path.basename(filePath);
+
                     if (record)
                         GLOBAL.site.data[collection].push(record);
                 } catch (ex) {
@@ -73,6 +75,12 @@ export default function(siteConfig) {
                 siteConfig.markdown_ext.concat(["json"]).map(ext => `${siteConfig.collections[collection].dir}/*.${ext}`),
                 addToCollection(collection)
             );
+        }
+
+        //If scavenging is on, we need to pick up md and json files outside
+        //  collection and data_dir and push them into the scavenge collection.
+        if (siteConfig.scavange_collection) {
+
         }
     };
 }

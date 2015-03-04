@@ -41,7 +41,10 @@ var getSiteConfig = function*(siteExists) {
 
         var getValueSetter = (config) => (prop, defaultValue) => {
             if (typeof argv[prop] !== "undefined" && argv[prop] !== null) {
-                config[prop] = argv[prop];
+                if (config[prop] instanceof Array)
+                    config[prop].concat(argv[prop]);
+                else
+                    config[prop] = argv[prop];
             } else if (typeof config[prop] === "undefined" || config[prop] === null) {
                 config[prop] = defaultValue;
             }
