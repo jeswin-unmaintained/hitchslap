@@ -15,32 +15,6 @@ export default function(siteConfig) {
             GLOBAL.site.data[collection] = [];
         }
 
-        this.watch(
-            siteConfig.markdown_ext.concat(["json"])
-                .map(ext => Object.keys(siteConfig.collections).map(dir => `${dir}/*.${ext}`))
-                .reduce((a,b) => a.concat(b)),
-            function*(filePath) {
-                var collection = filePath.split("/")[0];
-                var fileContents = yield* fsutils.readFile(filePath);
-                var extension = path.extname(filePath);
-
-                var record;
-                try {
-                    if (siteConfig.markdown_ext.map(ext => `.${ext}`).indexOf(extension) > -1) {
-                        record = yaml.safeLoad(fileContents);
-                    }
-
-                    if ([".json"].indexOf(extension) > -1) {
-                        record = JSON.parse(fileContents);
-                    }
-                } catch (ex) {
-                    console.log(ex);
-                }
-
-                if (record)
-                    GLOBAL.site.data[collection].push(record);
-            }
-        );
 
         this.watch(
             ["yaml", "yml", "json"]
@@ -50,24 +24,58 @@ export default function(siteConfig) {
                 var extension = path.extname(filePath);
                 var fileContents = yield* fsutils.readFile(filePath);
 
-                var record;
+                var records;
                 try {
                     if (["yaml", "yml"].map(ext => `.${ext}`).indexOf(extension) > -1) {
-                        record = yaml.safeLoad(fileContents);
+                        records = yaml.safeLoad(fileContents);
+                    }
+
+                    if ([".json"].indexOf(extension) > -1) {
+                        records = JSON.parse(fileContents);
+                    }
+
+                    var filename = path.basename(filePath, extension);
+
+                    if (records && records.length)
+                        GLOBAL.site.data[filename] = GLOBAL.site.data[filename].concat(records);
+                } catch (ex) {
+                    console.log(ex);
+                }
+            }
+        );
+
+
+        //Add a watch for each collection.
+        var addToCollection = function(collection) {
+            return function*(filePath) {
+                var fileContents = yield* fsutils.readFile(filePath);
+                var extension = path.extname(filePath);
+
+                try {
+                    var record;
+
+                    if (siteConfig.markdown_ext.map(ext => `.${ext}`).indexOf(extension) > -1) {
+                        record = frontMatter(fileContents);
                     }
 
                     if ([".json"].indexOf(extension) > -1) {
                         record = JSON.parse(fileContents);
                     }
+
+                    if (record)
+                        GLOBAL.site.data[collection].push(record);
                 } catch (ex) {
                     console.log(ex);
                 }
+            };
+        };
 
-                var filename = path.basename(filePath, extension);
-
-                if (record)
-                    GLOBAL.site.data[filename] = record;
-            }
-        );
+        for (let collection in siteConfig.collections) {
+            //Check the collection directories
+            this.watch(
+                siteConfig.markdown_ext.concat(["json"]).map(ext => `${siteConfig.collections[collection].dir}/*.${ext}`),
+                addToCollection(collection)
+            );
+        }
     };
 }

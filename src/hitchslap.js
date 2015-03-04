@@ -8,6 +8,13 @@ import yaml from "js-yaml";
 import path from "path";
 import fsutils from "./utils/fs";
 
+//modes
+import jekyllMode from "./jekyll-mode";
+var modes = {
+    "jekyll": jekyllMode
+};
+
+
 var argv = optimist.argv;
 
 //debug mode?
@@ -66,7 +73,7 @@ var getSiteConfig = function*(siteExists) {
             ["dir_css", "css"],
             ["dir_client_js", "vendor"],
 
-            ["collections", []],
+            ["collections", {}],
 
             //Handling Reading
             ["keep_files", [".git", ".svn"]],
@@ -92,34 +99,27 @@ var getSiteConfig = function*(siteExists) {
             ["disabled_tasks", []]
         ];
 
-        if (siteConfig.mode === "jekyll") {
-            defaults = defaults.concat([
-                ["dir_posts", "_posts"],
-
-                //Conversion
-                ["markdown", "markdown"],
-                ["highlighter", "highlight.js"],
-                ["excerpt_separator", "\n\n"],
-
-                //Filtering Content
-                ["show_drafts", false],
-                ["limit_posts", 0],
-                ["future", false],
-                ["unpublished", false],
-
-                //Outputting
-                ["permalink", "date"],
-                ["paginate_path", "/page:num"],
-                ["timezone", null]
-            ]);
+        if (siteConfig.mode !== "default") {
+            defaults = defaults.concat(modes[siteConfig.mode].loadDefaults());
         }
-
 
         var setter = getValueSetter(siteConfig);
         defaults.forEach(args => { var [prop, val] = args; setter(prop, val); }); //until jshint gets param destructuring
 
         siteConfig.source = path.resolve(siteConfig.source);
         siteConfig.destination = path.resolve(siteConfig.source, siteConfig.destination);
+
+        //If collections is a string array, convert to stardardized structure
+        if (siteConfig.collections instanceof Array) {
+            for (let name in siteConfig.collections) {
+                siteConfig.collections[name] = {};
+            }
+        }
+
+        //Make sure collections have dir set, if missing
+        for (let name of Object.keys(siteConfig.collections)) {
+            siteConfig.collections[name].dir = siteConfig.collections[name].dir || name;
+        }
 
         //Convert dir_xxx property values to [value] if value isn't an array.
         //We do this because dir_xxx properties allow multiple entries.
@@ -129,6 +129,10 @@ var getSiteConfig = function*(siteExists) {
                 if (!(val instanceof Array))
                     siteConfig[key] = [val];
             }
+        }
+
+        if (siteConfig.mode !== "default") {
+            defaults = defaults.concat(modes[siteConfig.mode].updateSiteConfig(siteConfig));
         }
     }
 
