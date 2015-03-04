@@ -1,4 +1,4 @@
-import babel from "babel";
+import {transform} from "babel";
 import optimist from "optimist";
 import path from "path";
 import fsutils from "../../../utils/fs";
@@ -21,7 +21,7 @@ export default function(siteConfig) {
                 yield* fsutils.mkdirp(outputDir);
             }
             var contents = yield* fsutils.readFile(filePath);
-            var result = babel.transform(contents, { blacklist });
+            var result = transform(contents, { blacklist });
             yield* fsutils.writeFile(outputPath, result.code);
         }, "babel_js_jsx");
     };

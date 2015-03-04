@@ -18,7 +18,9 @@ var modes = {
 var argv = optimist.argv;
 
 //debug mode?
-if (argv.debug){ GLOBAL.CRANKSHAFT_DEBUG_MODE = true;}
+if (argv.debug) {
+    GLOBAL.CRANKSHAFT_DEBUG_MODE = true;
+}
 
 //Commands might need the templates directory. Easier from root.
 GLOBAL.__libdir = __dirname;
@@ -39,13 +41,13 @@ var getSiteConfig = function*(siteExists) {
         var source = argv.source || argv.s || "./";
         var destination = argv.destination || argv.d || "_site";
 
-        var getValueSetter = (config, propPrefix) => (key, defaultValue) => {
-            var prop = propPrefix ? `${propPrefix}.${key}` : key;
-            if (typeof argv[prop] !== "undefined" && argv[prop] !== null) {
+        var getValueSetter = (config, propPrefix) => (prop, defaultValue) => {
+            var commandLineArg = argv[propPrefix ? `${propPrefix}.${prop}` : prop];
+            if (typeof commandLineArg !== "undefined" && commandLineArg !== null) {
                 if (config[prop] instanceof Array)
-                    config[prop].concat(argv[prop]);
+                    config[prop].concat(commandLineArg);
                 else
-                    config[prop] = argv[prop];
+                    config[prop] = commandLineArg;
             } else if (typeof config[prop] === "undefined" || config[prop] === null) {
                 config[prop] = defaultValue;
             }
@@ -63,9 +65,9 @@ var getSiteConfig = function*(siteExists) {
             ["dir_hitchslap", "_hitchslap"],
             ["dir_includes", "_includes"],
             ["dir_layouts", "_layouts"],
-            ["dir_custom_tasks", "_custom_tasks"],
             ["dir_css", "css"],
             ["dir_client_js", "vendor"],
+            ["dir_custom_tasks", "_custom_tasks"],
 
             ["collections", {}],
 
@@ -84,6 +86,8 @@ var getSiteConfig = function*(siteExists) {
 
             //Make too much noise while processing?
             ["quiet", false],
+
+            ["markdown_ext", ["markdown","mkdown","mkdn","mkd","md"]],
 
             //do not copy these extensions as static files. They aren't.
             ["skip_copying_extensions", ["markdown","mkdown","mkdn","mkd","md", "yml", "yaml", "jsx", "less", "json"]],
@@ -106,7 +110,7 @@ var getSiteConfig = function*(siteExists) {
 
             for (let args of modeDefaults) {
                 let [prop, val] = args;
-                setter(prop, val);
+                modeSetter(prop, val);
             }
         }
 
@@ -142,7 +146,6 @@ var getSiteConfig = function*(siteExists) {
     }
 
     siteConfig.node_modules = siteConfig.node_modules || ["react"];
-
     return siteConfig;
 };
 

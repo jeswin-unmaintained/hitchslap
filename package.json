@@ -25,6 +25,7 @@
     "dependencies": {
         "optimist": "*",
         "co": "*",
+        "co-parallel-tools": "*",
         "crankshaft": "*",
         "crankshaft-tools": "*",
         "front-matter": "*",

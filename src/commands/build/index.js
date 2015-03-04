@@ -70,7 +70,9 @@ export default function*(siteConfig) {
             tasks = [tasks];
         let build = crankshaft.create();
         for (let task of tasks) {
-            build.configure(task(siteConfig), siteConfig.source);
+            let fn = task(siteConfig);
+            if (fn)
+                build.configure(fn, siteConfig.source);
         }
         if (onComplete)
             build.onComplete(onComplete);
@@ -79,6 +81,11 @@ export default function*(siteConfig) {
             yield* build.start(monitor);
         } catch (ex) {
             console.log(ex);
+            console.log(ex.stack);
+            if (ex._inner) {
+                console.log(ex._inner);
+                console.log(ex._inner.stack);
+            }
         }
     };
 

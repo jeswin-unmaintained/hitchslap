@@ -2,8 +2,7 @@ var loadDefaults = function() {
     return [
         //Handling Reading
         ["encoding", "utf-8"],
-        ["markdown_ext", ["markdown","mkdown","mkdn","mkd","md"]],
-
+        
         //Conversion
         ["excerpt_separator", "\n\n"],
 

@@ -50,7 +50,7 @@ export default function(siteConfig) {
             a) starting with an underscore. eg: _layouts/*, _posts/* aren't pages
             b) collections
     */
-    return function() {
+    return function() {                
         var extensions = siteConfig.markdown_ext.map(ext => `${siteConfig.dir_posts}/*.${ext}`);
         this.watch(extensions, function*(filePath, ev, matches) {
             var results = yield* doLayout(filePath, "default", makePath, siteConfig);
