@@ -1,8 +1,10 @@
 var loadDefaults = function() {
     return [
+        //Handling Reading
+        ["encoding", "utf-8"],
+        ["markdown_ext", ["markdown","mkdown","mkdn","mkd","md"]],
+
         //Conversion
-        ["markdown", "markdown"],
-        ["highlighter", "highlight.js"],
         ["excerpt_separator", "\n\n"],
 
         //Filtering Content
@@ -15,6 +17,7 @@ var loadDefaults = function() {
         ["permalink", "date"],
         ["paginate_path", "/page:num"],
         ["timezone", null]
+
     ];
 };
 

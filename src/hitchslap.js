@@ -39,7 +39,8 @@ var getSiteConfig = function*(siteExists) {
         var source = argv.source || argv.s || "./";
         var destination = argv.destination || argv.d || "_site";
 
-        var getValueSetter = (config) => (prop, defaultValue) => {
+        var getValueSetter = (config, propPrefix) => (key, defaultValue) => {
+            var prop = propPrefix ? `${propPrefix}.${key}` : key;
             if (typeof argv[prop] !== "undefined" && argv[prop] !== null) {
                 if (config[prop] instanceof Array)
                     config[prop].concat(argv[prop]);
@@ -50,19 +51,9 @@ var getSiteConfig = function*(siteExists) {
             }
         };
 
-        var configFilePath = argv.config ? path.join(source, argv.config) :
-            (yield* fsutils.exists(path.join(source, "config.json"))) ? path.join(source, "config.json") : path.join(source, "_config.yml");
-
-
-        //If we are using _config.yml, assume we are using jekyll compat mode
-        if (/_config\.yml$/.test(configFilePath)) {
-            siteConfig = yaml.safeLoad(yield* fsutils.readFile(configFilePath));
-            siteConfig.mode = siteConfig.mode || "jekyll";
-
-        } else {
-            siteConfig = require(configFilePath);
-            siteConfig.mode = siteConfig.mode || "default";
-        }
+        var configFilePath = argv.config ? path.join(source, argv.config) : path.join(source, "config.json");
+        siteConfig = JSON.parse(yield* fsutils.readFile(configFilePath));
+        siteConfig.mode = siteConfig.mode || "jekyll";
 
         var defaults = [
             ['source', source],
@@ -80,8 +71,6 @@ var getSiteConfig = function*(siteExists) {
 
             //Handling Reading
             ["keep_files", [".git", ".svn"]],
-            ["encoding", "utf-8"],
-            ["markdown_ext", ["markdown","mkdown","mkdn","mkd","md"]],
             ["watch", true],
 
             //Serving
@@ -102,13 +91,26 @@ var getSiteConfig = function*(siteExists) {
             ["disabled_tasks", []]
         ];
 
-        if (siteConfig.mode !== "default") {
-            defaults = defaults.concat(modes[siteConfig.mode].loadDefaults());
+        var setter = getValueSetter(siteConfig);
+
+        for (let args of defaults) {
+            let [prop, val] = args;
+            setter(prop, val);
         }
 
-        var setter = getValueSetter(siteConfig);
-        defaults.forEach(args => { var [prop, val] = args; setter(prop, val); }); //until jshint gets param destructuring
+        //Load mode specific defaults
+        if (siteConfig.mode !== "default" && modes[siteConfig.mode].loadDefaults) {
+            siteConfig[siteConfig.mode] = {};
+            let modeDefaults = modes[siteConfig.mode].loadDefaults();
+            let modeSetter = getValueSetter(siteConfig[siteConfig.mode], siteConfig.mode);
 
+            for (let args of modeDefaults) {
+                let [prop, val] = args;
+                setter(prop, val);
+            }
+        }
+
+        //Store absolute paths for source and destination
         siteConfig.source = path.resolve(siteConfig.source);
         siteConfig.destination = path.resolve(siteConfig.source, siteConfig.destination);
 
@@ -134,7 +136,7 @@ var getSiteConfig = function*(siteExists) {
             }
         }
 
-        if (siteConfig.mode !== "default") {
+        if (siteConfig.mode !== "default" && modes[siteConfig.mode].updateSiteConfig) {
             defaults = defaults.concat(modes[siteConfig.mode].updateSiteConfig(siteConfig));
         }
     }
