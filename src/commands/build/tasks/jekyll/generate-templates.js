@@ -17,7 +17,7 @@ export default function(siteConfig) {
     /*
         Templates are JSX files outside the _layouts directory
     */
-    return function() {
+    var fn = function*() {
         var extensions = [`${path.resolve(siteConfig.destination)}/*.js`, "!app.bundle.js"]
             //exclude these directories.
             .concat(
@@ -31,4 +31,6 @@ export default function(siteConfig) {
             var result = yield* doLayout(filePath, filePath, makePath, siteConfig);
         }, `build_templates`);
     };
+
+    return { build: false, fn: fn };
 }

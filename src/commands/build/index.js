@@ -9,8 +9,8 @@ import React from "react";
 
 import transpile from "./tasks/transpile";
 import loadData from "./tasks/load-data";
-import defaultTasks from "./tasks/default";
-import jekyllTasks from "./tasks/jekyll";
+import * as defaultTasks from "./tasks/default";
+import * as jekyllTasks from "./tasks/jekyll";
 
 var modeTasks = {
     jekyll: jekyllTasks
@@ -40,6 +40,43 @@ export default function*(siteConfig) {
     console.log(`Source: ${siteConfig.source}`);
     console.log(`Destination: ${siteConfig.destination}`);
 
+
+    /*
+        Run a single task, or an array of tasks
+    */
+    var runTasks = function*(tasks, onComplete, monitor) {
+        if (!(tasks instanceof Array))
+            tasks = [tasks];
+
+        let build = crankshaft.create();
+
+        for (let taskBuilder of tasks) {
+            let task = taskBuilder(siteConfig);
+            if (task.build) {
+                if (task.fn)
+                    build.configure(task.fn, siteConfig.source);
+            } else {
+                if (task.fn)
+                    yield* task.fn();
+            }
+        }
+
+        if (onComplete)
+            build.onComplete(onComplete);
+
+        try {
+            yield* build.start(monitor);
+        } catch (ex) {
+            console.log(ex);
+            console.log(ex.stack);
+            if (ex._inner) {
+                console.log(ex._inner);
+                console.log(ex._inner.stack);
+            }
+        }
+    };
+
+
     /*
         Load customTasks from the config.dir_custom_tasks directory.
         Sub-directory names are used to hook into the build pipeline.
@@ -59,34 +96,6 @@ export default function*(siteConfig) {
             }
         }
         return customTasks;
-    };
-
-
-    /*
-        Run a single task, or an array of tasks
-    */
-    var runTasks = function*(tasks, onComplete, monitor) {
-        if (!(tasks instanceof Array))
-            tasks = [tasks];
-        let build = crankshaft.create();
-        for (let task of tasks) {
-            let fn = task(siteConfig);
-            if (fn)
-                build.configure(fn, siteConfig.source);
-        }
-        if (onComplete)
-            build.onComplete(onComplete);
-
-        try {
-            yield* build.start(monitor);
-        } catch (ex) {
-            console.log(ex);
-            console.log(ex.stack);
-            if (ex._inner) {
-                console.log(ex._inner);
-                console.log(ex._inner.stack);
-            }
-        }
     };
 
 
@@ -124,9 +133,6 @@ export default function*(siteConfig) {
         yield* runCustomTasks("after-data-load");
     }
 
-    console.log("loaded..")
-    console.log(site.data);
-
     //Before main tasks
     yield* runCustomTasks("before-main");
 
@@ -140,12 +146,12 @@ export default function*(siteConfig) {
     */
     var enabled = (prefix) => (task) => siteConfig.disabled_tasks.indexOf(`${prefix}${task}`) === -1;
 
-    var runnableDefaultTasks = Object.keys(defaultTasks).filter(enabled()).map(task => defaultTasks[task]);
+    var runnableDefaultTasks = Object.keys(defaultTasks.main).filter(enabled()).map(task => defaultTasks.main[task]);
 
     var runnableModeTasks = (siteConfig.mode !== "default") ?
-        Object.keys(modeTasks[siteConfig.mode])
+        Object.keys(modeTasks[siteConfig.mode].main)
             .filter(enabled(`${siteConfig.mode}.`))
-            .map(task => modeTasks[siteConfig.mode][task]) :
+            .map(task => modeTasks[siteConfig.mode].main[task]) :
         [];
 
     var customTasks = yield* getCustomTasks();

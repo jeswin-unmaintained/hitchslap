@@ -24,7 +24,7 @@ export default function(siteConfig) {
             a) directories starting with an underscore. eg: _layouts/*, _posts/* aren't pages
             b) directories outside collections
     */
-    return function() {
+    var fn = function*() {
         var extensions = siteConfig.markdown_ext.map(ext => `*.${ext}`)
             .concat(
                 ["dir_data", "dir_hitchslap", "dir_includes", "dir_layouts",
@@ -39,4 +39,6 @@ export default function(siteConfig) {
             GLOBAL.site.pages.push(result.page);
         }, "build_pages");
     };
+
+    return { build: false, fn: fn };
 }

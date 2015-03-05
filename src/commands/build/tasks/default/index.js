@@ -2,8 +2,10 @@ import copyStaticFiles from "./copy-static-files";
 import less from "./less";
 import webpack from "./webpack";
 
-export default {
+var main = {
     "copy-static-files": copyStaticFiles,
     "less": less,
-    "webpack": webpack
+    //"webpack": webpack
 };
+
+export { main };

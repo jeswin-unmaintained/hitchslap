@@ -7,22 +7,12 @@ import pretty from "pretty";
 
 var md = markdown.Markdown;
 
-var makePage = function(doc) {
-    var page = {};
-    for (var key in doc.attributes) {
-        page[key] = doc.attributes[key];
-    }
-    page.content = doc.body;
-    return page;
-};
-
-export default function*(sourcePath, layout, makePath, siteConfig) {
+export default function*(page, sourcePath, layout, makePath, siteConfig) {
     try {
-        var page, layoutsourcePath, params, component;
+        var layoutsourcePath, params, component;
 
         //Source path and layout are the same only when generating plain JSX templates (without frontmatter)
         if (sourcePath !== layout) {
-            page = makePage(frontMatter(yield* fsutils.readFile(sourcePath)));
             layoutsourcePath = path.resolve(siteConfig.destination, `${siteConfig.dir_layouts}/${page.layout || layout}`);
             params = { page: page, content: page.content, site: siteConfig };
         } else {

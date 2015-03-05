@@ -6,7 +6,7 @@ import generatorify from "nodefunc-generatorify";
 var lessc = generatorify(less.render.bind(less));
 
 export default function(siteConfig) {
-    return function() {
+    var fn = function() {
         this.watch(
             [`${siteConfig.dir_css}/*.less`, `!${siteConfig.dir_css}/includes/*.less`],
             function*(filePath, ev, match) {
@@ -24,4 +24,6 @@ export default function(siteConfig) {
             "less_compile"
         );
     };
+
+    return { build: true, fn: fn };
 }

@@ -8,7 +8,7 @@ var argv = optimist.argv;
 export default function(siteConfig) {
     var blacklist = argv["transpiler-blacklist"] ? [].concat(argv["transpiler-blacklist"]) : [];
 
-    return function() {
+    var fn = function() {
         var excluded = ["destination", "dir_client_js"]
             .map(k => siteConfig[k])
             .concat("node_modules")
@@ -25,4 +25,6 @@ export default function(siteConfig) {
             yield* fsutils.writeFile(outputPath, result.code);
         }, "babel_js_jsx");
     };
+
+    return { build: true, fn: fn };
 }

@@ -9,7 +9,7 @@ export default function(siteConfig) {
 
     var getMakePath = function(collection) {
         return function(filePath, page) {
-            var permalink = page.permalink || collection.permalink || siteConfig.permalink;
+            var permalink = page.permalink || collection.permalink || siteConfig.jekyll.permalink;
             var dir = path.dirname(filePath);
             var extension = path.extname(filePath);
             var basename = path.basename(filePath, extension);
@@ -23,24 +23,59 @@ export default function(siteConfig) {
         };
     };
 
-    /*
-        Pages are all markdown files residing outside
-            a) directories starting with an underscore. eg: _layouts/*, _posts/* aren't pages
-            b) directories outside collections
-    */
-    return function() {        
-        if (siteConfig.collection) {
-            Object.keys(siteConfig.collection).forEach(collectionName => {
-                let collection = siteConfig.collections[collectionName];
-                let makePath = getMakePath(collection);
-                if (collection.output) {
-                    let extensions = siteConfig.markdown_ext.map(ext => `${collectionName}/*.${ext}`);
-                    this.watch(extensions, function*(filePath, ev, matches) {
-                        var result = yield* doLayout(filePath, collection.layout || "default", makePath, siteConfig);
-                        GLOBAL.site.pages.push(result.page);
-                    }, `build_collection_${collectionName}`);
+    var makePostPath = function(filePath, page) {
+        var permalink = page.permalink || siteConfig.jekyll.permalink;
+
+        var dir = path.dirname(filePath);
+        var extension = path.extname(filePath);
+        var basename = path.basename(filePath, extension);
+
+        var [year, month, day, ...titleArr] = basename.split("-");
+        var placeholders = {
+            year: year,
+            month: month,
+            day: day,
+            title: titleArr.join("-"),
+            imonth: parseInt(month).toString(),
+            iday: parseInt(day).toString(),
+            short_year: parseInt(year) - parseInt(parseInt(year)/1000)*1000,
+            categories: page.categories ? page.categories.split(/\s+/).join("/") : ""
+        };
+
+        var parsePlaceholders = function(permalink) {
+            for (var key in placeholders) {
+                var regex = new RegExp(`\:\\b${key}\\b`);
+                permalink = permalink.replace(regex, placeholders[key]);
+            }
+            return permalink.replace(/^\/*/, "");
+        };
+
+        if (/\/$/.test(permalink))
+            permalink += "index.html";
+
+        return (
+            permalink === "pretty" ? parsePlaceholders("/:categories/:year/:month/:day/:title/index.html") :
+            permalink === "date" ? parsePlaceholders("/:categories/:year/:month/:day/:title.html") :
+            permalink === "none" ? parsePlaceholders("/:categories/:title.html") :
+            parsePlaceholders(permalink)
+        );
+    };
+
+    var fn = function*() {
+        for (let collectionName in siteConfig.collections) {
+            let collection = siteConfig.collections[collectionName];
+            if (collection.output) {
+                var makePath = collectionName === "posts" ? makePostPath : getMakePath(collection);
+
+                for (let item of GLOBAL.site.data[collectionName]) {
+                    //If we don't have a filename, we don't need to process it individually.
+                    if (item.__filename) {
+                        yield* doLayout(item, item.__filename, collection.layout || "default", makePath, siteConfig);
+                    }
                 }
-            });
+            }
         }
     };
+
+    return { build: false, fn: fn };
 }

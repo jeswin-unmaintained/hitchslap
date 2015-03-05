@@ -6,7 +6,7 @@ export default function(siteConfig) {
     /*
         Copy everything that is not a markdown, jsx or yml file.
     */
-    return function() {
+    var fn = function() {
         var extensions = ["*.*"]
             //add exclusions
             .concat(siteConfig.skip_copying_extensions
@@ -31,4 +31,6 @@ export default function(siteConfig) {
             }
         }, "copy_static_files");
     };
+
+    return { build: true, fn: fn };
 }

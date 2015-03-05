@@ -5,7 +5,15 @@ import frontMatter from "front-matter";
 var reader = {
     json: JSON.parse,
     yaml: yaml.safeLoad,
-    markdown: frontMatter,
+    markdown: function(contents) {
+        var doc = frontMatter(contents);
+        var result = {};
+        for (var key in doc.attributes) {
+            result[key] = doc.attributes[key];
+        }
+        result.content = doc.body;
+        return result;
+    },
     text: a => a
 };
 

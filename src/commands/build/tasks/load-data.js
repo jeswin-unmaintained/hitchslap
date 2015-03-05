@@ -10,7 +10,7 @@ import readFileByFormat from "../../../utils/file-reader";
 */
 export default function(siteConfig) {
 
-    return function() {
+    var fn = function() {
         GLOBAL.site.data = {};
 
         this.watch(
@@ -52,13 +52,16 @@ export default function(siteConfig) {
             };
         };
 
-        for (let collection in siteConfig.collections) {
-            GLOBAL.site.data[collection] = [];
+        for (let collectionName in siteConfig.collections) {
+            GLOBAL.site.data[collectionName] = [];
+            var collection = siteConfig.collections[collectionName];
             //Check the collection directories
-            this.watch(
-                siteConfig.markdown_ext.concat(["json"]).map(ext => `${siteConfig.collections[collection].dir}/*.${ext}`),
-                addToCollection(collection)
-            );
+            if (collection.dir) {
+                this.watch(
+                    siteConfig.markdown_ext.concat(["json"]).map(ext => `${collection.dir}/*.${ext}`),
+                    addToCollection(collectionName)
+                );
+            }
         }
 
         //If scavenging is on, we need to pick up md and json files outside
@@ -68,6 +71,7 @@ export default function(siteConfig) {
 
             var collectionsAndDataDirs = Object.keys(siteConfig.collections)
                 .map(coll => siteConfig.collections[coll].dir)
+                .filter(item => item)
                 .concat(siteConfig.dir_data)
                 .map(dir => `!${dir}/`);
 
@@ -79,4 +83,6 @@ export default function(siteConfig) {
             );
         }
     };
+
+    return { build: true, fn: fn };
 }

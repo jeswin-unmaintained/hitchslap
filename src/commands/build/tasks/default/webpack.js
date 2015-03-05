@@ -12,7 +12,7 @@ export default function(siteConfig) {
             a) All standalone templates
             b) All templates in _layouts
     */
-    return function() {
+    var fn = function() {
         var extensions = [`${path.resolve(siteConfig.destination)}/*.js`]
             //exclude these directories.
             //We exclude layouts because webpack needs only the entry point.
@@ -45,4 +45,6 @@ export default function(siteConfig) {
             var stats = yield* runner();
         }, "webpack_bundle");
     };
+
+    return { build: true, fn: fn };
 }
