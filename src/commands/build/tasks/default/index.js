@@ -5,7 +5,7 @@ import webpack from "./webpack";
 var main = {
     "copy-static-files": copyStaticFiles,
     "less": less,
-    //"webpack": webpack
+    "webpack": webpack
 };
 
 export { main };

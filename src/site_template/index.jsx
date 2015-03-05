@@ -1,3 +1,4 @@
+import React from "react";
 import Container from "./_includes/container";
 
 export default class Index extends React.Component {
@@ -8,8 +9,8 @@ export default class Index extends React.Component {
 
     static *loadData() {
         return {
-            posts: yield* db.posts.find({}, { limit: 5 }),
-            projects: yield* db.find({}, { limit: 5 })
+            posts: [],// yield* db.posts.find({}, { limit: 5 }),
+            projects: [], //yield* db.find({}, { limit: 5 })
         };
     }
 
@@ -26,7 +27,7 @@ export default class Index extends React.Component {
                                     <h2><a href="/articles">Articles</a></h2>
                                     <ul className="tight">
                                     {
-                                        site.posts.map(post =>
+                                        [].map(post =>
                                             <li>
                                             {[
                                                 post.externalUrl ?
@@ -51,7 +52,7 @@ export default class Index extends React.Component {
                                     <h2><a href="/projects">Projects</a></h2>
                                     <ul className="tight">
                                     {
-                                        site.data.projects.map(proj =>
+                                        [].map(proj =>
                                             <li>
                                                 <h4>
                                                     <a href="{proj.url}">{proj.name}</a>
@@ -70,7 +71,7 @@ export default class Index extends React.Component {
                                 <section className="content-area list">
                                     <ul className="gallery">
                                     {
-                                        site.data.projects.map(img =>
+                                        [].map(img =>
                                             <li>
                                                 <img src="{{img.src}}" alt="{{img.name}}" />
                                                 <br />

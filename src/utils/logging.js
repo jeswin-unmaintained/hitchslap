@@ -1,20 +1,24 @@
-var print = function(what) {
+var print = function(what, prefix) {
+    var _log = function(x) {
+        console.log(prefix ? `[${prefix}] ${x}` : x);
+    };
+
     if (what instanceof Error) {
-        console.log(ex);
-        console.log(ex.stack);
-        if (ex._inner) {
-            console.log(ex._inner);
-            console.log(ex._inner.stack);
+        _log(what);
+        _log(what.stack);
+        if (what._inner) {
+            _log(what._inner);
+            _log(what._inner.stack);
         }
     } else {
-        console.log(what);
+        _log(what);
     }
 };
 
-var getLogger = function(siteConfig) {
+var getLogger = function(siteConfig, prefix) {
     return function(what) {
         if (!siteConfig.quiet) {
-            print(what);
+            print(what, prefix);
         }
     };
 };

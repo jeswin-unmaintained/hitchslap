@@ -56,10 +56,10 @@ var getValueSetter = (config) => {
 
         var commandLineArg = argv[fullyQualifiedProperty];
         if (typeof commandLineArg !== "undefined" && commandLineArg !== null) {
-            if (options.append && currentProp[prop] instanceof Array)
-                currentProp[prop].push(commandLineArg);
-            else
+            if (options.replace || !(currentProp[prop] instanceof Array))
                 currentProp[prop] = commandLineArg;
+            else
+                currentProp[prop].push(commandLineArg);
         } else if (typeof currentProp[prop] === "undefined" || currentProp[prop] === null) {
             currentProp[prop] = defaultValue;
         }
@@ -104,7 +104,9 @@ var getSiteConfig = function*(siteExists) {
             //Make too much noise while processing?
             ["quiet", false],
 
-            ["disabled_tasks", []]
+            ["disabled_tasks", []],
+
+            ["tasks.webpack.exclude_dirs", ["custom_tasks"]],
         ];
 
         var modeDefaults = (siteConfig.mode !== "default" && modes[siteConfig.mode].loadDefaults) ? modes[siteConfig.mode].loadDefaults() : [];

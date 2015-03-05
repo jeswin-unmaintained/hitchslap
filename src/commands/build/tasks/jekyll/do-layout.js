@@ -9,7 +9,7 @@ import { print, getLogger } from "../../../../utils/logging";
 var md = markdown.Markdown;
 
 export default function*(page, sourcePath, layout, makePath, siteConfig) {
-    var logger = getLogger(siteConfig);
+    var logger = getLogger(siteConfig, "jekyll html generator");
     var taskConfig = siteConfig.jekyll;
 
     try {
@@ -38,13 +38,13 @@ export default function*(page, sourcePath, layout, makePath, siteConfig) {
             yield* fsutils.mkdirp(outputDir);
         }
 
-        logger(`Generating ${sourcePath} -> ${outputPath}`);
+        logger(`${sourcePath} -> ${outputPath}`);
 
         yield* fsutils.writeFile(outputPath, html);
 
         return { page };
     } catch(err) {
-        print(`Cannot process ${sourcePath} with template ${layout}.`);
+        logger(`cannot process ${sourcePath} with template ${layout}.`);
         throw err;
     }
 }

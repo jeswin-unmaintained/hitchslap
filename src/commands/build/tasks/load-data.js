@@ -3,14 +3,14 @@ import frontMatter from "front-matter";
 import yaml from "js-yaml";
 import fsutils from "../../../utils/fs";
 import readFileByFormat from "../../../utils/file-reader";
-import { getLogger } from "../../../utils/logging";
+import { print, getLogger } from "../../../utils/logging";
 
 /*
     config.dir_data directory contains a set of yaml files.
     Yaml is loaded into site.data.filename. eg: site.data.songs
 */
 export default function(siteConfig) {
-    var logger = getLogger(siteConfig);
+    var logger = getLogger(siteConfig, "load-data");
 
     var taskConfig = siteConfig.tasks["load-data"];
 
@@ -33,7 +33,7 @@ export default function(siteConfig) {
                         GLOBAL.site.data[filename] = GLOBAL.site.data[filename] ? GLOBAL.site.data[filename].concat(records) : records  ;
                     }
 
-                    logger(`Loaded ${filePath} into ${filename}`);
+                    logger(`loaded ${filePath} into ${filename}`);
 
                 } catch (ex) {
                     logger(ex);
@@ -53,10 +53,7 @@ export default function(siteConfig) {
 
                     if (record)
                         GLOBAL.site.data[collection].push(record);
-
-                        if (!siteConfig.quiet)
-                            logger(`Loaded ${filePath} into ${collection}`);
-
+                        logger(`loaded ${filePath} into ${collection}`);
                 } catch (ex) {
                     logger(ex);
                 }

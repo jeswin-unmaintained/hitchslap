@@ -3,7 +3,7 @@ var loadDefaults = function() {
         //Directories
         ["dir_includes", ["_includes"]],
         ["dir_layouts", ["_layouts"]],
-        ["dir_client_js", ["vendor"]],
+        ["dir_client_js", ["_fora", "vendor"]],
 
         //Handling Reading
         ["markdown_ext", ["markdown","mkdown","mkdn","mkd","md"]],
@@ -29,7 +29,8 @@ var loadDefaults = function() {
         ["tasks.load-data.dir_data", ["_data"]],
         ["tasks.load-data.markdown_ext", ["markdown","mkdown","mkdn","mkd","md"]],
         ["tasks.less.dirs", ["css"]],
-        ["tasks.copy-static-files.skip_extensions", ["markdown","mkdown","mkdn","mkd","md", "yml", "yaml", "jsx", "less", "json"], { append: true }]
+        ["tasks.copy-static-files.skip_extensions", ["markdown","mkdown","mkdn","mkd","md", "yml", "yaml", "jsx", "less", "json"]],
+        ["tasks.webpack.exclude_dirs", ["_data", "_includes", "_layouts", "_posts", "css", "vendor"]],
     ])
     .concat([
         ["collections.posts", { dir: "_posts", output: true }],
