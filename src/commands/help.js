@@ -12,10 +12,16 @@ export default function*(siteConfig) {
                 -h, --help         Show this message
                 -v, --version      Print the name and version
 
+        Build options
+                -n, --no-static Do not create static html files.
+                --db [DB Connection] MongoDb Connection (defaults to localhost:27017)
+
         Subcommands:
           build, b              Build your site
           new                   Creates a new hitchslap site scaffold in PATH
           help                  Show the help message, optionally for a given subcommand.
           serve, s              Serve your site locally
+          make, m               Same as build --no-static
+          run, r                Same as serve --no-static
     `);
 }

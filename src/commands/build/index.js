@@ -124,6 +124,9 @@ export default function*(siteConfig) {
         yield* runCustomTasks("after-data-load");
     }
 
+    console.log("loaded..")
+    console.log(site.data);
+
     //Before main tasks
     yield* runCustomTasks("before-main");
 

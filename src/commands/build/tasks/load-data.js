@@ -71,12 +71,11 @@ export default function(siteConfig) {
                 .concat(siteConfig.dir_data)
                 .map(dir => `!${dir}/`);
 
-            var exclusions = ["!node_modules/", "!config.json"].concat(collectionsAndDataDirs);
-            console.log(exclusions);
+            var exclusions = ["!node_modules/", "!config.json", "!config.yml", "!config.yaml"].concat(collectionsAndDataDirs);
 
             this.watch(
                 exclusions.concat(siteConfig.markdown_ext.concat(["json"]).map(ext => `*.${ext}`)),
-                function*(filePath) {console.log(filePath);}
+                addToCollection(siteConfig.scavenge_collection)
             );
         }
     };
