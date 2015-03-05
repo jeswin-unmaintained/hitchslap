@@ -1,3 +1,8 @@
+/*
+    No ES6 allowed.
+    This file is used by the build bootstrap.
+*/
+
 var fs = require("fs");
 var generatorify = require("nodefunc-generatorify");
 var extfs = require('extfs');

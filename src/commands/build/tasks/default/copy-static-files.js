@@ -1,7 +1,6 @@
 import path from "path";
 import fs from "fs";
 import fsutils from "../../../../utils/fs";
-import configutils from  "../../../../utils/config";
 
 export default function(siteConfig) {
     /*
@@ -27,7 +26,7 @@ export default function(siteConfig) {
                 yield* fsutils.mkdirp(outputDir);
             }
 
-            if (!(yield* fsutils.exists(destPath))) {                
+            if (!(yield* fsutils.exists(destPath))) {
                 fs.createReadStream(filePath).pipe(fs.createWriteStream(destPath));
             }
         }, "copy_static_files");

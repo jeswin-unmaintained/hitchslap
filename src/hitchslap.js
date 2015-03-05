@@ -7,6 +7,7 @@ import * as commands from "./commands";
 import yaml from "js-yaml";
 import path from "path";
 import fsutils from "./utils/fs";
+import readFileByFormat from "./utils/file-reader";
 
 //modes
 import jekyllMode from "./jekyll-mode";
@@ -53,8 +54,10 @@ var getSiteConfig = function*(siteExists) {
             }
         };
 
-        var configFilePath = argv.config ? path.join(source, argv.config) : path.join(source, "config.json");
-        siteConfig = JSON.parse(yield* fsutils.readFile(configFilePath));
+        var configFilePath = argv.config ? path.join(source, argv.config) :
+            (yield* fsutils.exists(path.join(source, "config.json"))) ? path.join(source, "config.json") : path.join(source, "config.yml");
+
+        siteConfig = yield* readFileByFormat(configFilePath);
         siteConfig.mode = siteConfig.mode || "jekyll";
 
         var defaults = [

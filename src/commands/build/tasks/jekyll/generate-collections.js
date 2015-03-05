@@ -28,7 +28,7 @@ export default function(siteConfig) {
             a) directories starting with an underscore. eg: _layouts/*, _posts/* aren't pages
             b) directories outside collections
     */
-    return function() {
+    return function() {        
         if (siteConfig.collection) {
             Object.keys(siteConfig.collection).forEach(collectionName => {
                 let collection = siteConfig.collections[collectionName];
