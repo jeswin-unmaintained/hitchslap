@@ -6,9 +6,12 @@ import generatorify from "nodefunc-generatorify";
 var lessc = generatorify(less.render.bind(less));
 
 export default function(siteConfig) {
+
+    var taskConfig = siteConfig.tasks.less;
+
     var fn = function() {
         this.watch(
-            [`${siteConfig.dir_css}/*.less`, `!${siteConfig.dir_css}/includes/*.less`],
+            [`${taskConfig.dirs}/*.less`, `!${taskConfig.dirs}/includes/*.less`],
             function*(filePath, ev, match) {
                 var outputPath = path.join(siteConfig.destination, filePath).replace(/\.less$/, ".css");
                 var outputDir = path.dirname(outputPath);

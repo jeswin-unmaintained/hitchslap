@@ -61,16 +61,30 @@ export default function(siteConfig) {
         );
     };
 
+    var makePagePath = function(filePath, page) {
+        var permalink = page.permalink || siteConfig.permalink;
+
+        var dir = path.dirname(filePath);
+        var extension = path.extname(filePath);
+        var basename = path.basename(filePath, extension);
+
+        return permalink === "pretty" ?
+            path.join(dir, basename, "index.html") :
+            path.join(dir, `${basename}.html`);
+    };
+
     var fn = function*() {
         for (let collectionName in siteConfig.collections) {
             let collection = siteConfig.collections[collectionName];
             if (collection.output) {
-                var makePath = collectionName === "posts" ? makePostPath : getMakePath(collection);
-
                 for (let item of GLOBAL.site.data[collectionName]) {
+                    var makePath = collectionName === "posts" ? makePostPath :
+                        collectionName === "pages" ? makePagePath :
+                        getMakePath(collection);
+
                     //If we don't have a filename, we don't need to process it individually.
-                    if (item.__filename) {
-                        yield* doLayout(item, item.__filename, collection.layout || "default", makePath, siteConfig);
+                    if (item.__filePath) {
+                        yield* doLayout(item, item.__filePath, collection.layout || "default", makePath, siteConfig);
                     }
                 }
             }

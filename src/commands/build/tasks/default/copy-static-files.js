@@ -6,17 +6,15 @@ export default function(siteConfig) {
     /*
         Copy everything that is not a markdown, jsx or yml file.
     */
+    var taskConfig = siteConfig.tasks["copy-static-files"];
+
     var fn = function() {
         var extensions = ["*.*"]
             //add exclusions
-            .concat(siteConfig.skip_copying_extensions
+            .concat(taskConfig.skip_extensions
                 .map(ext => `!*.${ext}`))
             .concat([siteConfig.destination, "node_modules"]
                 .map(dir => `!${dir}/`));
-
-        //If we are in jekyll blog mode, do not copy markdown files.
-        if (siteConfig.mode === "jekyll")
-            extensions = extensions.concat(siteConfig.markdown_ext.map(ext => `!*.${ext}`));
 
         this.watch(extensions, function*(filePath, ev, matches) {
             var destPath = path.join(siteConfig.destination, filePath);

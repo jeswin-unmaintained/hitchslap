@@ -34,6 +34,37 @@ var getCommand = function() {
     );
 };
 
+/*
+    getValueSetter() returns a valueSetter function.
+    valueSetter initializes config properties with command-line params and default values.
+*/
+var getValueSetter = (config) => {
+    return (fullyQualifiedProperty, defaultValue, options = {}) => {
+        //props are like "a.b.c"; we need to find config.a.b.c
+        //propParent will be config.a.b, in this case.
+        var propArray = fullyQualifiedProperty.split(".");
+        var prop = propArray.slice(propArray.length - 1)[0];
+        var propParents = propArray.slice(0, propArray.length - 1);
+
+        //Make sure a.b exists in config
+        var currentProp = config;
+        for (let parent of propParents) {
+            if (typeof currentProp[parent] === "undefined" || currentProp[parent] === null)
+                currentProp[parent] = {};
+            currentProp = currentProp[parent];
+        }
+
+        var commandLineArg = argv[fullyQualifiedProperty];
+        if (typeof commandLineArg !== "undefined" && commandLineArg !== null) {
+            if (options.append && currentProp[prop] instanceof Array)
+                currentProp[prop].push(commandLineArg);
+            else
+                currentProp[prop] = commandLineArg;
+        } else if (typeof currentProp[prop] === "undefined" || currentProp[prop] === null) {
+            currentProp[prop] = defaultValue;
+        }
+    };
+};
 
 var getSiteConfig = function*(siteExists) {
     var siteConfig = {};
@@ -42,40 +73,23 @@ var getSiteConfig = function*(siteExists) {
         var source = argv.source || argv.s || "./";
         var destination = argv.destination || argv.d || "_site";
 
-        var getValueSetter = (config, propPrefix) => (prop, defaultValue) => {
-            var commandLineArg = argv[propPrefix ? `${propPrefix}.${prop}` : prop];
-            if (typeof commandLineArg !== "undefined" && commandLineArg !== null) {
-                if (config[prop] instanceof Array)
-                    config[prop].concat(commandLineArg);
-                else
-                    config[prop] = commandLineArg;
-            } else if (typeof config[prop] === "undefined" || config[prop] === null) {
-                config[prop] = defaultValue;
-            }
-        };
-
         var configFilePath = argv.config ? path.join(source, argv.config) :
             (yield* fsutils.exists(path.join(source, "config.json"))) ? path.join(source, "config.json") : path.join(source, "config.yml");
 
         siteConfig = yield* readFileByFormat(configFilePath);
         siteConfig.mode = siteConfig.mode || "jekyll";
 
+        var setter = getValueSetter(siteConfig);
+
         var defaults = [
             ['source', source],
             ['destination', destination],
 
-            ["dir_data", "_data"],
-            ["dir_hitchslap", "_hitchslap"],
-            ["dir_includes", "_includes"],
-            ["dir_layouts", "_layouts"],
-            ["dir_css", "css"],
-            ["dir_client_js", "vendor"],
-            ["dir_custom_tasks", "_custom_tasks"],
+            ["dir_custom_tasks", "custom_tasks"],
 
             ["collections", {}],
 
             //Handling Reading
-            ["keep_files", [".git", ".svn"]],
             ["watch", true],
 
             //Serving
@@ -90,59 +104,19 @@ var getSiteConfig = function*(siteExists) {
             //Make too much noise while processing?
             ["quiet", false],
 
-            ["markdown_ext", ["markdown","mkdown","mkdn","mkd","md"]],
-
-            //do not copy these extensions as static files. They aren't.
-            ["skip_copying_extensions", ["markdown","mkdown","mkdn","mkd","md", "yml", "yaml", "jsx", "less", "json"]],
-
             ["disabled_tasks", []]
         ];
 
-        var setter = getValueSetter(siteConfig);
-
-        for (let args of defaults) {
-            let [prop, val] = args;
-            setter(prop, val);
-        }
-
-        //Load mode specific defaults
-        if (siteConfig.mode !== "default" && modes[siteConfig.mode].loadDefaults) {
-            siteConfig[siteConfig.mode] = {};
-            let modeDefaults = modes[siteConfig.mode].loadDefaults();
-            let modeSetter = getValueSetter(siteConfig[siteConfig.mode], siteConfig.mode);
-
-            for (let args of modeDefaults) {
-                let [prop, val] = args;
-                modeSetter(prop, val);
-            }
+        var modeDefaults = (siteConfig.mode !== "default" && modes[siteConfig.mode].loadDefaults) ? modes[siteConfig.mode].loadDefaults() : [];
+        for (let args of defaults.concat(modeDefaults)) {
+            setter.apply(null, args);
         }
 
         //Store absolute paths for source and destination
         siteConfig.source = path.resolve(siteConfig.source);
         siteConfig.destination = path.resolve(siteConfig.source, siteConfig.destination);
 
-        //If collections is a string array, convert to stardardized structure
-        if (siteConfig.collections instanceof Array) {
-            for (let name in siteConfig.collections) {
-                siteConfig.collections[name] = {};
-            }
-        }
-
-        //Make sure collections have dir set, if missing
-        for (let name of Object.keys(siteConfig.collections)) {
-            siteConfig.collections[name].dir = siteConfig.collections[name].dir || name;
-        }
-
-        //Convert dir_xxx property values to [value] if value isn't an array.
-        //We do this because dir_xxx properties allow multiple entries.
-        for (var key in siteConfig) {
-            if (/^dir_/.test(key)) {
-                var val = siteConfig[key];
-                if (!(val instanceof Array))
-                    siteConfig[key] = [val];
-            }
-        }
-
+        //Give modes one chance to update the siteConfig
         if (siteConfig.mode !== "default" && modes[siteConfig.mode].updateSiteConfig) {
             defaults = defaults.concat(modes[siteConfig.mode].updateSiteConfig(siteConfig));
         }

@@ -4,16 +4,20 @@ import frontMatter from "front-matter";
 import markdown from "node-markdown";
 import fsutils from "../../../../utils/fs";
 import pretty from "pretty";
+import { print, getLogger } from "../../../../utils/logging";
 
 var md = markdown.Markdown;
 
 export default function*(page, sourcePath, layout, makePath, siteConfig) {
+    var logger = getLogger(siteConfig);
+    var taskConfig = siteConfig.jekyll;
+
     try {
         var layoutsourcePath, params, component;
 
         //Source path and layout are the same only when generating plain JSX templates (without frontmatter)
         if (sourcePath !== layout) {
-            layoutsourcePath = path.resolve(siteConfig.destination, `${siteConfig.dir_layouts}/${page.layout || layout}`);
+            layoutsourcePath = path.resolve(siteConfig.destination, `${taskConfig.dir_layouts}/${page.layout || layout}`);
             params = { page: page, content: page.content, site: siteConfig };
         } else {
             page = {};
@@ -34,14 +38,13 @@ export default function*(page, sourcePath, layout, makePath, siteConfig) {
             yield* fsutils.mkdirp(outputDir);
         }
 
-        if (!siteConfig.quiet)
-            console.log(`Generating ${sourcePath} -> ${outputPath}`);
+        logger(`Generating ${sourcePath} -> ${outputPath}`);
 
         yield* fsutils.writeFile(outputPath, html);
 
         return { page };
     } catch(err) {
-        console.log(`Cannot process ${sourcePath} with template ${layout}.`);
+        print(`Cannot process ${sourcePath} with template ${layout}.`);
         throw err;
     }
 }

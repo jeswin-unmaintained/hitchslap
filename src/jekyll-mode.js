@@ -1,6 +1,12 @@
 var loadDefaults = function() {
     return [
+        //Directories
+        ["dir_includes", ["_includes"]],
+        ["dir_layouts", ["_layouts"]],
+        ["dir_client_js", ["vendor"]],
+
         //Handling Reading
+        ["markdown_ext", ["markdown","mkdown","mkdn","mkd","md"]],
         ["encoding", "utf-8"],
 
         //Conversion
@@ -15,20 +21,21 @@ var loadDefaults = function() {
         //Outputting
         ["permalink", "date"],
         ["paginate_path", "/page:num"],
-        ["timezone", null]
-
-    ];
+        ["timezone", null],
+    ]
+    .map(values => [`jekyll.${values[0]}`, values[1]])
+    .concat([
+        ["tasks.transpile.exclude_dirs", ["vendor"]],
+        ["tasks.load-data.dir_data", ["_data"]],
+        ["tasks.load-data.markdown_ext", ["markdown","mkdown","mkdn","mkd","md"]],
+        ["tasks.less.dirs", ["css"]],
+        ["tasks.copy-static-files.skip_extensions", ["markdown","mkdown","mkdn","mkd","md", "yml", "yaml", "jsx", "less", "json"], { append: true }]
+    ])
+    .concat([
+        ["collections.posts", { dir: "_posts", output: true }],
+        ["collections.pages", { output: true }],
+        ["scavenge_collection", "pages"]
+    ]);
 };
 
-var updateSiteConfig = function(siteConfig) {
-    siteConfig.collections.posts = siteConfig.collections.posts || { dir: "_posts", output: true };
-    siteConfig.collections.pages = siteConfig.collections.pages || { output: true };
-
-    //In jekyll mode, turn data scavenging on.
-    //  This means that the data loader should look outside the known collection
-    //  directories for data files (*.md files).
-    //Scavenged data goes into the pages collection unless overridden in config
-    siteConfig.scavenge_collection = siteConfig.data_scavenge_collection || "pages";
-};
-
-export default { loadDefaults, updateSiteConfig };
+export default { loadDefaults };

@@ -1,5 +1,6 @@
 import koa from "koa";
 import koaStatic from "koa-static";
+import { print, getLogger } from "../utils/logging";
 
 export default function*(siteConfig) {
     var koa = require('koa');
@@ -7,7 +8,7 @@ export default function*(siteConfig) {
     app.use(koaStatic(siteConfig.destination));
     app.listen(siteConfig.port);
 
-    console.log(`
+    print(`
             Configuration file: ${siteConfig.source}/_config.yml
                     Source: ${siteConfig.source}
                Destination: ${siteConfig.destination}

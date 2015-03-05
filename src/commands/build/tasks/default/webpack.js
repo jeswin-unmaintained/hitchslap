@@ -7,6 +7,8 @@ var argv = optimist.argv;
 
 export default function(siteConfig) {
 
+    var taskConfig = siteConfig.tasks.webpack;
+
     /*
         Entry points are
             a) All standalone templates

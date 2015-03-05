@@ -2,19 +2,21 @@ import tools from "crankshaft-tools";
 import optimist from "optimist";
 import path from "path";
 import fsutils from "../utils/fs";
+import { print, getLogger } from "../utils/logging";
 
 var argv = optimist.argv;
 
 export default function*(siteConfig) {
+    var logger = getLogger(siteConfig);
 
     var dest = argv.source || argv.s || process.argv[3];
     if (!dest) {
-        console.error("Error:  You must specify a path.");
+        print("Error:  You must specify a path.");
         return;
     }
 
     if (!argv.force && !argv.recreate && !(yield* fsutils.empty(dest))) {
-        console.error(`Conflict: ${path.resolve(dest)} is not empty.`);
+        print(`Conflict: ${path.resolve(dest)} is not empty.`);
     } else {
         if (argv.recreate) {
             if (yield* fsutils.exists(dest))
@@ -34,7 +36,7 @@ export default function*(siteConfig) {
             yield* fsutils.copyRecursive(path.join(node_modules_path, node_module), path.join(dest_node_modules_path, node_module), { forceDelete: true });
         }
 
-        console.log(`New hitchslap site installed in ${path.resolve(dest)}.`);
+        print(`New hitchslap site installed in ${path.resolve(dest)}.`);
     }
 
 }

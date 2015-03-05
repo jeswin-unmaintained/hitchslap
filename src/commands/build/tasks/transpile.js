@@ -6,12 +6,13 @@ import fsutils from "../../../utils/fs";
 var argv = optimist.argv;
 
 export default function(siteConfig) {
+    var taskConfig = siteConfig.tasks.transpile;
+
     var blacklist = argv["transpiler-blacklist"] ? [].concat(argv["transpiler-blacklist"]) : [];
 
     var fn = function() {
-        var excluded = ["destination", "dir_client_js"]
-            .map(k => siteConfig[k])
-            .concat("node_modules")
+        var excluded = [siteConfig.destination, "node_modules"]
+            .concat(taskConfig.exclude_dirs)
             .map(dir => `!${dir}/`);
 
         this.watch(["*.js", "*.jsx"].concat(excluded), function*(filePath, ev, match) {

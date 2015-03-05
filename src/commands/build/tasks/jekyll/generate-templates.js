@@ -28,9 +28,9 @@ export default function(siteConfig) {
                     .map(dir => `!${dir}/`)
             );
         this.watch(extensions, function*(filePath, ev, matches) {
-            var result = yield* doLayout(filePath, filePath, makePath, siteConfig);
+            var result = yield* doLayout(null, filePath, filePath, makePath, siteConfig);
         }, `build_templates`);
     };
 
-    return { build: false, fn: fn };
+    return { build: true, fn: fn };
 }

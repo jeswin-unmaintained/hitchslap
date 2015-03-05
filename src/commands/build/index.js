@@ -7,6 +7,8 @@ import optimist from "optimist";
 import crankshaft from "crankshaft";
 import React from "react";
 
+import { getLogger } from "../../utils/logging";
+
 import transpile from "./tasks/transpile";
 import loadData from "./tasks/load-data";
 import * as defaultTasks from "./tasks/default";
@@ -34,11 +36,12 @@ var argv = optimist.argv;
 */
 
 export default function*(siteConfig) {
+    var logger = getLogger(siteConfig);
 
     GLOBAL.site = {};
 
-    console.log(`Source: ${siteConfig.source}`);
-    console.log(`Destination: ${siteConfig.destination}`);
+    logger(`Source: ${siteConfig.source}`);
+    logger(`Destination: ${siteConfig.destination}`);
 
 
     /*
@@ -67,12 +70,7 @@ export default function*(siteConfig) {
         try {
             yield* build.start(monitor);
         } catch (ex) {
-            console.log(ex);
-            console.log(ex.stack);
-            if (ex._inner) {
-                console.log(ex._inner);
-                console.log(ex._inner.stack);
-            }
+            logger(ex);
         }
     };
 
@@ -171,7 +169,7 @@ export default function*(siteConfig) {
         yield* runCustomTasks("on-complete");
 
         var endTime = Date.now();
-        console.log(`Build took ${(endTime - startTime)/1000} seconds.`);
+        logger(`Build took ${(endTime - startTime)/1000} seconds.`);
     };
 
     yield* runTasks(
