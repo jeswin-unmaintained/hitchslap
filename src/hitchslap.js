@@ -20,7 +20,7 @@ var argv = optimist.argv;
 
 //debug mode?
 if (argv.debug) {
-    GLOBAL.CRANKSHAFT_DEBUG_MODE = true;
+    GLOBAL.CO_PARALLEL_TOOLS_DEBUG = true;
 }
 
 //Commands might need the templates directory. Easier from root.

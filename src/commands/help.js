@@ -7,14 +7,16 @@ export default function*(siteConfig) {
           hitchslap <subcommand> [options]
 
         Options:
-                -s, --source [DIR]  Source directory (defaults to ./)
-                -d, --destination [DIR]  Destination directory (defaults to ./_site)
-                -h, --help         Show this message
-                -v, --version      Print the name and version
+                -s, --source [DIR]      Source directory (defaults to ./)
+                -d, --destination [DIR] Destination directory (defaults to ./_site)
+                -h, --help              Show this message
+                -v, --version           Print the name and version
 
-        Build options
-                -n, --no-static Do not create static html files.
-                --db [DB Connection] MongoDb Connection (defaults to localhost:27017)
+        Build and Serve options
+                -n, --no-static         Do not create static html files
+                --db <DB name>          Mongo database name
+                --db-host [DB Host]     MongoDb server (defaults to localhost)
+                --db-port [DB Port]     MongoDb port (defaults to 27017)
 
         Subcommands:
           build, b              Build your site
