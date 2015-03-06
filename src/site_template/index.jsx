@@ -10,7 +10,7 @@ export default class Index extends React.Component {
     static *loadData() {
         return {
             posts: [],// yield* db.posts.find({}, { limit: 5 }),
-            projects: [], //yield* db.find({}, { limit: 5 })
+            projects: [] //yield* db.find({}, { limit: 5 })
         };
     }
 
@@ -89,4 +89,4 @@ export default class Index extends React.Component {
             </Container>
         );
     }
-}
+};
