@@ -1,7 +1,0 @@
-{
-    "name": "fora-blog-template",
-    "dependencies": {
-        "react": "*",
-        "koa": "*"
-    }
-}

@@ -45,6 +45,8 @@
         "rimraf": "*",
         "less": "*",
         "minimongo": "*",
-        "ceramic-backend-mongodb": "*"
+        "ceramic-backend-mongodb": "*",
+        "fora-template-blog": "*",
+        "fora-template-jekyll": "*"
     }
 }

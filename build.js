@@ -12,17 +12,10 @@ var build = crankshaft.create();
 build.onStart(function*() {
     if (yield* fsutils.exists("lib"))
         yield* fsutils.remove("lib");
-
-    /*
-        Copy directories that don't need any transpilation or processing.
-        ie, everything inside site_templates
-    */
-    yield* fsutils.mkdirp("lib/site_templates");
-    yield* fsutils.copyRecursive("src/site_templates", "lib/site_templates", { forceDelete: true });
 });
 
 build.configure(function() {
-    var excluded = [ "!node_modules/", "!src/site_templates/"];
+    var excluded = [ "!node_modules/"];
 
     /*
         Transpile js and jsx with babel.

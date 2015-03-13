@@ -7,6 +7,7 @@ import * as commands from "./commands";
 import yaml from "js-yaml";
 import path from "path";
 import fsutils from "./utils/fs";
+import { print } from "./utils/logging";
 import readFileByFormat from "./utils/file_reader";
 
 //modes
@@ -108,12 +109,14 @@ var getFullyQualifiedProperties = (obj, prefixes = [], acc = []) => {
         let val = obj[key];
         var fullNameArray = prefixes.concat(key);
         if (!(val instanceof Array) && val !== null && typeof val === "object" && (typeof val.value === "undefined")) {
+            acc.push([fullNameArray.join("."), {}]);
             getFullyQualifiedProperties(val, fullNameArray, acc);
         } else {
-            if (val && typeof val.value !== "undefined")
+            if (val && typeof val.value !== "undefined") {
                 acc.push([fullNameArray.join("."), val.value, val.options]);
-            else
+            } else {
                 acc.push([fullNameArray.join("."), val]);
+            }
         }
     }
     return acc;
@@ -130,17 +133,11 @@ var getSiteConfig = function*() {
         (yield* fsutils.exists(path.join(source, "config.json"))) ? path.join(source, "config.json") : path.join(source, "config.yml");
 
     siteConfig = yield* readFileByFormat(configFilePath);
-    siteConfig.mode = siteConfig.mode || "default";
-
-    siteConfig.tasks = siteConfig.tasks || {};
-    siteConfig.tasks.load_data = siteConfig.tasks.load_data || {};
-    siteConfig.tasks.copy_static_files = siteConfig.tasks.copy_static_files || {};
-    siteConfig.tasks.transpile = siteConfig.tasks.transpile || {};
-    siteConfig.tasks.webpack = siteConfig.tasks.webpack || {};
 
     var setter = getValueSetter(siteConfig);
 
     var defaults = getFullyQualifiedProperties({
+        mode: "default",
         source: source,
         destination: destination,
         dir_custom_tasks: "custom_tasks",
@@ -188,6 +185,7 @@ var getSiteConfig = function*() {
         setter.apply(null, args);
     }
 
+
     //Store absolute paths for source and destination
     siteConfig.source = path.resolve(siteConfig.source);
     siteConfig.destination = path.resolve(siteConfig.source, siteConfig.destination);
@@ -196,7 +194,6 @@ var getSiteConfig = function*() {
     if (siteConfig.mode !== "default" && modes[siteConfig.mode].updateSiteConfig) {
         defaults = defaults.concat(modes[siteConfig.mode].updateSiteConfig(siteConfig));
     }
-
     return siteConfig;
 };
 
@@ -213,10 +210,10 @@ co(function*() {
                 yield* command(config);
             }
         } else {
-            console.log("Invalid command. Use --help for more information.");
+            print("Invalid command. Use --help for more information.");
         }
     }
     catch(err) {
-        console.error(err.stack);
+        print(err.stack);
     }
 });

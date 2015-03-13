@@ -27,8 +27,9 @@ export default function*() {
 
         var template = argv.template || argv.t || "jekyll";
 
-        //Copy site_templates
-        yield* fsutils.copyRecursive(path.join(GLOBAL.__libdir, "site_templates", template), dest, { forceDelete: true });
+        //Copy template
+        var node_modules_path = path.resolve(GLOBAL.__libdir, "../node_modules");
+        yield* fsutils.copyRecursive(path.join(node_modules_path, `fora-template-${template}`), dest, { forceDelete: true });
 
         //Install npm dependencies.
         var exec = tools.process.exec();

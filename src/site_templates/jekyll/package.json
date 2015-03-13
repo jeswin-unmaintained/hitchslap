@@ -1,7 +1,0 @@
-{
-    "name": "fora-jekyll-template",
-    "dependencies": {
-        "react": "*",
-        "koa": "*"
-    }
-}
