@@ -197,8 +197,6 @@ var getSiteConfig = function*() {
         defaults = defaults.concat(modes[siteConfig.mode].updateSiteConfig(siteConfig));
     }
 
-    console.log(JSON.stringify(siteConfig));
-
     return siteConfig;
 };
 
