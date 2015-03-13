@@ -26,10 +26,10 @@ var loadDefaults = function() {
     .map(values => [`jekyll.${values[0]}`, values[1]])
     .concat([
         ["tasks.transpile.exclude_dirs", ["vendor"]],
-        ["tasks.load-data.dir_data", ["_data"]],
-        ["tasks.load-data.markdown_ext", ["markdown","mkdown","mkdn","mkd","md"]],
+        ["tasks.load_data.dir_data", ["_data"]],
+        ["tasks.load_data.markdown_ext", ["markdown","mkdown","mkdn","mkd","md"]],
         ["tasks.less.dirs", ["css"]],
-        ["tasks.copy-static-files.skip_extensions", ["markdown","mkdown","mkdn","mkd","md", "yml", "yaml", "jsx", "less", "json"]],
+        ["tasks.copy_static_files.skip_extensions", ["markdown","mkdown","mkdn","mkd","md", "yml", "yaml", "jsx", "less", "json"]],
         ["tasks.webpack.exclude_dirs", ["_data", "_includes", "_layouts", "_posts", "css", "vendor"]],
     ])
     .concat([

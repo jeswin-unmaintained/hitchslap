@@ -1,9 +1,9 @@
-import copyStaticFiles from "./copy-static-files";
+import copyStaticFiles from "./copy_static_files";
 import less from "./less";
 import webpack from "./webpack";
 
 var main = {
-    "copy-static-files": copyStaticFiles,
+    "copy_static_files": copyStaticFiles,
     "less": less,
     "webpack": webpack
 };

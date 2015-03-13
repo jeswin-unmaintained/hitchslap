@@ -1,9 +1,9 @@
-import generateCollections from "./generate-collections";
-import generateTemplates from "./generate-templates";
+import generateCollections from "./generate_collections";
+import generateTemplates from "./generate_templates";
 
 var main = {
-    "generate-collections": generateCollections,
-    "generate-templates": generateTemplates
+    "generate_collections": generateCollections,
+    "generate_templates": generateTemplates
 };
 
 export { main };

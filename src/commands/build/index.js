@@ -10,7 +10,7 @@ import React from "react";
 import { getLogger } from "../../utils/logging";
 
 import transpile from "./tasks/transpile";
-import loadData from "./tasks/load-data";
+import loadData from "./tasks/load_data";
 import * as defaultTasks from "./tasks/default";
 import * as jekyllTasks from "./tasks/jekyll";
 

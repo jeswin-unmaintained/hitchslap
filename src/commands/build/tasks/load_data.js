@@ -2,7 +2,7 @@ import path from "path";
 import frontMatter from "front-matter";
 import yaml from "js-yaml";
 import fsutils from "../../../utils/fs";
-import readFileByFormat from "../../../utils/file-reader";
+import readFileByFormat from "../../../utils/file_reader";
 import { print, getLogger } from "../../../utils/logging";
 
 /*
@@ -10,9 +10,9 @@ import { print, getLogger } from "../../../utils/logging";
     Yaml is loaded into site.data.filename. eg: site.data.songs
 */
 export default function(siteConfig) {
-    var logger = getLogger(siteConfig, "load-data");
+    var logger = getLogger(siteConfig, "load_data");
 
-    var taskConfig = siteConfig.tasks["load-data"];
+    var taskConfig = siteConfig.tasks["load_data"];
 
     var fn = function() {
         GLOBAL.site.data = {};
@@ -65,8 +65,9 @@ export default function(siteConfig) {
             GLOBAL.site.data[collectionName] = [];
             var collection = siteConfig.collections[collectionName];
             if (collection.dir) {
+                var collectionDir = taskConfig.collections_root_dir ? path.combine(taskConfig.collections_root_dir, collection.dir) : collection.dir;
                 this.watch(
-                    taskConfig.markdown_ext.concat(["json"]).map(ext => `${collection.dir}/*.${ext}`),
+                    taskConfig.markdown_ext.concat(["json"]).map(ext => `${collectionDir}/*.${ext}`),
                     addToCollection(collectionName)
                 );
             }

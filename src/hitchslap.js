@@ -7,10 +7,10 @@ import * as commands from "./commands";
 import yaml from "js-yaml";
 import path from "path";
 import fsutils from "./utils/fs";
-import readFileByFormat from "./utils/file-reader";
+import readFileByFormat from "./utils/file_reader";
 
 //modes
-import jekyllMode from "./jekyll-mode";
+import jekyllMode from "./jekyll_mode";
 var modes = {
     "jekyll": jekyllMode
 };
