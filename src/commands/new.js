@@ -23,8 +23,8 @@ export default function*(siteConfig) {
                 yield* fsutils.remove(dest);
         }
 
-        //Copy site_template
-        yield* fsutils.copyRecursive(path.join(GLOBAL.__libdir, "site_template"), dest, { forceDelete: true });
+        //Copy site_templates
+        yield* fsutils.copyRecursive(path.join(GLOBAL.__libdir, "site_templates", siteConfig.mode), dest, { forceDelete: true });
 
         //Create node_modules
         var node_modules_path = path.resolve(GLOBAL.__libdir, "../node_modules");

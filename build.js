@@ -15,14 +15,14 @@ build.onStart(function*() {
 
     /*
         Copy directories that don't need any transpilation or processing.
-        ie, everything inside the default site_template
+        ie, everything inside site_templates
     */
-    yield* fsutils.mkdirp("lib/site_template");
-    yield* fsutils.copyRecursive("src/site_template", "lib/site_template", { forceDelete: true });
+    yield* fsutils.mkdirp("lib/site_templates");
+    yield* fsutils.copyRecursive("src/site_templates", "lib/site_templates", { forceDelete: true });
 });
 
 build.configure(function() {
-    var excluded = [ "!node_modules/", "!src/site_template/"];
+    var excluded = [ "!node_modules/", "!src/site_templates/"];
 
     /*
         Transpile js and jsx with babel.

@@ -122,9 +122,12 @@ var getSiteConfig = function*(siteExists) {
         if (siteConfig.mode !== "default" && modes[siteConfig.mode].updateSiteConfig) {
             defaults = defaults.concat(modes[siteConfig.mode].updateSiteConfig(siteConfig));
         }
+    } else {
+        siteConfig.mode = "jekyll";
     }
 
     siteConfig.node_modules = siteConfig.node_modules || ["react"];
+
     return siteConfig;
 };
 
