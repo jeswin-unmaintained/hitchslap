@@ -8,7 +8,7 @@ var lessc = generatorify(less.render.bind(less));
 
 export default function(siteConfig) {
 
-    var logger = getLogger(siteConfig, "less");
+    var logger = getLogger(siteConfig.quiet, "less");
     var taskConfig = siteConfig.tasks.less;
 
     var fn = function() {

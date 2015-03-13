@@ -7,7 +7,7 @@ import { print, getLogger } from "../../../utils/logging";
 var argv = optimist.argv;
 
 export default function(siteConfig) {
-    var logger = getLogger(siteConfig, "transpile");
+    var logger = getLogger(siteConfig.quiet, "transpile");
     var taskConfig = siteConfig.tasks.transpile;
 
     var blacklist = argv["transpiler-blacklist"] ? [].concat(argv["transpiler-blacklist"]) : [];
@@ -28,6 +28,8 @@ export default function(siteConfig) {
             var contents = yield* fsutils.readFile(filePath);
             var result = transform(contents, { blacklist });
             yield* fsutils.writeFile(outputPath, result.code);
+            if (argv.verbose)
+                print(`${filePath} -> ${outputPath}`, "transpile");
         }, "babel_js_jsx");
 
         this.onComplete(function*() {

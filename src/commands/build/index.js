@@ -35,7 +35,7 @@ var argv = optimist.argv;
 */
 
 export default function*(siteConfig) {
-    var logger = getLogger(siteConfig);
+    var logger = getLogger(siteConfig.quiet);
 
     GLOBAL.site = {};
 

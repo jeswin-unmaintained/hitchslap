@@ -8,7 +8,7 @@ export default function(siteConfig) {
         Copy everything that is not a markdown, jsx or yml file.
     */
 
-    var logger = getLogger(siteConfig, "copy_static_files");
+    var logger = getLogger(siteConfig.quiet, "copy_static_files");
     var taskConfig = siteConfig.tasks.copy_static_files;
 
     var fn = function() {

@@ -6,8 +6,8 @@ import { print, getLogger } from "../utils/logging";
 
 var argv = optimist.argv;
 
-export default function*(siteConfig) {
-    var logger = getLogger(siteConfig);
+export default function*() {
+    var logger = getLogger(argv.quiet || false);
 
     var dest = argv.destination || argv.d || !(/^--/.test(process.argv[3])) ? process.argv[3] : "";
     if (!dest) {
@@ -19,12 +19,16 @@ export default function*(siteConfig) {
         print(`Conflict: ${path.resolve(dest)} is not empty.`);
     } else {
         if (argv.recreate) {
-            if (yield* fsutils.exists(dest))
+            if (yield* fsutils.exists(dest)) {
+                print(`Deleting ${dest}`);
                 yield* fsutils.remove(dest);
+            }
         }
 
+        var template = argv.template || argv.t || "jekyll";
+
         //Copy site_templates
-        yield* fsutils.copyRecursive(path.join(GLOBAL.__libdir, "site_templates", siteConfig.mode), dest, { forceDelete: true });
+        yield* fsutils.copyRecursive(path.join(GLOBAL.__libdir, "site_templates", template), dest, { forceDelete: true });
 
         //Install npm dependencies.
         var exec = tools.process.exec();
@@ -33,7 +37,7 @@ export default function*(siteConfig) {
         console.log(yield* exec(`npm install`));
         process.chdir(curdir);
 
-        print(`New ${siteConfig.mode} site installed in ${path.resolve(dest)}.`);
+        print(`New ${template} site installed in ${path.resolve(dest)}.`);
     }
 
 }

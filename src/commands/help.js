@@ -1,8 +1,7 @@
-import { getLogger } from "../utils/logging";
+import { print } from "../utils/logging";
 
-export default function*(siteConfig) {
-    var logger = getLogger(siteConfig);
-    logger(`
+export default function*() {
+    print(`
         hitchslap 0.0.1 -- hitchslap is a blog-aware, static site generator in NodeJS
 
         Usage:

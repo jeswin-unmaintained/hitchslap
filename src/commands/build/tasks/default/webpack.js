@@ -12,7 +12,7 @@ export default function(siteConfig) {
             a) All standalone templates
             b) All templates in _layouts
     */
-    var logger = getLogger(siteConfig, "webpack");
+    var logger = getLogger(siteConfig.quiet, "webpack");
 
     var taskConfig = siteConfig.tasks.webpack;
 

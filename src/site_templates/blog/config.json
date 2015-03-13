@@ -3,6 +3,5 @@
     "email": "youremail@example.com",
     "collections": {
         "music": {}
-    },
-    "mode": "jekyll"
+    }
 }

@@ -10,7 +10,7 @@ import { print, getLogger } from "../../../utils/logging";
     Yaml is loaded into site.data.filename. eg: site.data.songs
 */
 export default function(siteConfig) {
-    var logger = getLogger(siteConfig, "load_data");
+    var logger = getLogger(siteConfig.quiet, "load_data");
 
     var taskConfig = siteConfig.tasks.load_data;
 

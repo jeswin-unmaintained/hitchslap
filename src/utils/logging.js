@@ -15,9 +15,9 @@ var print = function(what, prefix) {
     }
 };
 
-var getLogger = function(siteConfig, prefix) {
+var getLogger = function(quiet, prefix) {
     return function(what) {
-        if (!siteConfig.quiet) {
+        if (!quiet) {
             print(what, prefix);
         }
     };

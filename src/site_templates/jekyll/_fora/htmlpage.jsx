@@ -20,7 +20,7 @@ export default class Container extends React.Component {
         var _joinPath = joinPath(this.props.site.baseurl);
         var css = this.props.css ? this.props.css.map(_joinPath) : [];
         var scripts = this.props.scripts ?
-            ["/vendor/react.min.js", "/vendor/jquery.min.js"].concat(this.props.scripts).map(_joinPath) : [];
+            ["/_vendor/react.min.js", "/_vendor/jquery.min.js"].concat(this.props.scripts).map(_joinPath) : [];
         return (
             <html>
                 <head>

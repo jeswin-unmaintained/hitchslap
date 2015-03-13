@@ -9,7 +9,7 @@ import { print, getLogger } from "../../../../utils/logging";
 var md = markdown.Markdown;
 
 export default function*(page, sourcePath, layout, makePath, siteConfig) {
-    var logger = getLogger(siteConfig, "jekyll html generator");
+    var logger = getLogger(siteConfig.quiet, "jekyll html generator");
     var taskConfig = siteConfig.jekyll;
 
     try {
