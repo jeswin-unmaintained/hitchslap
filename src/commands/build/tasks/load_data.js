@@ -12,7 +12,7 @@ import { print, getLogger } from "../../../utils/logging";
 export default function(siteConfig) {
     var logger = getLogger(siteConfig, "load_data");
 
-    var taskConfig = siteConfig.tasks["load_data"];
+    var taskConfig = siteConfig.tasks.load_data;
 
     var fn = function() {
         GLOBAL.site.data = {};

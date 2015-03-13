@@ -5,7 +5,6 @@ import fs from "fs";
 import fsutils from "../../utils/fs";
 import optimist from "optimist";
 import crankshaft from "crankshaft";
-import React from "react";
 
 import { getLogger } from "../../utils/logging";
 

@@ -6,8 +6,11 @@ export default class Default extends React.Component {
         super(props);
     }
 
-    render() {
+    getContent() {
+        return typeof this.props.content !== "undefined" && this.props.content !== null ? this.props.content : "";
+    }
 
+    render() {
         return (
             <Container {...this.props}>
                 <div className="post">
@@ -17,7 +20,7 @@ export default class Default extends React.Component {
                     </header>
 
                     <article className="post-content">
-                        <div dangerouslySetInnerHTML={{__html: this.props.content}}></div>
+                        <div dangerouslySetInnerHTML={{__html: this.getContent()}}></div>
                     </article>
 
                 </div>

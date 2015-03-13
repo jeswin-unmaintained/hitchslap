@@ -9,7 +9,7 @@ export default function(siteConfig) {
     */
 
     var logger = getLogger(siteConfig, "copy_static_files");
-    var taskConfig = siteConfig.tasks["copy_static_files"];
+    var taskConfig = siteConfig.tasks.copy_static_files;
 
     var fn = function() {
         var extensions = ["*.*"]

@@ -126,8 +126,6 @@ var getSiteConfig = function*(siteExists) {
         siteConfig.mode = "jekyll";
     }
 
-    siteConfig.node_modules = siteConfig.node_modules || ["react"];
-
     return siteConfig;
 };
 

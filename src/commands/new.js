@@ -9,9 +9,9 @@ var argv = optimist.argv;
 export default function*(siteConfig) {
     var logger = getLogger(siteConfig);
 
-    var dest = argv.source || argv.s || process.argv[3];
+    var dest = argv.destination || argv.d || !(/^--/.test(process.argv[3])) ? process.argv[3] : "";
     if (!dest) {
-        print("Error:  You must specify a path.");
+        print("Error:  You must specify a path. eg: hitchslap new <dir> [options..].");
         return;
     }
 
@@ -26,17 +26,14 @@ export default function*(siteConfig) {
         //Copy site_templates
         yield* fsutils.copyRecursive(path.join(GLOBAL.__libdir, "site_templates", siteConfig.mode), dest, { forceDelete: true });
 
-        //Create node_modules
-        var node_modules_path = path.resolve(GLOBAL.__libdir, "../node_modules");
-        var dest_node_modules_path = path.resolve(dest, "node_modules");
-        yield* fsutils.mkdirp(dest_node_modules_path);
+        //Install npm dependencies.
+        var exec = tools.process.exec();
+        var curdir = yield* exec(`pwd`);
+        process.chdir(dest);
+        console.log(yield* exec(`npm install`));
+        process.chdir(curdir);
 
-        //Copy react
-        for (let node_module of siteConfig.node_modules) {
-            yield* fsutils.copyRecursive(path.join(node_modules_path, node_module), path.join(dest_node_modules_path, node_module), { forceDelete: true });
-        }
-
-        print(`New hitchslap site installed in ${path.resolve(dest)}.`);
+        print(`New ${siteConfig.mode} site installed in ${path.resolve(dest)}.`);
     }
 
 }
