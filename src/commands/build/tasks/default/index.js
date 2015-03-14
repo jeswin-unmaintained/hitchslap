@@ -1,11 +1,13 @@
-import copyStaticFiles from "./copy_static_files";
+import copy_static_files from "./copy_static_files";
 import less from "./less";
 import webpack from "./webpack";
+import write_config from "./write_config";
 
 var main = {
-    "copy_static_files": copyStaticFiles,
+    "copy_static_files": copy_static_files,
     "less": less,
-    "webpack": webpack
+    "webpack": webpack,
+    "write_config": write_config
 };
 
 export { main };

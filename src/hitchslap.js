@@ -73,7 +73,7 @@ var getValueSetter = (config) => {
             currentProp[prop] = defaultValue;
             config.__defaultFields.push(fullyQualifiedProperty);
         } else if (config.__defaultFields.indexOf(fullyQualifiedProperty) !== -1) {
-            if (options.replace || !(currentProp[prop] instanceof Array)) {
+            if (options.replace) {
                 currentProp[prop] = defaultValue;
             } else {
                 if (currentProp[prop] instanceof Array) {
@@ -175,6 +175,9 @@ var getSiteConfig = function*() {
             },
             webpack: {
                 exclude_dirs: []
+            },
+            write_config: {
+                filename: "config.json"
             }
         }
     });
@@ -185,7 +188,6 @@ var getSiteConfig = function*() {
         setter.apply(null, args);
     }
 
-
     //Store absolute paths for source and destination
     siteConfig.source = path.resolve(siteConfig.source);
     siteConfig.destination = path.resolve(siteConfig.source, siteConfig.destination);
@@ -194,6 +196,10 @@ var getSiteConfig = function*() {
     if (siteConfig.mode !== "default" && modes[siteConfig.mode].updateSiteConfig) {
         defaults = defaults.concat(modes[siteConfig.mode].updateSiteConfig(siteConfig));
     }
+
+    //We don't need this anymore.
+    delete siteConfig.__defaultFields;
+
     return siteConfig;
 };
 

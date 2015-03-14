@@ -25,14 +25,13 @@ export default function*() {
             }
         }
 
-        var template = argv.template || argv.t || "jekyll";
-
         //Copy template
+        var exec = tools.process.exec();
+        var template = argv.template || argv.t || "jekyll";
         var node_modules_path = path.resolve(GLOBAL.__libdir, "../node_modules");
-        yield* fsutils.copyRecursive(path.join(node_modules_path, `fora-template-${template}`), dest, { forceDelete: true });
+            yield* fsutils.copyRecursive(path.join(node_modules_path, `fora-template-${template}`), dest, { forceDelete: true });
 
         //Install npm dependencies.
-        var exec = tools.process.exec();
         var curdir = yield* exec(`pwd`);
         process.chdir(dest);
         console.log(yield* exec(`npm install`));
