@@ -1,10 +1,12 @@
 var loadDefaults = function() {
     return {
+        dir_custom_tasks: { value: "_custom_tasks", replace: true },
+        dir_client_js: { value: "_js", replace: true },
         jekyll: {
             //Directories
-            dir_includes: ["_includes"],
-            dir_layouts: ["_layouts"],
-            dir_client_js: ["_fora", "_vendor"],
+            dirs_includes: ["_includes"],
+            dirs_layouts: ["_layouts"],
+            dirs_client_vendor: ["_vendor"],
 
             //Handling Reading
             markdown_ext: ["markdown","mkdown","mkdn","mkd","md"],
@@ -29,17 +31,17 @@ var loadDefaults = function() {
                 exclude_dirs: ["_vendor"]
             },
             load_data: {
-                dir_data: ["_data"],
+                dirs_data: ["_data"],
                 markdown_ext: ["markdown","mkdown","mkdn","mkd","md"]
             },
             less: {
-                dirs: ["css"]
+                dirs: ["_css"]
             },
             copy_static_files: {
                 skip_extensions: ["markdown","mkdown","mkdn","mkd","md", "yml", "yaml", "jsx", "less", "json"]
             },
             webpack: {
-                exclude_dirs: ["_data", "_includes", "_layouts", "_posts", "css", "_vendor"]
+                exclude_dirs: ["_data", "_includes", "_layouts", "_posts", "_css", "_vendor"]
             }
         },
 

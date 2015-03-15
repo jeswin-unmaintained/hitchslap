@@ -113,7 +113,7 @@ var getFullyQualifiedProperties = (obj, prefixes = [], acc = []) => {
             getFullyQualifiedProperties(val, fullNameArray, acc);
         } else {
             if (val && typeof val.value !== "undefined") {
-                acc.push([fullNameArray.join("."), val.value, val.options]);
+                acc.push([fullNameArray.join("."), val.value, val]);
             } else {
                 acc.push([fullNameArray.join("."), val]);
             }
@@ -141,7 +141,9 @@ var getSiteConfig = function*() {
         source: source,
         destination: destination,
         dir_custom_tasks: "custom_tasks",
+        dir_client_js: "js",
         collections: {},
+        collections_root_dir: "",
 
         //Handling Reading
         watch: true,
@@ -160,22 +162,17 @@ var getSiteConfig = function*() {
 
         disabled_tasks: [],
         tasks: {
-            transpile: {
-                exclude_dirs: []
-            },
+            transpile: {},
             load_data: {
-                dir_data: [],
-                markdown_ext: []
+                dirs_data: ["data"]
             },
             less: {
-                dirs: []
+                dirs: ["css"]
             },
             copy_static_files: {
                 skip_extensions: ["markdown","mkdown","mkdn","mkd","md", "yml", "yaml", "jsx", "less", "json"]
             },
-            webpack: {
-                exclude_dirs: []
-            },
+            webpack: {},
             write_config: {
                 filename: "config.json"
             }
@@ -197,8 +194,10 @@ var getSiteConfig = function*() {
         defaults = defaults.concat(modes[siteConfig.mode].updateSiteConfig(siteConfig));
     }
 
+    console.log(siteConfig);
     //We don't need this anymore.
     delete siteConfig.__defaultFields;
+
 
     return siteConfig;
 };

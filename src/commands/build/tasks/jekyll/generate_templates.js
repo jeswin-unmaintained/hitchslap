@@ -25,9 +25,10 @@ export default function(siteConfig) {
         var exclusions = ["!app.bundle.js"]
             .concat(
                 ["node_modules"]
-                    .concat(taskConfig.dir_includes)
-                    .concat(taskConfig.dir_layouts)
-                    .concat(taskConfig.dir_client_js)
+                    .concat(taskConfig.dirs_includes)
+                    .concat(taskConfig.dirs_layouts)
+                    .concat(taskConfig.dirs_client_vendor)
+                    .concat(siteConfig.dir_client_js)
                     .concat(siteConfig.dir_custom_tasks)
                     .map(dir => `!${dir}/`)
             );

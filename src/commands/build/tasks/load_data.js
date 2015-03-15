@@ -6,7 +6,7 @@ import readFileByFormat from "../../../utils/file_reader";
 import { print, getLogger } from "../../../utils/logging";
 
 /*
-    config.dir_data directory contains a set of yaml files.
+    config.dirs_data directory contains a set of yaml files.
     Yaml is loaded into site.data.filename. eg: site.data.songs
 */
 export default function(siteConfig) {
@@ -19,7 +19,7 @@ export default function(siteConfig) {
 
         this.watch(
             ["yaml", "yml", "json"]
-                .map(ext => taskConfig.dir_data.map(dir => `${dir}/*.${ext}`))
+                .map(ext => taskConfig.dirs_data.map(dir => `${dir}/*.${ext}`))
                 .reduce((a,b) => a.concat(b)),
             function*(filePath) {
                 var extension = path.extname(filePath);
@@ -81,7 +81,7 @@ export default function(siteConfig) {
             var collectionsAndDataDirs = Object.keys(siteConfig.collections)
                 .map(coll => siteConfig.collections[coll].dir)
                 .filter(item => item)
-                .concat(taskConfig.dir_data)
+                .concat(taskConfig.dirs_data)
                 .map(dir => `!${dir}/`);
 
             var exclusions = ["!node_modules/", "!config.json", "!config.yml", "!config.yaml"].concat(collectionsAndDataDirs);

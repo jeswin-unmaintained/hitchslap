@@ -17,7 +17,7 @@ export default function*(page, sourcePath, layout, makePath, siteConfig) {
 
         //Source path and layout are the same only when generating plain JSX templates (without frontmatter)
         if (sourcePath !== layout) {
-            layoutsourcePath = path.resolve(siteConfig.destination, `${taskConfig.dir_layouts}/${page.layout || layout}`);
+            layoutsourcePath = path.resolve(siteConfig.destination, `${taskConfig.dirs_layouts}/${page.layout || layout}`);
             params = { page: page, content: page.content, site: siteConfig };
         } else {
             page = {};
