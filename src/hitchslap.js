@@ -66,7 +66,7 @@ var getValueSetter = (config) => {
                 currentProp[prop] = commandLineArg;
             } else {
                 if (currentProp[prop] instanceof Array) {
-                    currentProp[prop].push(commandLineArg);
+                    currentProp[prop] = currentProp[prop].concat(commandLineArg);
                 }
             }
         } else if (typeof currentProp[prop] === "undefined" || currentProp[prop] === null) {
@@ -141,9 +141,11 @@ var getSiteConfig = function*() {
         source: source,
         destination: destination,
         dir_custom_tasks: "custom_tasks",
-        dir_client_js: "js",
+        dir_client_build: "js",
+        dir_dev_build: "dev_js",
         collections: {},
         collections_root_dir: "",
+        dirs_client_vendor: ["vendor"],
 
         //Handling Reading
         watch: true,
@@ -162,7 +164,6 @@ var getSiteConfig = function*() {
 
         disabled_tasks: [],
         tasks: {
-            transpile: {},
             load_data: {
                 dirs_data: ["data"]
             },
@@ -172,7 +173,9 @@ var getSiteConfig = function*() {
             copy_static_files: {
                 skip_extensions: ["jsx", "less"]
             },
-            webpack: {},
+            build_client: {
+                dev: false
+            },
             write_config: {
                 filename: "config.json"
             }
@@ -196,7 +199,6 @@ var getSiteConfig = function*() {
 
     //We don't need this anymore.
     delete siteConfig.__defaultFields;
-
 
     return siteConfig;
 };

@@ -27,9 +27,34 @@ var readFile = function*() {
     return (yield* fn.apply(null, arguments)).toString();
 };
 
+var copyFile = function(source, target, cb) {
+    var cbCalled = false;
+
+    var rd = fs.createReadStream(source);
+    rd.on("error", function(err) {
+        done(err);
+    });
+    var wr = fs.createWriteStream(target);
+    wr.on("error", function(err) {
+        done(err);
+    });
+    wr.on("close", function(ex) {
+        done();
+    });
+    rd.pipe(wr);
+
+    function done(err) {
+        if (!cbCalled) {
+            cb(err);
+            cbCalled = true;
+        }
+    }
+};
+
 module.exports = {
-    writeFile: generatorify(fs.writeFile),
     readFile: readFile,
+    writeFile: generatorify(fs.writeFile),
+    copyFile: generatorify(copyFile),
     mkdirp: generatorify(_mkdirp),
     copyRecursive: generatorify(wrench.copyDirRecursive),
     exists: exists,

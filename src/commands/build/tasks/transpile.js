@@ -14,9 +14,8 @@ export default function(siteConfig) {
 
     var fn = function() {
         var excluded = [siteConfig.destination, "node_modules"]
-            .concat(taskConfig.exclude_dirs)
+            .concat(siteConfig.dirs_client_vendor)
             .map(dir => `!${dir}/`);
-
         var transpiledFiles = [];
         this.watch(["*.js", "*.jsx"].concat(excluded), function*(filePath, ev, match) {
             transpiledFiles.push(filePath);

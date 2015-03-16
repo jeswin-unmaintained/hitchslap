@@ -10,10 +10,10 @@ export default function(siteConfig) {
 
     var logger = getLogger(siteConfig.quiet, "less");
     var taskConfig = siteConfig.tasks.less;
-
+    var watchPattern = Array.prototype.concat.apply([], taskConfig.dirs.map(dir => [`${dir}/*.less`, `!${dir}/includes/*.less`]));
     var fn = function() {
         this.watch(
-            [`${taskConfig.dirs}/*.less`, `!${taskConfig.dirs}/includes/*.less`],
+            watchPattern,
             function*(filePath, ev, match) {
                 var outputPath = path.join(siteConfig.destination, filePath).replace(/\.less$/, ".css");
                 var outputDir = path.dirname(outputPath);

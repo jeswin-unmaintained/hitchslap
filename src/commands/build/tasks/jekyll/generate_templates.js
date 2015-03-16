@@ -25,17 +25,17 @@ export default function(siteConfig) {
         var exclusions = ["!app.bundle.js"]
             .concat(
                 ["node_modules"]
+                    .concat(siteConfig.dirs_client_vendor)
+                    .concat(siteConfig.dir_client_build)
+                    .concat(siteConfig.dir_dev_build)
+                    .concat(siteConfig.dir_custom_tasks)
                     .concat(jekyllConfig.dirs_includes)
                     .concat(jekyllConfig.dirs_layouts)
-                    .concat(jekyllConfig.dirs_client_vendor)
                     .concat(jekyllConfig.dir_fora)
-                    .concat(siteConfig.dir_client_js)
-                    .concat(siteConfig.dir_custom_tasks)
                     .map(dir => `!${dir}/`)
             );
 
         this.watch(extensions.concat(exclusions), function*(filePath, ev, matches) {
-            console.log(filePath);
             var result = yield* doLayout(null, filePath, filePath, makePath, siteConfig);
         }, `build_templates`);
     };

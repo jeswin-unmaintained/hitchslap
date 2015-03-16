@@ -7,9 +7,9 @@ import build_client from "./build_client";
 var main = {
     "copy_static_files": copy_static_files,
     "less": less,
-    "webpack": webpack,
+    //"webpack": webpack,
     "write_config": write_config,
-    //"build_client": build_client
+    "build_client": build_client
 };
 
 export { main };
