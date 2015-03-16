@@ -4,7 +4,7 @@ import fsutils from "../../../../utils/fs";
 
 export default function(siteConfig) {
 
-    var taskConfig = siteConfig.jekyll;
+    var jekyllConfig = siteConfig.jekyll;
 
     var makePath = function(filePath, page) {
         var permalink = siteConfig.permalink;
@@ -25,9 +25,10 @@ export default function(siteConfig) {
         var exclusions = ["!app.bundle.js"]
             .concat(
                 ["node_modules"]
-                    .concat(taskConfig.dirs_includes)
-                    .concat(taskConfig.dirs_layouts)
-                    .concat(taskConfig.dirs_client_vendor)
+                    .concat(jekyllConfig.dirs_includes)
+                    .concat(jekyllConfig.dirs_layouts)
+                    .concat(jekyllConfig.dirs_client_vendor)
+                    .concat(jekyllConfig.dir_fora)
                     .concat(siteConfig.dir_client_js)
                     .concat(siteConfig.dir_custom_tasks)
                     .map(dir => `!${dir}/`)

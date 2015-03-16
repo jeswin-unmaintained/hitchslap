@@ -7,6 +7,7 @@ var loadDefaults = function() {
             dirs_includes: ["_includes"],
             dirs_layouts: ["_layouts"],
             dirs_client_vendor: ["_vendor"],
+            dir_fora: "_fora",
 
             //Handling Reading
             markdown_ext: ["markdown","mkdown","mkdn","mkd","md"],
@@ -38,7 +39,7 @@ var loadDefaults = function() {
                 dirs: ["_css"]
             },
             copy_static_files: {
-                skip_extensions: ["markdown","mkdown","mkdn","mkd","md", "yml", "yaml", "jsx", "less", "json"]
+                skip_extensions: { value: ["markdown","mkdown","mkdn","mkd","md", "yml", "yaml", "jsx", "less", "json"], replace: true }
             },
             webpack: {
                 exclude_dirs: ["_data", "_includes", "_layouts", "_posts", "_css", "_vendor"]

@@ -170,7 +170,7 @@ var getSiteConfig = function*() {
                 dirs: ["css"]
             },
             copy_static_files: {
-                skip_extensions: ["markdown","mkdown","mkdn","mkd","md", "yml", "yaml", "jsx", "less", "json"]
+                skip_extensions: ["jsx", "less"]
             },
             webpack: {},
             write_config: {
@@ -194,7 +194,6 @@ var getSiteConfig = function*() {
         defaults = defaults.concat(modes[siteConfig.mode].updateSiteConfig(siteConfig));
     }
 
-    console.log(siteConfig);
     //We don't need this anymore.
     delete siteConfig.__defaultFields;
 

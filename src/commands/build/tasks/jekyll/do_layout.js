@@ -10,14 +10,14 @@ var md = markdown.Markdown;
 
 export default function*(page, sourcePath, layout, makePath, siteConfig) {
     var logger = getLogger(siteConfig.quiet, "jekyll html generator");
-    var taskConfig = siteConfig.jekyll;
+    var jekyllConfig = siteConfig.jekyll;
 
     try {
         var layoutsourcePath, params, component;
 
         //Source path and layout are the same only when generating plain JSX templates (without frontmatter)
         if (sourcePath !== layout) {
-            layoutsourcePath = path.resolve(siteConfig.destination, `${taskConfig.dirs_layouts}/${page.layout || layout}`);
+            layoutsourcePath = path.resolve(siteConfig.destination, `${jekyllConfig.dirs_layouts}/${page.layout || layout}`);
             params = { page: page, content: page.content, site: siteConfig };
         } else {
             page = {};
