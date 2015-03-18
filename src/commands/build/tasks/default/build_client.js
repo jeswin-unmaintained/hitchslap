@@ -34,15 +34,38 @@ export default function(siteConfig) {
             yield* fsutils.copyFile(filePath, clientDest);
         };
 
+        var clientSpecificFiles = [];
+        var devSpecificFiles = [];
+
         this.watch(extensions, function*(filePath, ev, matches) {
+            if (new RegExp(`${siteConfig.client_js_suffix}\.js$`).text(filePath))
+                clientSpecificFiles.push(filePath);
             yield* copyFile(filePath, siteConfig.dir_client_build);
 
             if (taskConfig.dev) {
+                if (new RegExp(`~${siteConfig.dev_js_suffix}\.js$`).text(filePath))
+                    devSpecificFiles.push(filePath);
                 yield* copyFile(filePath, siteConfig.dir_dev_build);
             }
         }, "build_client");
 
+        var replaceFiles = function*(files, suffix) {
+            var regex = new RegExp(`~${suffix}\\.js$`);
+            console.log(regex);
+            for (let file of files) {
+                let original = file.replace(regex, ".js");
+                let renamed = original.replace(/\.js$/, "_base.js");
+                let originalContents = yield* fsutils.readFile(original);
+                yield* fsutils.writeFile(renamed, originalContents);
+                let renamedContents = yield* fsutils.readFile(original);
+                yield* fsutils.writeFile(original, renamedContents);
+            }
+        };
+
         this.onComplete(function*() {
+            replaceFiles(clientSpecificFiles, client_js_suffix);
+            if (taskConfig.dev)
+                replaceFiles(devSpecificFiles, dev_js_suffix);
         });
     };
 
