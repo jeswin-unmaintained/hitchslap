@@ -138,16 +138,24 @@ var getSiteConfig = function*() {
 
     var defaults = getFullyQualifiedProperties({
         mode: "default",
+
         source: source,
         destination: destination,
+
         dir_custom_tasks: "custom_tasks",
+
         dir_client_build: "js",
         client_js_suffix: "~client",
+
         dir_dev_build: "dev_js",
         dev_js_suffix: "~dev",
+
         collections: {},
         collections_root_dir: "",
+
         dirs_client_vendor: ["vendor"],
+
+        entry_point: "app.js",
 
         //Handling Reading
         watch: true,
