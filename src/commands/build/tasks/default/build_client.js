@@ -17,7 +17,7 @@ export default function(siteConfig) {
 
     var fn = function() {
         var extensions = [
-            `${siteConfig.destination}/*.js`,
+            `${siteConfig.destination}/*.js`, `${siteConfig.destination}/*.json`,
             `!${siteConfig.destination}/${siteConfig.dir_client_build}/`,
             `!${siteConfig.destination}/${siteConfig.dir_dev_build}/`,
             `!${siteConfig.destination}/${siteConfig.dir_custom_tasks}/`,
@@ -38,23 +38,23 @@ export default function(siteConfig) {
         var devSpecificFiles = [];
 
         this.watch(extensions, function*(filePath, ev, matches) {
-            if (new RegExp(`${siteConfig.client_js_suffix}\.js$`).text(filePath))
+            if (new RegExp(`${siteConfig.client_js_suffix}\.(js|json)$`).test(filePath))
                 clientSpecificFiles.push(filePath);
             yield* copyFile(filePath, siteConfig.dir_client_build);
 
             if (taskConfig.dev) {
-                if (new RegExp(`~${siteConfig.dev_js_suffix}\.js$`).text(filePath))
+                if (new RegExp(`~${siteConfig.dev_js_suffix}\.(js|json)$`).test(filePath))
                     devSpecificFiles.push(filePath);
                 yield* copyFile(filePath, siteConfig.dir_dev_build);
             }
         }, "build_client");
 
         var replaceFiles = function*(files, suffix) {
-            var regex = new RegExp(`~${suffix}\\.js$`);
-            console.log(regex);
             for (let file of files) {
-                let original = file.replace(regex, ".js");
-                let renamed = original.replace(/\.js$/, "_base.js");
+                var extension = /\.js$/.test(file) ? "js" : "json";
+                var regex = new RegExp(`~${suffix}\\.${extension}$`);
+                let original = file.replace(regex, `.${extension}`);
+                let renamed = original.replace(/\.js$/, `_base.${extension}`);
                 let originalContents = yield* fsutils.readFile(original);
                 yield* fsutils.writeFile(renamed, originalContents);
                 let renamedContents = yield* fsutils.readFile(original);
@@ -63,9 +63,9 @@ export default function(siteConfig) {
         };
 
         this.onComplete(function*() {
-            replaceFiles(clientSpecificFiles, client_js_suffix);
+            replaceFiles(clientSpecificFiles, siteConfig.client_js_suffix);
             if (taskConfig.dev)
-                replaceFiles(devSpecificFiles, dev_js_suffix);
+                replaceFiles(devSpecificFiles, siteConfig.dev_js_suffix);
         });
     };
 
