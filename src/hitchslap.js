@@ -185,7 +185,11 @@ var getSiteConfig = function*() {
     });
 
 
-    var modeDefaults = (siteConfig.mode !== "default" && modes[siteConfig.mode].loadDefaults) ? modes[siteConfig.mode].loadDefaults() : [];
+    var modeDefaults = (
+            siteConfig.mode !== "default" &&
+            modes[siteConfig.mode] &&
+            modes[siteConfig.mode].loadDefaults
+        ) ? modes[siteConfig.mode].loadDefaults() : [];
     for (let args of defaults.concat(getFullyQualifiedProperties(modeDefaults))) {
         setter.apply(null, args);
     }

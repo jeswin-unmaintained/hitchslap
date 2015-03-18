@@ -27,14 +27,15 @@ export default function*() {
 
         //Copy template
         var exec = tools.process.exec();
-        var template = argv.template || argv.t || "jekyll";
+        var template = argv.template || argv.t || "fora-template-jekyll";
         var node_modules_path = path.resolve(GLOBAL.__libdir, "../node_modules");
-            yield* fsutils.copyRecursive(path.join(node_modules_path, `fora-template-${template}`), dest, { forceDelete: true });
+            yield* fsutils.copyRecursive(path.join(node_modules_path, `${template}`), dest, { forceDelete: true });
 
         //Install npm dependencies.
         var curdir = yield* exec(`pwd`);
         process.chdir(dest);
-        console.log(yield* exec(`npm install`));
+        var npmMessages = yield* exec(`npm install`);
+        print(npmMessages);
         process.chdir(curdir);
 
         print(`New ${template} site installed in ${path.resolve(dest)}.`);

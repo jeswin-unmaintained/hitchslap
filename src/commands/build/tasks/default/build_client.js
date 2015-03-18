@@ -38,13 +38,17 @@ export default function(siteConfig) {
         var devSpecificFiles = [];
 
         this.watch(extensions, function*(filePath, ev, matches) {
-            if (new RegExp(`${siteConfig.client_js_suffix}\.(js|json)$`).test(filePath))
-                clientSpecificFiles.push(filePath);
+            if (new RegExp(`${siteConfig.client_js_suffix}\.(js|json)$`).test(filePath)) {
+                var clientFilePath = path.join(siteConfig.dir_client_build, path.basename(filePath));
+                clientSpecificFiles.push(clientFilePath);
+            }
             yield* copyFile(filePath, siteConfig.dir_client_build);
 
             if (taskConfig.dev) {
-                if (new RegExp(`~${siteConfig.dev_js_suffix}\.(js|json)$`).test(filePath))
-                    devSpecificFiles.push(filePath);
+                if (new RegExp(`~${siteConfig.dev_js_suffix}\.(js|json)$`).test(filePath)) {
+                    var devFilePath = path.join(siteConfig.dir_client_build, path.basename(filePath));
+                    devSpecificFiles.push(devFilePath);
+                }
                 yield* copyFile(filePath, siteConfig.dir_dev_build);
             }
         }, "build_client");
@@ -52,20 +56,22 @@ export default function(siteConfig) {
         var replaceFiles = function*(files, suffix) {
             for (let file of files) {
                 var extension = /\.js$/.test(file) ? "js" : "json";
-                var regex = new RegExp(`~${suffix}\\.${extension}$`);
+                var regex = new RegExp(`${suffix}\\.${extension}$`);
                 let original = file.replace(regex, `.${extension}`);
                 let renamed = original.replace(/\.js$/, `_base.${extension}`);
+                console.log(file, original, renamed);
                 let originalContents = yield* fsutils.readFile(original);
                 yield* fsutils.writeFile(renamed, originalContents);
                 let renamedContents = yield* fsutils.readFile(original);
                 yield* fsutils.writeFile(original, renamedContents);
+                yield* fsutils.remove(file);
             }
         };
 
         this.onComplete(function*() {
-            replaceFiles(clientSpecificFiles, siteConfig.client_js_suffix);
+            yield* replaceFiles(clientSpecificFiles, siteConfig.client_js_suffix);
             if (taskConfig.dev)
-                replaceFiles(devSpecificFiles, siteConfig.dev_js_suffix);
+                yield* replaceFiles(devSpecificFiles, siteConfig.dev_js_suffix);
         });
     };
 
