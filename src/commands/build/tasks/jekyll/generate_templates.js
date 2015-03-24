@@ -22,10 +22,9 @@ export default function(siteConfig) {
     var fn = function() {
         var extensions = [`${path.resolve(siteConfig.destination)}/*.js`];
 
-        var exclusions = ["!app.bundle.js"]
+        var excluded = ["!app.bundle.js"]
             .concat(
-                ["node_modules"]
-                    .concat(siteConfig.dirs_exclude )
+                siteConfig.dirs_exclude
                     .concat(siteConfig.dirs_client_vendor)
                     .concat(siteConfig.dir_client_build)
                     .concat(siteConfig.dir_dev_build)
@@ -34,9 +33,10 @@ export default function(siteConfig) {
                     .concat(jekyllConfig.dirs_layouts)
                     .concat(jekyllConfig.dir_fora)
                     .map(dir => `!${dir}/`)
+                    .concat(siteConfig.patterns_exclude)
             );
 
-        this.watch(extensions.concat(exclusions), function*(filePath, ev, matches) {
+        this.watch(extensions.concat(excluded), function*(filePath, ev, matches) {
             var result = yield* doLayout(null, filePath, filePath, makePath, siteConfig);
         }, `build_templates`);
     };

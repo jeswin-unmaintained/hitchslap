@@ -145,8 +145,11 @@ var getSiteConfig = function*() {
         dir_custom_tasks: "custom_tasks",
         dirs_client_vendor: ["vendor"],
 
-        //Exclude the dirs
+        //Exclude these patterns
         dirs_exclude: [".git", "node_modules"],
+        patterns_exclude: [
+            { exclude: "file", regex: "\.gitignore" }
+        ],
 
         //build
         dir_client_build: "js",

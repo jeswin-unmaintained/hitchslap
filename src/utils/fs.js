@@ -11,6 +11,8 @@ var wrench = require("wrench");
 var rimraf = require("rimraf");
 var path = require("path");
 
+var mkdirp = generatorify(_mkdirp);
+
 var exists = generatorify(function(what, cb) {
     fs.exists(what, function(exists) {
         cb(null, exists);
@@ -28,7 +30,7 @@ var readFile = function*() {
     return (yield* fn.apply(null, arguments)).toString();
 };
 
-var copyFile = function(source, target, cb) {
+var _doCopy = generatorify(function(source, target, cb) {
     var cbCalled = false;
 
     var rd = fs.createReadStream(source);
@@ -50,6 +52,26 @@ var copyFile = function(source, target, cb) {
             cbCalled = true;
         }
     }
+});
+
+var copyFile = function*(source, target, options) {
+    options = options || {};
+    if (typeof options.overwrite === "undefined" || options.overwrite === null)
+        options.overwrite = true;
+    if (typeof options.createDir === "undefined" || options.createDir === null)
+        options.createDir = true;
+
+    var outputDir = path.dirname(target);
+
+    if (options.createDir && !(yield* exists(outputDir))) {
+        yield* mkdirp(outputDir);
+    }
+
+    if (!options.overwrite && (yield* exists(target))) {
+        return;
+    }
+
+    return yield* _doCopy(source, target);
 };
 
 /*
@@ -75,8 +97,8 @@ var changeExtension = function(filePath, extensions) {
 module.exports = {
     readFile: readFile,
     writeFile: generatorify(fs.writeFile),
-    copyFile: generatorify(copyFile),
-    mkdirp: generatorify(_mkdirp),
+    copyFile: copyFile,
+    mkdirp: mkdirp,
     copyRecursive: generatorify(wrench.copyDirRecursive),
     exists: exists,
     empty: empty,

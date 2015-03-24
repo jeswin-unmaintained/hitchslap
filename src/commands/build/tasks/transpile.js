@@ -15,7 +15,8 @@ export default function(siteConfig) {
         var excluded = [siteConfig.destination]
             .concat(siteConfig.dirs_client_vendor)
             .concat(siteConfig.dirs_exclude)
-            .map(dir => `!${dir}/`);
+            .map(dir => `!${dir}/`)
+            .concat(siteConfig.patterns_exclude);
 
         var transpiledFiles = [];
 

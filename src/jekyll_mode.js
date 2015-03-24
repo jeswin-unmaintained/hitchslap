@@ -41,9 +41,6 @@ var loadDefaults = function() {
             },
             copy_static_files: {
                 skip_extensions: { value: ["markdown","mkdown","mkdn","mkd","md", "yml", "yaml", "less", "json"], replace: true }
-            },
-            webpack: {
-                dirs_exclude: { value: ["_data", "_includes", "_layouts", "_posts", "_css"], replace: true }
             }
         },
 

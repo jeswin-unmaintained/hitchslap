@@ -22,17 +22,15 @@ export default function(siteConfig) {
         var excluded = siteConfig.dirs_exclude
             .concat(siteConfig.destination)
             .concat(siteConfig.dirs_client_vendor.map(dir => `${siteConfig.destination}/${dir}`))
-            .map(dir => `!${dir}/`);
+            .map(dir => `!${dir}/`)
+            .concat(siteConfig.patterns_exclude);
 
         //Copy filePath into destDir
         var copyFile = function*(filePath, destDir) {
             //Get the relative filePath by removing the monitored directory (siteConfig.source)
             var relativeFilePath = filePath.substring(siteConfig.source.length);
             var clientDest = path.join(siteConfig.destination, destDir, relativeFilePath);
-            var clientDestDir = path.dirname(clientDest);
-            if (!(yield* fsutils.exists(clientDestDir)))
-                yield* fsutils.mkdirp(clientDestDir);
-            yield* fsutils.copyFile(filePath, clientDest);
+            yield* fsutils.copyFile(filePath, clientDest, { createDir: true });
         };
 
         var clientSpecificFiles = [];
