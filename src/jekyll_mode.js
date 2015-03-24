@@ -14,6 +14,9 @@ var loadDefaults = function() {
             markdown_ext: ["markdown","mkdown","mkdn","mkd","md"],
             encoding: "utf-8",
 
+            //Serving
+            dirs_static_files: { value: ["js", "vendor", "css", "images", "fonts"], replace: true },
+
             //Conversion
             excerpt_separator: "\n\n",
 
@@ -37,7 +40,7 @@ var loadDefaults = function() {
                 dirs: { value: ["_css"], replace: true }
             },
             copy_static_files: {
-                skip_extensions: { value: ["markdown","mkdown","mkdn","mkd","md", "yml", "yaml", "jsx", "less", "json"], replace: true }
+                skip_extensions: { value: ["markdown","mkdown","mkdn","mkd","md", "yml", "yaml", "less", "json"], replace: true }
             },
             webpack: {
                 exclude_dirs: { value: ["_data", "_includes", "_layouts", "_posts", "_css"], replace: true }

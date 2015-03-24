@@ -143,19 +143,22 @@ var getSiteConfig = function*() {
         destination: destination,
 
         dir_custom_tasks: "custom_tasks",
+        dirs_client_vendor: ["vendor"],
 
+        //build
         dir_client_build: "js",
         client_js_suffix: "~client",
 
+        build_dev: false,
         dir_dev_build: "dev_js",
         dev_js_suffix: "~dev",
 
+        //collections
         collections: {},
         collections_root_dir: "",
 
-        dirs_client_vendor: ["vendor"],
-
         entry_point: "app.js",
+        js_extensions: ["js", " jsx"],
 
         //Handling Reading
         watch: true,
@@ -165,6 +168,8 @@ var getSiteConfig = function*() {
         port: 4000,
         host: "127.0.0.1",
         baseurl: "",
+        serve_static: "true",
+        dirs_static_files: ["js", "vendor", "css", "images", "fonts"],
 
         //Outputting
         beautify: true, //beautify html output?
@@ -174,6 +179,9 @@ var getSiteConfig = function*() {
 
         disabled_tasks: [],
         tasks: {
+            transpile: {
+                blacklist: ["regenerator"]
+            },
             load_data: {
                 dirs_data: ["data"]
             },
@@ -181,7 +189,7 @@ var getSiteConfig = function*() {
                 dirs: ["css"]
             },
             copy_static_files: {
-                skip_extensions: ["jsx", "less"]
+                skip_extensions: ["less"]
             },
             build_client: {
                 dev: false

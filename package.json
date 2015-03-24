@@ -1,50 +1,55 @@
 {
-    "name": "hitchslap",
-    "version": "0.0.2",
-    "description": "A static website generator",
-    "preferGlobal": "true",
-    "main": "lib/hitchslap.js",
-    "bin": {
-        "hitchslap": "lib/hitchslap.js"
-    },
-    "scripts": {
-        "test": "echo \"Error: no test specified\" && exit 1"
-    },
-    "repository": {
-        "type": "git",
-        "url": "https://github.com/jeswin/hitchslap"
-    },
-    "author": {
-      "name": "Jeswin Kumar",
-      "email": "jeswinpk@agilehead.com"
-    },
-    "license": "GNU GPL",
-    "bugs": {
-        "url": "https://github.com/jeswin/hitchslap/issues"
-    },
-    "dependencies": {
-        "optimist": "*",
-        "co": "*",
-        "co-parallel-tools": "*",
-        "crankshaft": "*",
-        "crankshaft-tools": "*",
-        "front-matter": "*",
-        "js-yaml": "*",
-        "react": "*",
-        "babel": "*",
-        "node-markdown": "*",
-        "mkdirp": "*",
-        "koa": "*",
-        "koa-static": "*",
-        "nodefunc-generatorify": "*",
-        "extfs": "*",
-        "fs.extra": "*",
-        "webpack": "*",
-        "pretty": "*",
-        "wrench": "*",
-        "rimraf": "*",
-        "less": "*",
-        "minimongo": "*",
-        "ceramic-backend-mongodb": "*"
-    }
+  "name": "hitchslap",
+  "version": "0.0.2",
+  "description": "A static website generator",
+  "preferGlobal": "true",
+  "main": "lib/hitchslap.js",
+  "bin": {
+    "hitchslap": "lib/hitchslap.js"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/jeswin/hitchslap"
+  },
+  "author": {
+    "name": "Jeswin Kumar",
+    "email": "jeswinpk@agilehead.com"
+  },
+  "license": "GNU GPL",
+  "bugs": {
+    "url": "https://github.com/jeswin/hitchslap/issues"
+  },
+  "dependencies": {
+    "optimist": "*",
+    "co": "*",
+    "co-parallel-tools": "*",
+    "crankshaft": "*",
+    "crankshaft-tools": "*",
+    "front-matter": "*",
+    "js-yaml": "*",
+    "react": "*",
+    "babel": "*",
+    "node-markdown": "*",
+    "mkdirp": "*",
+    "koa": "*",
+    "koa-static": "*",
+    "nodefunc-generatorify": "*",
+    "extfs": "*",
+    "fs.extra": "*",
+    "webpack": "*",
+    "babel-loader": "*",
+    "pretty": "*",
+    "wrench": "*",
+    "rimraf": "*",
+    "less": "*",
+    "minimongo": "*",
+    "ceramic-backend-mongodb": "*"
+  },
+  "devDependencies": {
+    "babel-core": "^4.7.16",
+    "babel-loader": "^4.2.0"
+  }
 }

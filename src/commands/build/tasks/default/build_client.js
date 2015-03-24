@@ -11,26 +11,20 @@ import { print, getLogger } from "../../../../utils/logging";
 
 export default function(siteConfig) {
     /*
-        Copy everything that is not a markdown, jsx or yml file.
+        Copy everything that is not a markdown or yml file.
     */
 
     var logger = getLogger(siteConfig.quiet, "build_client");
     var taskConfig = siteConfig.tasks.build_client;
 
     var fn = function() {
-        var extensions = [
-            `${siteConfig.destination}/*.js`, `${siteConfig.destination}/*.json`,
-            `!${siteConfig.destination}/${siteConfig.dir_client_build}/`,
-            `!${siteConfig.destination}/${siteConfig.dir_dev_build}/`,
-            `!${siteConfig.destination}/${siteConfig.dir_custom_tasks}/`,
-        ].concat(
-            siteConfig.dirs_client_vendor.map(dir => `!${siteConfig.destination}/${dir}/`)
-        );
+        var extensions = [`${siteConfig.source}/*.js`, `${siteConfig.source}/*.json`,`!${siteConfig.destination}/`, `!node_modules/`]
+            .concat(siteConfig.dirs_client_vendor.map(dir => `!${siteConfig.destination}/${dir}/`));
 
         //Copy filePath into destDir
         var copyFile = function*(filePath, destDir) {
-            //Get the relative filePath by removing the monitored directory (siteConfig.destination)
-            var relativeFilePath = filePath.substring(siteConfig.destination.length);
+            //Get the relative filePath by removing the monitored directory (siteConfig.source)
+            var relativeFilePath = filePath.substring(siteConfig.source.length);
             var clientDest = path.join(siteConfig.destination, destDir, relativeFilePath);
             var clientDestDir = path.dirname(clientDest);
             if (!(yield* fsutils.exists(clientDestDir)))
@@ -47,8 +41,8 @@ export default function(siteConfig) {
             }
             yield* copyFile(filePath, siteConfig.dir_client_build);
 
-            if (taskConfig.dev) {
-                if (new RegExp(`~${siteConfig.dev_js_suffix}\.(js|json)$`).test(filePath)) {
+            if (siteConfig.build_dev) {
+                if (new RegExp(`${siteConfig.dev_js_suffix}\.(js|json)$`).test(filePath)) {
                     devSpecificFiles.push(filePath);
                 }
                 yield* copyFile(filePath, siteConfig.dir_dev_build);
@@ -59,7 +53,7 @@ export default function(siteConfig) {
             for (let file of files) {
                 //file is the path to the source js file, which needs to be copied into dir_client_build and dir_dev_build
                 //  ie, /some_dir/abc.js to /some_dir/js/abc.js
-                var relativeFilePath = file.substring(siteConfig.destination.length);
+                var relativeFilePath = file.substring(siteConfig.source.length);
                 var filePath = path.join(siteConfig.destination, build, relativeFilePath);
 
                 var extension = /\.js$/.test(file) ? "js" : "json";
@@ -79,6 +73,9 @@ export default function(siteConfig) {
 
                 var config = {
                     entry: [path.join(siteConfig.destination, build, siteConfig.entry_point)],
+                    module: {
+                        loaders: [ { test: /\.(js|jsx)$/, exclude: /node_modules/, loader: 'babel?experimental&optional=runtime' }]
+                    },
                     output: {
                         filename: path.join(siteConfig.destination, build, "app.bundle.js")
                     }
@@ -93,7 +90,7 @@ export default function(siteConfig) {
 
         this.onComplete(function*() {
             yield* replaceFiles(clientSpecificFiles, siteConfig.client_js_suffix, siteConfig.dir_client_build);
-            if (taskConfig.dev)
+            if (siteConfig.build_dev)
                 yield* replaceFiles(devSpecificFiles, siteConfig.dev_js_suffix, siteConfig.dir_dev_build);
         });
     };

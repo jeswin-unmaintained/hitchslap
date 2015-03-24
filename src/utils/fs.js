@@ -9,6 +9,7 @@ var extfs = require('extfs');
 var _mkdirp = require("mkdirp");
 var wrench = require("wrench");
 var rimraf = require("rimraf");
+var path = require("path");
 
 var exists = generatorify(function(what, cb) {
     fs.exists(what, function(exists) {
@@ -51,6 +52,18 @@ var copyFile = function(source, target, cb) {
     }
 };
 
+/*
+    Changes the extension to toExtension
+    If fromExtensions[array] is not empty, filePath is changed only if extension is in fromExtensions
+*/
+var changeExtension = function(filePath, toExtension, fromExtensions) {
+    var dir = path.dirname(filePath);
+    var extension = path.extname(filePath);
+    var filename = path.basename(filePath, extension);
+    return fromExtensions && fromExtensions.length && fromExtensions.indexOf(extension.split(".")[1]) === -1 ?
+        filePath : path.join(dir, `${filename}.${toExtension}`);
+};
+
 module.exports = {
     readFile: readFile,
     writeFile: generatorify(fs.writeFile),
@@ -59,6 +72,7 @@ module.exports = {
     copyRecursive: generatorify(wrench.copyDirRecursive),
     exists: exists,
     empty: empty,
+    changeExtension: changeExtension,
     remove: generatorify(rimraf),
     readdir: generatorify(fs.readdir)
 };

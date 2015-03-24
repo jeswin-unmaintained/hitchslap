@@ -5,7 +5,7 @@ import { print, getLogger } from "../../../../utils/logging";
 
 export default function(siteConfig) {
     /*
-        Copy everything that is not a markdown, jsx or yml file.
+        Copy everything that is not a markdown or yml file.
     */
 
     var logger = getLogger(siteConfig.quiet, "copy_static_files");
@@ -18,11 +18,10 @@ export default function(siteConfig) {
                 .map(ext => `!*.${ext}`))
             .concat([siteConfig.destination, "node_modules"]
                 .map(dir => `!${dir}/`));
-
         var copiedFiles = [];
-        this.watch(extensions, function*(filePath, ev, matches) {
-            copiedFiles.push(filePath);
-            var destPath = path.join(siteConfig.destination, filePath);
+
+        var copyFile = function*(filePath, dir) {
+            var destPath = path.join(dir, filePath);
             var outputDir = path.dirname(destPath);
 
             if (!(yield* fsutils.exists(outputDir))) {
@@ -32,10 +31,19 @@ export default function(siteConfig) {
             if (!(yield* fsutils.exists(destPath))) {
                 fs.createReadStream(filePath).pipe(fs.createWriteStream(destPath));
             }
+        };
+
+        this.watch(extensions, function*(filePath, ev, matches) {
+            copiedFiles.push(filePath);
+            yield* copyFile(filePath, siteConfig.destination);
+            yield* copyFile(filePath, path.join(siteConfig.destination, siteConfig.dir_client_build));
+            if (siteConfig.build_dev)
+                yield* copyFile(filePath, path.join(siteConfig.destination, siteConfig.dir_dev_build));
         }, "copy_static_files");
 
         this.onComplete(function*() {
             logger(`copied ${copiedFiles.length} files`);
+            copiedFiles = [];
         });
     };
 

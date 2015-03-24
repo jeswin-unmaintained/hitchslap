@@ -10,26 +10,37 @@ export default function(siteConfig) {
     var logger = getLogger(siteConfig.quiet, "transpile");
     var taskConfig = siteConfig.tasks.transpile;
 
-    var blacklist = argv["transpiler-blacklist"] ? [].concat(argv["transpiler-blacklist"]) : [];
-
     var fn = function() {
+        var extensions = siteConfig.js_extensions.map(e => `*.${e}`);
         var excluded = [siteConfig.destination, "node_modules"]
             .concat(siteConfig.dirs_client_vendor)
             .map(dir => `!${dir}/`);
         var transpiledFiles = [];
-        this.watch(["*.js", "*.jsx"].concat(excluded), function*(filePath, ev, match) {
-            transpiledFiles.push(filePath);
-            var outputPath = path.join(siteConfig.destination, filePath).replace(/\.jsx$/, ".js");
+
+        var makeOutputDir = function*(outputPath) {
             var outputDir = path.dirname(outputPath);
             if (!(yield* fsutils.exists(outputDir))) {
                 yield* fsutils.mkdirp(outputDir);
             }
+        };
+
+        //We compile client, dev build separately because they may have different blacklists.
+        //  For example, on iojs we want to blacklist regenerator. But on the client, we don't.
+        this.watch(extensions.concat(excluded), function*(filePath, ev, match) {
+            transpiledFiles.push(filePath);
+
+            //Make the output dir, if it doesn't exist
+            var outputPath = fsutils.changeExtension(path.join(siteConfig.destination, filePath), "js", siteConfig.js_extensions);
+            yield* makeOutputDir(outputPath);
+
             var contents = yield* fsutils.readFile(filePath);
-            var result = transform(contents, { blacklist });
+
+            var result = transform(contents, { blacklist: taskConfig.blacklist });
             yield* fsutils.writeFile(outputPath, result.code);
+
             if (argv.verbose)
                 print(`${filePath} -> ${outputPath}`, "transpile");
-        }, "babel_js_jsx");
+        }, "babel_em_all");
 
         this.onComplete(function*() {
             logger(`rewrote ${transpiledFiles.length} files`);
