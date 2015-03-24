@@ -84,6 +84,7 @@ export default function(siteConfig) {
                 var compiler = webpack(config);
                 var runner = generatorify(compiler.run.bind(compiler));
                 var stats = yield* runner();
+                console.log(stats);
                 logger(`packed app files into app.bundle.js`);
             }
         };

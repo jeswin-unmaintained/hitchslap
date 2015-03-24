@@ -30,7 +30,10 @@ export default function(siteConfig) {
             transpiledFiles.push(filePath);
 
             //Make the output dir, if it doesn't exist
-            var outputPath = fsutils.changeExtension(path.join(siteConfig.destination, filePath), "js", siteConfig.js_extensions);
+            var outputPath = fsutils.changeExtension(
+                path.join(siteConfig.destination, filePath),
+                [ { to:"js", from: siteConfig.js_extensions }]
+            );
             yield* makeOutputDir(outputPath);
 
             var contents = yield* fsutils.readFile(filePath);

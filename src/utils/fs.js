@@ -56,12 +56,21 @@ var copyFile = function(source, target, cb) {
     Changes the extension to toExtension
     If fromExtensions[array] is not empty, filePath is changed only if extension is in fromExtensions
 */
-var changeExtension = function(filePath, toExtension, fromExtensions) {
+var changeExtension = function(filePath, extensions) {
     var dir = path.dirname(filePath);
-    var extension = path.extname(filePath);
-    var filename = path.basename(filePath, extension);
-    return fromExtensions && fromExtensions.length && fromExtensions.indexOf(extension.split(".")[1]) === -1 ?
-        filePath : path.join(dir, `${filename}.${toExtension}`);
+    var fileExtension = path.extname(filePath);
+    var filename = path.basename(filePath, fileExtension);
+    for (var i = 0; i < extensions.length; i++) {
+        var extension = extensions[i];
+        console.log(extension);
+        if (extension.from && extension.from.length) {
+            if (extension.from.indexOf(fileExtension.split(".")[1]) !== -1)
+                return path.join(dir, `${filename}.${extension.to}`);
+        } else {
+            return path.join(dir, `${filename}.${extension.to}`);
+        }
+    }
+    return filePath;
 };
 
 module.exports = {

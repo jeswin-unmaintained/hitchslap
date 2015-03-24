@@ -35,10 +35,15 @@ export default function(siteConfig) {
 
         this.watch(extensions, function*(filePath, ev, matches) {
             copiedFiles.push(filePath);
-            yield* copyFile(filePath, siteConfig.destination);
-            yield* copyFile(filePath, path.join(siteConfig.destination, siteConfig.dir_client_build));
+            var newFilePath = fsutils.changeExtension(
+                filePath,
+                [ { to: "js", from: siteConfig.js_extensions }]
+            );
+            console.log(newFilePath);
+            yield* copyFile(newFilePath, siteConfig.destination);
+            yield* copyFile(newFilePath, path.join(siteConfig.destination, siteConfig.dir_client_build));
             if (siteConfig.build_dev)
-                yield* copyFile(filePath, path.join(siteConfig.destination, siteConfig.dir_dev_build));
+                yield* copyFile(newFilePath, path.join(siteConfig.destination, siteConfig.dir_dev_build));
         }, "copy_static_files");
 
         this.onComplete(function*() {

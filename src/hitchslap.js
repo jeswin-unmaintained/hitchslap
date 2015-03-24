@@ -158,7 +158,7 @@ var getSiteConfig = function*() {
         collections_root_dir: "",
 
         entry_point: "app.js",
-        js_extensions: ["js", " jsx"],
+        js_extensions: ["js", "jsx"],
 
         //Handling Reading
         watch: true,
