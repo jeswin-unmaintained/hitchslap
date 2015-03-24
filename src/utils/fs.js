@@ -62,7 +62,6 @@ var changeExtension = function(filePath, extensions) {
     var filename = path.basename(filePath, fileExtension);
     for (var i = 0; i < extensions.length; i++) {
         var extension = extensions[i];
-        console.log(extension);
         if (extension.from && extension.from.length) {
             if (extension.from.indexOf(fileExtension.split(".")[1]) !== -1)
                 return path.join(dir, `${filename}.${extension.to}`);

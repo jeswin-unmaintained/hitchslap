@@ -12,12 +12,12 @@ export default function(siteConfig) {
     var taskConfig = siteConfig.tasks.copy_static_files;
 
     var fn = function() {
-        var extensions = ["*.*"]
-            //add exclusions
-            .concat(taskConfig.skip_extensions
-                .map(ext => `!*.${ext}`))
-            .concat([siteConfig.destination, "node_modules"]
-                .map(dir => `!${dir}/`));
+        var extensions = ["*.*"];
+        var excluded = siteConfig.dirs_exclude
+            .concat(siteConfig.destination)
+            .map(dir => `!${dir}/`)
+            .concat(taskConfig.skip_extensions.map(ext => `!*.${ext}`));
+
         var copiedFiles = [];
 
         var copyFile = function*(filePath, dir) {
@@ -33,13 +33,12 @@ export default function(siteConfig) {
             }
         };
 
-        this.watch(extensions, function*(filePath, ev, matches) {
+        this.watch(extensions.concat(excluded), function*(filePath, ev, matches) {
             copiedFiles.push(filePath);
             var newFilePath = fsutils.changeExtension(
                 filePath,
                 [ { to: "js", from: siteConfig.js_extensions }]
             );
-            console.log(newFilePath);
             yield* copyFile(newFilePath, siteConfig.destination);
             yield* copyFile(newFilePath, path.join(siteConfig.destination, siteConfig.dir_client_build));
             if (siteConfig.build_dev)

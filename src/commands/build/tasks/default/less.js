@@ -10,6 +10,7 @@ export default function(siteConfig) {
 
     var logger = getLogger(siteConfig.quiet, "less");
     var taskConfig = siteConfig.tasks.less;
+
     var watchPattern = Array.prototype.concat.apply([], taskConfig.dirs.map(dir => [`${dir}/*.less`, `!${dir}/includes/*.less`]));
     var fn = function() {
         this.watch(

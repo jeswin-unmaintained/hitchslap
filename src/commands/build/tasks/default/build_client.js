@@ -18,8 +18,11 @@ export default function(siteConfig) {
     var taskConfig = siteConfig.tasks.build_client;
 
     var fn = function() {
-        var extensions = [`${siteConfig.source}/*.js`, `${siteConfig.source}/*.json`,`!${siteConfig.destination}/`, `!node_modules/`]
-            .concat(siteConfig.dirs_client_vendor.map(dir => `!${siteConfig.destination}/${dir}/`));
+        var extensions = [`${siteConfig.source}/*.js`, `${siteConfig.source}/*.json`];
+        var excluded = siteConfig.dirs_exclude
+            .concat(siteConfig.destination)
+            .concat(siteConfig.dirs_client_vendor.map(dir => `${siteConfig.destination}/${dir}`))
+            .map(dir => `!${dir}/`);
 
         //Copy filePath into destDir
         var copyFile = function*(filePath, destDir) {
@@ -35,7 +38,7 @@ export default function(siteConfig) {
         var clientSpecificFiles = [];
         var devSpecificFiles = [];
 
-        this.watch(extensions, function*(filePath, ev, matches) {
+        this.watch(extensions.concat(excluded), function*(filePath, ev, matches) {
             if (new RegExp(`${siteConfig.client_js_suffix}\.(js|json)$`).test(filePath)) {
                 clientSpecificFiles.push(filePath);
             }
@@ -84,7 +87,6 @@ export default function(siteConfig) {
                 var compiler = webpack(config);
                 var runner = generatorify(compiler.run.bind(compiler));
                 var stats = yield* runner();
-                console.log(stats);
                 logger(`packed app files into app.bundle.js`);
             }
         };

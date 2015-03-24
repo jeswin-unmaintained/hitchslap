@@ -21,7 +21,7 @@ export default function(siteConfig) {
 
         //exclude these directories.
         //We exclude layouts because webpack needs only the entry point.
-        var exclusions = ["node_modules"].concat(taskConfig.exclude_dirs).map(dir => `!${dir}/`);
+        var exclusions = siteConfig.dirs_exclude.concat(taskConfig.dirs_exclude).map(dir => `!${dir}/`);
 
         var files = [];
         this.watch(extensions.concat(exclusions), function*(filePath, ev, match) {

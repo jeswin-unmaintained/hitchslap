@@ -25,6 +25,7 @@ export default function(siteConfig) {
         var exclusions = ["!app.bundle.js"]
             .concat(
                 ["node_modules"]
+                    .concat(siteConfig.dirs_exclude )
                     .concat(siteConfig.dirs_client_vendor)
                     .concat(siteConfig.dir_client_build)
                     .concat(siteConfig.dir_dev_build)

@@ -145,6 +145,9 @@ var getSiteConfig = function*() {
         dir_custom_tasks: "custom_tasks",
         dirs_client_vendor: ["vendor"],
 
+        //Exclude the dirs
+        dirs_exclude: [".git", "node_modules"],
+
         //build
         dir_client_build: "js",
         client_js_suffix: "~client",
@@ -159,6 +162,7 @@ var getSiteConfig = function*() {
 
         entry_point: "app.js",
         js_extensions: ["js", "jsx"],
+
 
         //Handling Reading
         watch: true,

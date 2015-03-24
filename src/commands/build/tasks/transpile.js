@@ -12,9 +12,11 @@ export default function(siteConfig) {
 
     var fn = function() {
         var extensions = siteConfig.js_extensions.map(e => `*.${e}`);
-        var excluded = [siteConfig.destination, "node_modules"]
+        var excluded = [siteConfig.destination]
             .concat(siteConfig.dirs_client_vendor)
+            .concat(siteConfig.dirs_exclude)
             .map(dir => `!${dir}/`);
+
         var transpiledFiles = [];
 
         var makeOutputDir = function*(outputPath) {
