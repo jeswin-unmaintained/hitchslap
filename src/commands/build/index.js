@@ -138,12 +138,11 @@ export default function*(siteConfig) {
             1. default tasks
             2. mode-specific tasks, if mode !== "default"
             3. custom tasks
-        Filter out
-            siteConfig.disabled_tasks
+        Filter by
+            siteConfig.enabled_tasks
     */
-    var enabled = (prefix) => (task) => siteConfig.disabled_tasks.indexOf(`${prefix}${task}`) === -1;
-
-    var runnableDefaultTasks = Object.keys(defaultTasks.main).filter(enabled()).map(task => defaultTasks.main[task]);
+    var enabled = (prefix) => (task) => siteConfig.enabled_tasks.indexOf(`${prefix}${task}`) > -1;
+    var runnableDefaultTasks = Object.keys(defaultTasks.main).filter(enabled('')).map(task => defaultTasks.main[task]);
 
     var runnableModeTasks = (siteConfig.mode !== "default") ?
         Object.keys(modeTasks[siteConfig.mode].main)

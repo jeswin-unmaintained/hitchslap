@@ -184,7 +184,7 @@ var getSiteConfig = function*() {
         //Make too much noise while processing?
         quiet: false,
 
-        disabled_tasks: [],
+        enabled_tasks: ["transpile", "load_data", "less", "copy_static_files", "build_client", "write_config"],
         tasks: {
             transpile: {
                 blacklist: ["regenerator"]
