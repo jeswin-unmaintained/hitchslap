@@ -6,6 +6,29 @@ import { print, getLogger } from "../utils/logging";
 
 var argv = optimist.argv;
 
+/*
+    Search paths are:
+        a) Current node_modules directory
+        b) ~/.fora/templates/node_modules
+*/
+var resolveTemplatePath = function*(name) {
+    var templateName = /^fora-template-/.test(name) ? name : `fora-template-${name}`;
+
+    //Current node_modules_dir
+    var templatePath = path.resolve(GLOBAL.__libdir, "../node_modules", templateName);
+    if (yield* fsutils.exists(templatePath)) {
+        return templatePath;
+    } else {
+        var HOME_DIR = process.env.HOME || process.env.HOMEPATH || process.env.USERPROFILE;
+        templatePath = path.resolve(`${HOME_DIR}/.fora/templates/node_modules`, templateName);
+        if (yield* fsutils.exists(templatePath)) {
+            return templatePath;
+        }
+    }
+    throw new Error(`Template ${templateName} was not found.`);
+};
+
+
 export default function*() {
     var logger = getLogger(argv.quiet || false);
 
@@ -27,9 +50,10 @@ export default function*() {
 
         //Copy template
         var exec = tools.process.exec();
-        var template = argv.template || argv.t || "fora-template-jekyll";
-        var node_modules_path = path.resolve(GLOBAL.__libdir, "../node_modules");
-            yield* fsutils.copyRecursive(path.join(node_modules_path, `${template}`), dest, { forceDelete: true });
+        var template = argv.template || argv.t || "blog";
+        var templatePath = yield* resolveTemplatePath(template);
+        logger(`Copying ${templatePath} -> ${dest}`);
+        yield* fsutils.copyRecursive(templatePath, dest, { forceDelete: true });
 
         //Install npm dependencies.
         var curdir = yield* exec(`pwd`);
@@ -40,5 +64,4 @@ export default function*() {
 
         print(`New ${template} site installed in ${path.resolve(dest)}.`);
     }
-
 }
