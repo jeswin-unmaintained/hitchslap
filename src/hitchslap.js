@@ -159,6 +159,9 @@ var getSiteConfig = function*() {
         dir_dev_build: "dev_js",
         dev_js_suffix: "~dev",
 
+        //original file replaced by *~client.js and *~dev.js will be renamed to *_base.js
+        original_js_suffix: "_base",
+
         //collections
         collections: {},
         collections_root_dir: "",
