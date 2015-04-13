@@ -34,7 +34,7 @@ var argv = optimist.argv;
     7. on-complete
 */
 
-export default function*(siteConfig) {
+var build = function*(siteConfig) {
     var logger = getLogger(siteConfig.quiet);
 
     GLOBAL.site = {};
@@ -176,4 +176,6 @@ export default function*(siteConfig) {
         siteConfig.watch
     );
 
-}
+};
+
+export default build;

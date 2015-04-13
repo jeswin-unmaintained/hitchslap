@@ -9,7 +9,7 @@ import { print, getLogger } from "../../../utils/logging";
     config.dirs_data directory contains a set of yaml files.
     Yaml is loaded into site.data.filename. eg: site.data.songs
 */
-export default function(siteConfig) {
+var loadStaticData = function(siteConfig) {
     var logger = getLogger(siteConfig.quiet, "load_data");
 
     var taskConfig = siteConfig.tasks.load_data;
@@ -94,4 +94,6 @@ export default function(siteConfig) {
     };
 
     return { build: true, fn: fn };
-}
+};
+
+export default loadStaticData;

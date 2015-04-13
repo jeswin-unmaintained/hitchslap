@@ -15,21 +15,34 @@ var resolveTemplatePath = function*(name) {
     var templateName = /^fora-template-/.test(name) ? name : `fora-template-${name}`;
 
     //Current node_modules_dir
-    var templatePath = path.resolve(GLOBAL.__libdir, "../node_modules", templateName);
-    if (yield* fsutils.exists(templatePath)) {
-        return templatePath;
-    } else {
-        var HOME_DIR = process.env.HOME || process.env.HOMEPATH || process.env.USERPROFILE;
-        templatePath = path.resolve(`${HOME_DIR}/.fora/templates/node_modules`, templateName);
+    var node_modules_templatePath = path.resolve(GLOBAL.__libdir, "../node_modules", name);
+    var node_modules_prefixedTemplatePath = path.resolve(GLOBAL.__libdir, "../node_modules", `fora-template-${name}`);
+
+    var HOME_DIR = process.env.HOME || process.env.HOMEPATH || process.env.USERPROFILE;
+    var HOME_templatePath = path.resolve(`${HOME_DIR}/.fora/templates/node_modules`, name);
+    var HOME_prefixedTemplatePath = path.resolve(`${HOME_DIR}/.fora/templates/node_modules`, `fora-template-${name}`);
+
+    var paths = [
+        node_modules_templatePath,
+        node_modules_prefixedTemplatePath,
+        HOME_templatePath,
+        HOME_prefixedTemplatePath
+    ];
+
+    for (let templatePath of paths) {
         if (yield* fsutils.exists(templatePath)) {
             return templatePath;
         }
     }
-    throw new Error(`Template ${templateName} was not found.`);
+
+    throw new Error(`Template "${name}" or "fora-template-${name}" was not found.`);
 };
 
 
-export default function*() {
+/*
+    Copy files from the template directory to the destination directory.
+*/
+var copyTemplateFiles = function*() {
     var logger = getLogger(argv.quiet || false);
 
     var dest = argv.destination || argv.d || !(/^--/.test(process.argv[3])) ? process.argv[3] : "";
@@ -38,9 +51,11 @@ export default function*() {
         return;
     }
 
+    //Make sure the directory is empty or the force flag is on
     if (!argv.force && !argv.recreate && !(yield* fsutils.empty(dest))) {
         print(`Conflict: ${path.resolve(dest)} is not empty.`);
     } else {
+
         if (argv.recreate) {
             if (yield* fsutils.exists(dest)) {
                 print(`Deleting ${dest}`);
@@ -64,4 +79,6 @@ export default function*() {
 
         print(`New ${template} site installed in ${path.resolve(dest)}.`);
     }
-}
+};
+
+export default copyTemplateFiles;

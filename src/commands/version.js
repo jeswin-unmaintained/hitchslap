@@ -1,5 +1,7 @@
 import { print, getLogger } from "../utils/logging";
 
-export default function*(siteConfig) {
+var version = function*(siteConfig) {
     print("hitchslap 0.0.1");
-}
+};
+
+export default version;

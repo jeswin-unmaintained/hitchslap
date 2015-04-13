@@ -9,7 +9,7 @@ import generatorify from "nodefunc-generatorify";
 import fsutils from "../../../../utils/fs";
 import { print, getLogger } from "../../../../utils/logging";
 
-export default function(siteConfig) {
+var buildClient = function(siteConfig) {
     /*
         Copy everything that is not a markdown or yml file.
     */
@@ -50,6 +50,15 @@ export default function(siteConfig) {
             }
         }, "build_client");
 
+
+        /*
+            Rules:
+                1. In the client build, filename~client.js will be moved to filename.js
+                2. Original filename.js will then be renamed filename_base.js
+                3. filename~client.js will longer exist, since it was moved.
+
+                The same rules apply for "dev", "test" and other builds.
+        */
         var replaceFiles = function*(files, suffix, build) {
             for (let file of files) {
                 //file is the path to the source js file, which needs to be copied into dir_client_build and dir_dev_build
@@ -97,4 +106,6 @@ export default function(siteConfig) {
     };
 
     return { build: true, fn: fn };
-}
+};
+
+export default buildClient;

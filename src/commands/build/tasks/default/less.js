@@ -6,7 +6,7 @@ import { print, getLogger } from "../../../../utils/logging";
 
 var lessc = generatorify(less.render.bind(less));
 
-export default function(siteConfig) {
+var compileLess = function(siteConfig) {
 
     var logger = getLogger(siteConfig.quiet, "less");
     var taskConfig = siteConfig.tasks.less;
@@ -33,4 +33,6 @@ export default function(siteConfig) {
     };
 
     return { build: true, fn: fn };
-}
+};
+
+export default compileLess;

@@ -2,7 +2,7 @@ import path from "path";
 import fsutils from "../../../../utils/fs";
 import { print, getLogger } from "../../../../utils/logging";
 
-export default function(siteConfig) {
+var writeConfig = function(siteConfig) {
     /*
         Copy everything that is not a markdown, jsx or yml file.
     */
@@ -14,3 +14,5 @@ export default function(siteConfig) {
     };
     return { build: false, fn: fn };
 }
+
+export default writeConfig;

@@ -2,7 +2,7 @@ import koa from "koa";
 import koaStatic from "koa-static";
 import { print, getLogger } from "../utils/logging";
 
-export default function*(siteConfig) {
+var serve = function*(siteConfig) {
     var koa = require('koa');
     var app = koa();
     app.use(koaStatic(siteConfig.destination));
@@ -19,4 +19,6 @@ export default function*(siteConfig) {
             Server address: http://${siteConfig.host}:${siteConfig.port}/
           Server running... press ctrl-c to stop.
     `);
-}
+};
+
+export default serve;

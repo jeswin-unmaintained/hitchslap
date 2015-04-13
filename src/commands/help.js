@@ -1,6 +1,6 @@
 import { print } from "../utils/logging";
 
-export default function*() {
+var help = function*() {
     print(`
         hitchslap 0.0.1 -- hitchslap is a blog-aware, static site generator in NodeJS
 
@@ -28,4 +28,6 @@ export default function*() {
           make, m               Same as build --no-static
           run, r                Same as serve --no-static
     `);
-}
+};
+
+export default help;

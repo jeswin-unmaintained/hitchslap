@@ -3,7 +3,7 @@ import fs from "fs";
 import fsutils from "../../../../utils/fs";
 import { print, getLogger } from "../../../../utils/logging";
 
-export default function(siteConfig) {
+var copyStaticFiles = function(siteConfig) {
     /*
         Copy everything that is not a markdown or yml file.
     */
@@ -38,4 +38,6 @@ export default function(siteConfig) {
     };
 
     return { build: true, fn: fn };
-}
+};
+
+export default copyStaticFiles;

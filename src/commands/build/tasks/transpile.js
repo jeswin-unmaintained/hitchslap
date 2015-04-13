@@ -6,7 +6,7 @@ import { print, getLogger } from "../../../utils/logging";
 
 var argv = optimist.argv;
 
-export default function(siteConfig) {
+var transpile = function(siteConfig) {
     var logger = getLogger(siteConfig.quiet, "transpile");
     var taskConfig = siteConfig.tasks.transpile;
 
@@ -54,4 +54,6 @@ export default function(siteConfig) {
     };
 
     return { build: true, fn: fn };
-}
+};
+
+export default transpile;
