@@ -9,7 +9,7 @@ import crankshaft from "crankshaft";
 import { getLogger } from "../../utils/logging";
 
 import transpile from "./tasks/transpile";
-import loadData from "./tasks/load_data";
+import loadData from "./tasks/load-data";
 import * as defaultTasks from "./tasks/default";
 import * as jekyllTasks from "./tasks/jekyll";
 

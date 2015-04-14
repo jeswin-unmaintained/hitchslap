@@ -8,10 +8,10 @@ import yaml from "js-yaml";
 import path from "path";
 import fsutils from "./utils/fs";
 import { print } from "./utils/logging";
-import readFileByFormat from "./utils/file_reader";
+import readFileByFormat from "./utils/file-reader";
 
 //modes
-import jekyllMode from "./jekyll_mode";
+import jekyllMode from "./jekyll-mode";
 var modes = {
     "jekyll": jekyllMode
 };
@@ -154,10 +154,12 @@ var getSiteConfig = function*() {
         //build
         dir_client_build: "js",
         client_js_suffix: "~client",
+        client_bundle_name: "app.bundle.js",
 
         build_dev: false,
         dir_dev_build: "dev_js",
         dev_js_suffix: "~dev",
+        dev_bundle_name: "dev.bundle.js",
 
         //original file replaced by *~client.js and *~dev.js will be renamed to *_base.js
         original_js_suffix: "_base",

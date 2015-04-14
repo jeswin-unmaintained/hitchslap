@@ -2,7 +2,7 @@ import path from "path";
 import frontMatter from "front-matter";
 import yaml from "js-yaml";
 import fsutils from "../../../utils/fs";
-import readFileByFormat from "../../../utils/file_reader";
+import readFileByFormat from "../../../utils/file-reader";
 import { print, getLogger } from "../../../utils/logging";
 
 /*

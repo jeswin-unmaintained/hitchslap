@@ -91,32 +91,33 @@ var buildClient = function(siteConfig) {
             Create the client and dev builds with webpack.
             Take the entry point from siteConfig, which defaults to app.js
         */
-        var webpackFiles = function*(dir_client_build) {
+        var webpackFiles = function*(dir_client_build, bundleName) {
+            var entry = path.join(siteConfig.destination, dir_client_build, siteConfig.entry_point);
+            var output = path.join(siteConfig.destination, dir_client_build, bundleName);
             var config = {
-                entry: [path.join(siteConfig.destination, dir_client_build, siteConfig.entry_point)],
+                entry: [entry],
                 module: {
-                    loaders: [ { test: /\.(js|jsx)$/, exclude: /node_modules/, loader: 'babel?experimental&optional=runtime' }]
+                    loaders: [ { test: /\.(js|jsx)$/, exclude: /node_modules/, loader: "babel-loader" }]
                 },
                 output: {
-                    filename: path.join(siteConfig.destination, dir_client_build, "app.bundle.js")
+                    filename: output
                 }
             };
-
             var compiler = webpack(config);
-            var runner = generatorify(compiler.run.bind(compiler));
-            var stats = yield* runner();
-            logger(`packed app files into app.bundle.js`);
+            var fnRun = generatorify(compiler.run);
+            var stats = yield* fnRun.call(compiler);
+            logger(`Packed js files into ${output}`);
         };
 
         this.onComplete(function*() {
             //Make the client build
             yield* replaceFiles(clientSpecificFiles, siteConfig.client_js_suffix, siteConfig.dir_client_build);
-            yield* webpackFiles(siteConfig.dir_client_build);
+            yield* webpackFiles(siteConfig.dir_client_build, siteConfig.client_bundle_name);
 
             //Make the dev build
             if (siteConfig.build_dev) {
                 yield* replaceFiles(devSpecificFiles, siteConfig.dev_js_suffix, siteConfig.dir_dev_build);
-                yield* webpackFiles(siteConfig.dir_dev_build);
+                yield* webpackFiles(siteConfig.dir_dev_build, siteConfig.dev_bundle_name);
             }
         });
     };
