@@ -97,7 +97,7 @@ var buildClient = function(siteConfig) {
             var config = {
                 entry: [entry],
                 module: {
-                    loaders: [ { test: /\.(js|jsx)$/, exclude: /node_modules/, loader: "babel-loader" }]
+                    loaders: [ { test: /\.(js|jsx)$/, loader: "babel-loader" }]
                 },
                 output: {
                     filename: output

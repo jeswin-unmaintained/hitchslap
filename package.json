@@ -25,7 +25,6 @@
   "dependencies": {
     "optimist": "*",
     "co": "*",
-    "co-parallel-tools": "*",
     "crankshaft": "*",
     "crankshaft-tools": "*",
     "front-matter": "*",
@@ -34,8 +33,6 @@
     "babel": "*",
     "node-markdown": "*",
     "mkdirp": "*",
-    "koa": "*",
-    "koa-static": "*",
     "nodefunc-generatorify": "*",
     "extfs": "*",
     "fs.extra": "*",
@@ -45,8 +42,6 @@
     "wrench": "*",
     "rimraf": "*",
     "less": "*",
-    "minimongo": "*",
-    "ceramic-backend-mongodb": "*"
   },
   "devDependencies": {
     "babel-core": "^4.7.16",
