@@ -34,7 +34,7 @@ export default function*(page, sourcePath, layout, makePath, siteConfig) {
         );
 
         var outputDir = path.dirname(outputPath);
-        if (!yield* fsutils.exists(outputDir)) {
+        if (!(yield* fsutils.exists(outputDir))) {
             yield* fsutils.mkdirp(outputDir);
         }
 

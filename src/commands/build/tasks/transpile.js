@@ -44,7 +44,7 @@ var transpile = function(siteConfig) {
             var result = transform(contents, { blacklist: taskConfig.blacklist });
             yield* fsutils.writeFile(outputPath, result.code);
 
-            if (argv.verbose)
+            if (argv.verbose_transpile)
                 print(`${filePath} -> ${outputPath}`, "transpile");
         }, "babel_em_all");
 

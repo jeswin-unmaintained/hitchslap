@@ -11,7 +11,11 @@ import path from "path";
 import webpack from "webpack";
 import generatorify from "nodefunc-generatorify";
 import fsutils from "../../../../utils/fs";
+import { tryRead } from "../../../../utils/config";
 import { print, getLogger } from "../../../../utils/logging";
+import optimist from "optimist";
+
+var argv = optimist.argv;
 
 var buildClient = function(siteConfig) {
 
@@ -94,18 +98,29 @@ var buildClient = function(siteConfig) {
         var webpackFiles = function*(dir_client_build, bundleName) {
             var entry = path.join(siteConfig.destination, dir_client_build, siteConfig.entry_point);
             var output = path.join(siteConfig.destination, dir_client_build, bundleName);
+            var externals = tryRead(siteConfig, ["tasks", "build_client", "webpack", "externals"], {});
+            var devtool = tryRead(siteConfig, ["tasks", "build_client", "webpack", "devtool"], "source-map");
             var config = {
                 entry: [entry],
                 module: {
-                    loaders: [ { test: /\.(js|jsx)$/, loader: "babel-loader" }]
+                    loaders: [
+                        { test: /\.(js|jsx)$/, loader: "babel-loader" },
+                        { test: /\.json$/, loader: "json-loader" }
+                    ],
                 },
                 output: {
                     filename: output
-                }
+                },
+                externals,
+                devtool
             };
+
+
             var compiler = webpack(config);
             var fnRun = generatorify(compiler.run);
             var stats = yield* fnRun.call(compiler);
+            if (argv.verbose_webpack)
+                print(stats);
             logger(`Packed js files into ${output}`);
         };
 

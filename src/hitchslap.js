@@ -35,6 +35,10 @@ var getCommand = function() {
     );
 };
 
+var isEmpty = function(val) {
+    return typeof val === "undefined" || val === null;
+};
+
 /*
     getValueSetter() returns a valueSetter function.
     valueSetter initializes config properties with
@@ -54,30 +58,41 @@ var getValueSetter = (config) => {
         //Make sure a.b exists in config
         var currentProp = config;
         for (let parent of propParents) {
-            if (typeof currentProp[parent] === "undefined" || currentProp[parent] === null) {
+            if (isEmpty(currentProp[parent])) {
                 currentProp[parent] = {};
             }
             currentProp = currentProp[parent];
         }
 
+        //Commandline switches can override everything. Including config.json
         var commandLineArg = argv[fullyQualifiedProperty];
-        if (typeof commandLineArg !== "undefined" && commandLineArg !== null) {
-            if (options.replace || !(currentProp[prop] instanceof Array)) {
+        if (!isEmpty(commandLineArg)) {
+            if (isEmpty(currentProp[prop])) {
                 currentProp[prop] = commandLineArg;
-            } else {
+            } else if (argv[fullyQualifiedProperty + "-replace"]) {
                 if (currentProp[prop] instanceof Array) {
                     currentProp[prop] = currentProp[prop].concat(commandLineArg);
+                } else {
+                    currentProp[prop] = commandLineArg;
                 }
             }
-        } else if (typeof currentProp[prop] === "undefined" || currentProp[prop] === null) {
-            currentProp[prop] = defaultValue;
-            config.__defaultFields.push(fullyQualifiedProperty);
-        } else if (config.__defaultFields.indexOf(fullyQualifiedProperty) !== -1) {
-            if (options.replace) {
+        } else {
+            if (isEmpty(currentProp[prop])) {
                 currentProp[prop] = defaultValue;
+                config.__defaultFields.push(fullyQualifiedProperty);
             } else {
-                if (currentProp[prop] instanceof Array) {
-                    currentProp[prop] = currentProp[prop].concat(defaultValue);
+                if (config.__defaultFields.indexOf(fullyQualifiedProperty) === -1) {
+                    if (currentProp[prop] instanceof Array) {
+                        currentProp[prop] = currentProp[prop].concat(defaultValue);
+                    }
+                } else {
+                    if (options.replace) {
+                        currentProp[prop] = defaultValue;
+                    } else {
+                        if (currentProp[prop] instanceof Array) {
+                            currentProp[prop] = currentProp[prop].concat(defaultValue);
+                        }
+                    }
                 }
             }
         }
