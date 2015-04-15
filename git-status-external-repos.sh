@@ -12,4 +12,10 @@ runtask() {
 }
 
 runtask "fora-template-blog" "node_modules"
-runtask "fora-template-jekyll" "node_modules"
+
+runtask "isotropy-koa-mode" "node_modules/fora-template-blog/node_modules"
+runtask "isotropy" "node_modules/fora-template-blog/node_modules/isotropy-koa-mode/node_modules"
+
+runtask "isotropy-browser-mode" "node_modules/fora-template-blog/node_modules"
+runtask "isotropy" "node_modules/fora-template-blog/node_modules/isotropy-browser-mode/node_modules"
+runtask "isotropy-browser-request" "node_modules/fora-template-blog/node_modules/isotropy-browser-mode/node_modules"
