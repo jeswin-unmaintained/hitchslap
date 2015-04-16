@@ -26,14 +26,13 @@ var copyStaticFiles = function(siteConfig) {
             var newFilePath = fsutils.changeExtension(filePath, [{ to: "js", from: siteConfig.js_extensions }]);
             yield* fsutils.copyFile(filePath, path.join(siteConfig.destination, newFilePath), { overwrite: false });
             yield* fsutils.copyFile(filePath, path.join(siteConfig.destination, siteConfig.dir_client_build, newFilePath));
-                if (siteConfig.build_dev) {
+            if (siteConfig.build_dev) {
                 yield* fsutils.copyFile(filePath, path.join(siteConfig.destination, siteConfig.dir_dev_build, newFilePath));
             }
         }, "copy_static_files");
 
         this.onComplete(function*() {
             logger(`copied ${copiedFiles.length} files`);
-            copiedFiles = [];
         });
     };
 

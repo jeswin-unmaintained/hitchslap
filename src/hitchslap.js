@@ -159,7 +159,7 @@ var getSiteConfig = function*() {
         client_js_suffix: "~client",
         client_bundle_name: "app.bundle.js",
 
-        build_dev: false,
+        build_dev: true,
         dir_dev_build: "dev_js",
         dev_js_suffix: "~dev",
         dev_bundle_name: "dev.bundle.js",
@@ -207,7 +207,6 @@ var getSiteConfig = function*() {
                 skip_extensions: ["less"]
             },
             build_client: {
-                dev: false,
                 browserify: {}
             },
             write_config: {
@@ -254,7 +253,7 @@ co(function*() {
             }
         } else {
             print("Invalid command. Use --help for more information.");
-        }
+        }        
     }
     catch(err) {
         print(err.stack);
