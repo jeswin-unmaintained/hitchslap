@@ -70,28 +70,16 @@ var getValueSetter = (config) => {
             if (isEmpty(currentProp[prop])) {
                 currentProp[prop] = commandLineArg;
             } else if (argv[fullyQualifiedProperty + "-replace"]) {
-                if (currentProp[prop] instanceof Array) {
-                    currentProp[prop] = currentProp[prop].concat(commandLineArg);
-                } else {
-                    currentProp[prop] = commandLineArg;
-                }
+                currentProp[prop] = commandLineArg;
             }
         } else {
             if (isEmpty(currentProp[prop])) {
                 currentProp[prop] = defaultValue;
                 config.__defaultFields.push(fullyQualifiedProperty);
             } else {
-                if (config.__defaultFields.indexOf(fullyQualifiedProperty) === -1) {
-                    if (currentProp[prop] instanceof Array) {
-                        currentProp[prop] = currentProp[prop].concat(defaultValue);
-                    }
-                } else {
+                if (config.__defaultFields.indexOf(fullyQualifiedProperty) !== -1) {
                     if (options.replace) {
                         currentProp[prop] = defaultValue;
-                    } else {
-                        if (currentProp[prop] instanceof Array) {
-                            currentProp[prop] = currentProp[prop].concat(defaultValue);
-                        }
                     }
                 }
             }
@@ -219,7 +207,8 @@ var getSiteConfig = function*() {
                 skip_extensions: ["less"]
             },
             build_client: {
-                dev: false
+                dev: false,
+                browserify: {}
             },
             write_config: {
                 filename: "config.json"
@@ -248,7 +237,6 @@ var getSiteConfig = function*() {
 
     //We don't need this anymore.
     delete siteConfig.__defaultFields;
-
     return siteConfig;
 };
 

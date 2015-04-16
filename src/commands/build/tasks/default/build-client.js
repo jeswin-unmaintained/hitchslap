@@ -8,12 +8,15 @@
 */
 
 import path from "path";
-import webpack from "webpack";
+import fs from "fs";
 import generatorify from "nodefunc-generatorify";
 import fsutils from "../../../../utils/fs";
 import { tryRead } from "../../../../utils/config";
 import { print, getLogger } from "../../../../utils/logging";
 import optimist from "optimist";
+import browserify from "browserify";
+import babelify from "babelify";
+import exposify from "exposify";
 
 var argv = optimist.argv;
 
@@ -92,47 +95,44 @@ var buildClient = function(siteConfig) {
 
 
         /*
-            Create the client and dev builds with webpack.
+            Create the client and dev builds with browserify.
             Take the entry point from siteConfig, which defaults to app.js
         */
-        var webpackFiles = function*(dir_client_build, bundleName) {
+        var browserifyFiles = function*(dir_client_build, bundleName) {
+            var config = siteConfig.tasks.build_client.browserify;
+
             var entry = path.join(siteConfig.destination, dir_client_build, siteConfig.entry_point);
             var output = path.join(siteConfig.destination, dir_client_build, bundleName);
-            var externals = tryRead(siteConfig, ["tasks", "build_client", "webpack", "externals"], {});
-            var devtool = tryRead(siteConfig, ["tasks", "build_client", "webpack", "devtool"], "source-map");
-            var config = {
-                entry: [entry],
-                module: {
-                    loaders: [
-                        { test: /\.(js|jsx)$/, loader: "babel-loader" },
-                        { test: /\.json$/, loader: "json-loader" }
-                    ],
-                },
-                output: {
-                    filename: output
-                },
-                externals,
-                devtool
-            };
 
+            var debug = tryRead(siteConfig, ["tasks", "build_client", "browserify", "debug"], false);
+            var b = browserify([entry], { debug });
 
-            var compiler = webpack(config);
-            var fnRun = generatorify(compiler.run);
-            var stats = yield* fnRun.call(compiler);
-            if (argv.verbose_webpack)
-                print(stats);
+            var exclude = tryRead(siteConfig, ["tasks", "build_client", "browserify", "exclude"], []);
+            exclude.forEach(function(e) {
+                b = b.external(e);
+            });
+
+            var globals = tryRead(siteConfig, ["tasks", "build_client", "browserify", "globals"], {});
+            var exposeConfig = { expose: globals };
+
+            var blacklist = tryRead(siteConfig, ["tasks", "build_client", "browserify", "babel", "blacklist"], []);
+            b.transform(babelify.configure({ blacklist }))
+                .transform(exposify, exposeConfig)
+                .bundle()
+                .pipe(fs.createWriteStream(output));
+
             logger(`Packed js files into ${output}`);
         };
 
         this.onComplete(function*() {
             //Make the client build
             yield* replaceFiles(clientSpecificFiles, siteConfig.client_js_suffix, siteConfig.dir_client_build);
-            yield* webpackFiles(siteConfig.dir_client_build, siteConfig.client_bundle_name);
+            yield* browserifyFiles(siteConfig.dir_client_build, siteConfig.client_bundle_name);
 
             //Make the dev build
             if (siteConfig.build_dev) {
                 yield* replaceFiles(devSpecificFiles, siteConfig.dev_js_suffix, siteConfig.dir_dev_build);
-                yield* webpackFiles(siteConfig.dir_dev_build, siteConfig.dev_bundle_name);
+                yield* browserifyFiles(siteConfig.dir_dev_build, siteConfig.dev_bundle_name);
             }
         });
     };

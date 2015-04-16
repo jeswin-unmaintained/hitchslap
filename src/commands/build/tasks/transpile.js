@@ -28,7 +28,7 @@ var transpile = function(siteConfig) {
         };
 
         //We compile client, dev build separately because they may have different blacklists.
-        //  For example, on iojs we want to blacklist regenerator. But on the client, we don't.
+        //For example, on iojs we want to blacklist regenerator. But on the client, we don't.
         this.watch(extensions.concat(excluded), function*(filePath, ev, match) {
             transpiledFiles.push(filePath);
 
