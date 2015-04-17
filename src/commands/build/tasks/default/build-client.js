@@ -30,11 +30,12 @@ var buildClient = function(siteConfig) {
         //Get the relative filePath by removing the monitored directory (siteConfig.source)
         var relativeFilePath = filePath.substring(siteConfig.source.length);
         var clientDest = path.join(siteConfig.destination, destDir, relativeFilePath);
-        yield* fsutils.copyFile(filePath, clientDest, { createDir: true });
+        var newFilePath = fsutils.changeExtension(clientDest, [{ to: "js", from: siteConfig.js_extensions }]);
+        yield* fsutils.copyFile(filePath, newFilePath, { createDir: true });
     };
 
     var fn = function() {
-        var extensions = [`${siteConfig.source}/*.js`, `${siteConfig.source}/*.json`];
+        var extensions = siteConfig.js_extensions.concat("json").map(e => `${siteConfig.source}/*.${e}`);
 
         var excluded = siteConfig.dirs_exclude
             .concat(siteConfig.destination)
@@ -111,43 +112,39 @@ var buildClient = function(siteConfig) {
             Create the client and dev builds with browserify.
             Take the entry point from siteConfig, which defaults to app.js
         */
-        var browserifyFiles = function(dir_build_destination, bundleName) {
-            var promise = new Promise(function(resolve, reject) {
-                var config = siteConfig.tasks.build_client.browserify;
+        var browserifyFiles = function*(dir_build_destination, bundleName) {
+            var config = siteConfig.tasks.build_client.browserify;
 
-                var entry = path.join(siteConfig.destination, dir_build_destination, siteConfig.entry_point);
-                var output = path.join(siteConfig.destination, dir_build_destination, bundleName);
+            var entry = path.join(siteConfig.destination, dir_build_destination, siteConfig.entry_point);
+            var output = path.join(siteConfig.destination, dir_build_destination, bundleName);
 
-                var debug = tryRead(siteConfig, ["tasks", "build_client", "browserify", "debug"], false);
-                var b = browserify([entry], { debug });
+            var debug = tryRead(siteConfig, ["tasks", "build_client", "browserify", "debug"], false);
+            var b = browserify([entry], { debug });
 
-                var exclude = tryRead(siteConfig, ["tasks", "build_client", "browserify", "exclude"], []);
-                exclude.forEach(function(e) {
-                    b = b.external(e);
-                });
+            var globals = tryRead(siteConfig, ["tasks", "build_client", "browserify", "globals"], {});
+            var exclude = tryRead(siteConfig, ["tasks", "build_client", "browserify", "exclude"], []);
 
-                var globals = tryRead(siteConfig, ["tasks", "build_client", "browserify", "globals"], {});
-                var exposeConfig = { expose: globals };
-
-                var blacklist = tryRead(siteConfig, ["tasks", "build_client", "browserify", "babel", "blacklist"], []);
-
-                var r = b.transform(babelify, { blacklist, global: true })
-                    .transform(exposify, exposeConfig)
-                    .bundle(function(err, src) { if (err) { reject(err); } else { resolve(src); } })
-                    .pipe(fs.createWriteStream(output));
+            exclude.concat(Object.keys(globals)).forEach(function(e) {
+                b = b.external(e);
             });
-            return promise;
+
+            var blacklist = tryRead(siteConfig, ["tasks", "build_client", "browserify", "babel", "blacklist"], []);
+            b.transform(babelify.configure({ blacklist }), { global: true })
+                .transform(exposify, { expose: globals, global: true })
+                .bundle()
+                .pipe(fs.createWriteStream(output));
         };
+
 
         this.onComplete(function*() {
             //Make the client build
             yield* replaceFiles(clientSpecificFiles, siteConfig.client_js_suffix, siteConfig.dir_client_build);
-            yield browserifyFiles(siteConfig.dir_client_build, siteConfig.client_bundle_name);
+            yield* browserifyFiles(siteConfig.dir_client_build, siteConfig.client_bundle_name);
 
             //Make the dev build
             if (siteConfig.build_dev) {
                 yield* replaceFiles(devSpecificFiles, siteConfig.dev_js_suffix, siteConfig.dir_dev_build);
-                yield browserifyFiles(siteConfig.dir_dev_build, siteConfig.dev_bundle_name);
+                yield* browserifyFiles(siteConfig.dir_dev_build, siteConfig.dev_bundle_name);
             }
 
             clientSpecificFiles = [];
