@@ -23,6 +23,29 @@ let tryRead = function(obj, path, defaultVal) {
 };
 
 
+var getProperty = function(config, fullyQualifiedProperty) {
+    //props are like "a.b.c"; we need to find config.a.b.c
+    //propParent will be config.a.b, in this case.
+    let propArray = fullyQualifiedProperty.split(".");
+    let propertyName = propArray.slice(propArray.length - 1)[0];
+    let propParents = propArray.slice(0, propArray.length - 1);
+
+    //Make sure a.b exists in config
+    let parentProperty = config;
+
+    for (let parent of propParents) {
+        if (isEmpty(parentProperty[parent])) {
+            parentProperty[parent] = {};
+        }
+        parentProperty = parentProperty[parent];
+    }
+
+    return { propertyName, parentProperty };
+};
+
+
+
+
 /*
     getValueSetter() returns a valueSetter function.
     valueSetter initializes config properties with
@@ -30,59 +53,53 @@ let tryRead = function(obj, path, defaultVal) {
         b) default values, if property is currently empty
 */
 let getValueSetter = function(config) {
-    config.__defaultFields = [];
-
     return (fullyQualifiedProperty, defaultValue, options = {}) => {
-        //props are like "a.b.c"; we need to find config.a.b.c
-        //propParent will be config.a.b, in this case.
-        let propArray = fullyQualifiedProperty.split(".");
-        let prop = propArray.slice(propArray.length - 1)[0];
-        let propParents = propArray.slice(0, propArray.length - 1);
+        var { propertyName, parentProperty } = getProperty(config, fullyQualifiedProperty);
 
-        //Make sure a.b exists in config
-        let currentProp = config;
-        for (let parent of propParents) {
-            if (isEmpty(currentProp[parent])) {
-                currentProp[parent] = {};
-            }
-            currentProp = currentProp[parent];
-        }
-
-        //Commandline switches can override everything. Including config.json
-        let commandLineArg = argv[fullyQualifiedProperty];
-        if (!isEmpty(commandLineArg)) {
-            if (isEmpty(currentProp[prop])) {
-                //If current prop is empty replace anyway
-                currentProp[prop] = commandLineArg;
-            } else {
-                //If current prop is not empty, but is an array, replace if
-                // flag is set. Otherwise concat.
-                if (currentProp[prop] instanceof Array) {
-                    if (argv[fullyQualifiedProperty + "-replace"]) {
-                        currentProp[prop] = (commandLineArg instanceof Array) ? commandLineArg : [commandLineArg];
-                    } else {
-                        currentProp[prop] = currentProp[prop].concat(commandLineArg);
-                    }
-                } else {
-                    //If current prop is not an array, replace anyway.
-                    currentProp[prop] = commandLineArg;
-                }
-            }
+        if (isEmpty(parentProperty[propertyName])) {
+            parentProperty[propertyName] = defaultValue;
         } else {
-            if (isEmpty(currentProp[prop])) {
-                currentProp[prop] = defaultValue;
-                config.__defaultFields.push(fullyQualifiedProperty);
-            } else {
-                if (config.__defaultFields.indexOf(fullyQualifiedProperty) !== -1) {
-                    if (options.replace) {
-                        currentProp[prop] = defaultValue;
-                    }
-                }
+            if (options.replace) {
+                parentProperty[propertyName] = defaultValue;
             }
         }
     };
 };
 
+
+let commandLineSetter = function(config) {
+    for (var cmd in argv) {
+        let isArray = false;
+        if (cmd !== "_" && !(/^\$/.test(cmd)) && ["s", "d", "source", "destination"].indexOf(cmd) === -1) {
+            if (/\[\]$/.test(cmd)) {
+                cmd = cmd.replace(/\[\]$/, "");
+                isArray = true;
+            }
+
+            var { propertyName, parentProperty } = getProperty(config, cmd);
+
+            var commandLineValue = argv[cmd];
+            if (!isEmpty(commandLineValue)) {
+                if (isEmpty(parentProperty[propertyName])) {
+                    parentProperty[propertyName] = isArray ? [].concat(commandLineValue) : commandLineValue;
+                } else {
+                    //If current prop is not empty, but is an array, replace if
+                    // flag is set. Otherwise concat.
+                    if (parentProperty[propertyName] instanceof Array) {
+                        if (argv[fullyQualifiedProperty + "-replace"]) {
+                            parentProperty[propertyName] = [].concat(commandLineValue);
+                        } else {
+                            parentProperty[propertyName] = parentProperty[propertyName].concat(commandLineValue);
+                        }
+                    } else {
+                        //If current prop is not an array, replace anyway.
+                        parentProperty[propertyName] = isArray ? [].concat(commandLineValue) : commandLineValue;
+                    }
+                }
+            }
+        }
+    }
+};
 
 
 /*
@@ -124,4 +141,4 @@ let getFullyQualifiedProperties = function(obj, prefixes = [], acc = []) {
 
 
 
-export default { tryRead, getValueSetter, getFullyQualifiedProperties };
+export default { tryRead, getValueSetter, commandLineSetter, getFullyQualifiedProperties };

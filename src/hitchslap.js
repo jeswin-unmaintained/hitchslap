@@ -52,6 +52,8 @@ let getSiteConfig = function*() {
         setter.apply(null, args);
     }
 
+    configutils.commandLineSetter(siteConfig);
+
     //Store absolute paths for source and destination
     siteConfig.source = path.resolve(siteConfig.source);
     siteConfig.destination = path.resolve(siteConfig.source, siteConfig.destination);
@@ -60,8 +62,6 @@ let getSiteConfig = function*() {
     if (configurations[siteConfig.mode].updateSiteConfig)
     configurations[siteConfig.mode].updateSiteConfig(siteConfig);
 
-    //We don't need this anymore.
-    delete siteConfig.__defaultFields;
     return siteConfig;
 };
 

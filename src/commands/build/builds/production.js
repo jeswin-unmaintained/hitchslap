@@ -2,7 +2,7 @@ import path from "path";
 import fsutils from "../../../utils/fs";
 import configutils from "../../../utils/config";
 import { getLogger } from "../../../utils/logging";
-
+import getCommonTasks from "../build-utils/common-tasks";
 /*
     Hookable Build Pipeline Events
     ------------------------------
@@ -29,56 +29,9 @@ let build = function*(siteConfig, buildConfig, builtInPlugins, buildUtils) {
     if (customTasks)
         yield* buildUtils.tasks.runTasks(customTasks["on-start"]);
 
-    var tasks = [];
+    var { transpileServer, less, copyStaticFiles, writeConfig } = getCommonTasks(siteConfig, buildConfig, builtInPlugins);
 
-    tasks.push({
-        name: "transpile-server", //babel transpile server files, blacklist (regenerator)
-        plugin: builtInPlugins.babel,
-        options: {
-            destination: siteConfig.destination,
-            extensions: siteConfig["js-extensions"],
-            excludedDirectories: [siteConfig.destination]
-                .concat(siteConfig["dirs-client-vendor"])
-                .concat(siteConfig["dirs-exclude"]),
-            excludedPatterns: siteConfig["patterns-exclude"],
-            blacklist: ["regenerator"]
-        }
-    });
-
-    tasks.push({
-        name: "less", //compile less files
-        plugin: builtInPlugins.less,
-        options: {
-            destination: siteConfig.destination,
-            directories: configutils.tryRead(buildConfig, ["tasks", "less", "dirs"], [])
-        }
-    });
-
-
-    tasks.push({
-        name: "copy-static-files", //copy static funny .gifs
-        plugin: builtInPlugins["copy-static-files"],
-        options: {
-            destination: siteConfig.destination,
-            extensions: ["*.*"],
-            excludedDirectories: [siteConfig.destination]
-                .concat(siteConfig["dirs-exclude"]),
-            excludedPatterns: siteConfig["patterns-exclude"],
-            excludedExtensions: configutils.tryRead(buildConfig, ["tasks", "copy-static-files", "exclude-extensions"], ["less"]),
-            changeExtensions: configutils.tryRead(buildConfig, ["tasks", "copy-static-files", "change-extensions"], [{ to: "js", from: ["jsx"] }])
-        }
-    });
-
-
-    tasks.push({
-        name: "write-config", //write the merged config file into the destination directory
-        plugin: builtInPlugins["write-config"],
-        options: {
-            destination: siteConfig.destination,
-            filename: configutils.tryRead(buildConfig, ["tasks", "write-config", "filename"], ["config.json"]),
-            config: siteConfig
-        }
-    });
+    var tasks = [transpileServer, less, copyStaticFiles, writeConfig];
 
     tasks.push({
         name: "build-client", //build client js bundle
@@ -92,8 +45,8 @@ let build = function*(siteConfig, buildConfig, builtInPlugins, buildUtils) {
             extensions: ["js", "jsx", "json"],
             changeExtensions: configutils.tryRead(buildConfig, ["tasks", "build-client", "change-extensions"], [{ to: "js", from: ["jsx"] }]),
             debug: false,
-            globalModules: configutils.tryRead(buildConfig, ["tasks", "build-client", "globalModules"], []),
-            excludedModules: configutils.tryRead(buildConfig, ["tasks", "build-client", "excludedModules"], []),
+            globalModules: configutils.tryRead(buildConfig, ["tasks", "build-client", "global-modules"], []),
+            excludedModules: configutils.tryRead(buildConfig, ["tasks", "build-client", "excluded-modules"], []),
             excludedDirectories: [siteConfig.destination]
                 .concat(siteConfig["dirs-client-vendor"])
                 .concat(siteConfig["dirs-exclude"]),
@@ -107,6 +60,9 @@ let build = function*(siteConfig, buildConfig, builtInPlugins, buildUtils) {
 
 
     var onComplete = function*() {
+        if (customTasks)
+            yield* buildUtils.tasks.runTasks(customTasks["on-complete"]);
+
         let endTime = Date.now();
         logger(`Build took ${(endTime - startTime)/1000} seconds.`);
     };
