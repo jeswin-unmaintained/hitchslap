@@ -10,46 +10,44 @@
 import path from "path";
 import fs from "fs";
 import generatorify from "nodefunc-generatorify";
-import fsutils from "../../../../utils/fs";
-import { tryRead } from "../../../../utils/config";
-import { print, getLogger } from "../../../../utils/logging";
+import fsutils from "../../../utils/fs";
+import { tryRead } from "../../../utils/config";
+import { print, getLogger } from "../../../utils/logging";
 import optimist from "optimist";
 import browserify from "browserify";
 import babelify from "babelify";
 import exposify from "exposify";
 
-var argv = optimist.argv;
+let argv = optimist.argv;
 
-var buildClient = function(siteConfig) {
-
-    var logger = getLogger(siteConfig.quiet, "build_client");
-    var taskConfig = siteConfig.tasks.build_client;
+let buildClient = function(siteConfig, buildConfig, taskConfig) {
+    let logger = getLogger(siteConfig.quiet, "build-client");
 
     //Copy file into destDir
-    var copyFile = function*(filePath, destDir) {
+    let copyFile = function*(filePath, destDir) {
         //Get the relative filePath by removing the monitored directory (siteConfig.source)
-        var relativeFilePath = filePath.substring(siteConfig.source.length);
-        var clientDest = path.join(siteConfig.destination, destDir, relativeFilePath);
-        var newFilePath = fsutils.changeExtension(clientDest, [{ to: "js", from: siteConfig.js_extensions }]);
+        let relativeFilePath = filePath.substring(siteConfig.source.length);
+        let clientDest = path.join(siteConfig.destination, destDir, relativeFilePath);
+        let newFilePath = fsutils.changeExtension(clientDest, [{ to: "js", from: siteConfig.js_extensions }]);
         yield* fsutils.copyFile(filePath, newFilePath, { createDir: true });
     };
 
-    var fn = function() {
-        var extensions = siteConfig.js_extensions.concat("json").map(e => `${siteConfig.source}/*.${e}`);
+    let fn = function() {
+        let extensions = siteConfig.js_extensions.concat("json").map(e => `${siteConfig.source}/*.${e}`);
 
-        var excluded = siteConfig.dirs_exclude
+        let excluded = siteConfig.dirs_exclude
             .concat(siteConfig.destination)
             .concat(siteConfig.dirs_client_vendor.map(dir => `${siteConfig.destination}/${dir}`))
             .map(dir => `!${dir}/`)
             .concat(siteConfig.patterns_exclude);
 
 
-        var clientSpecificFiles = [];
-        var devSpecificFiles = [];
+        let clientSpecificFiles = [];
+        let devSpecificFiles = [];
 
         this.watch(extensions.concat(excluded), function*(filePath, ev, matches) {
-            var clientFileRegex = new RegExp(`${siteConfig.client_js_suffix}\.(js|json)$`);
-            var devFileRegex = new RegExp(`${siteConfig.dev_js_suffix}\.(js|json)$`);
+            let clientFileRegex = new RegExp(`${siteConfig.client_js_suffix}\.(js|json)$`);
+            let devFileRegex = new RegExp(`${siteConfig.dev_js_suffix}\.(js|json)$`);
 
             /*
                 In client mode, keep the ~dev.js files out.
@@ -72,7 +70,7 @@ var buildClient = function(siteConfig) {
                     yield* copyFile(filePath, siteConfig.dir_dev_build);
 
             }
-        }, "build_client");
+        }, "build-client");
 
 
         /*
@@ -83,15 +81,15 @@ var buildClient = function(siteConfig) {
 
                 The same rules apply for "dev", "test" and other builds.
         */
-        var replaceFiles = function*(files, suffix, dir_build_destination) {
+        let replaceFiles = function*(files, suffix, dir_build_destination) {
             for (let file of files) {
                 //file is the path to the source js file, which needs to be copied into dir_client_build and dir_dev_build
                 //  ie, /some_dir/abc.js to /some_dir/js/abc.js
-                var relativeFilePath = file.substring(siteConfig.source.length);
-                var filePath = path.join(siteConfig.destination, dir_build_destination, relativeFilePath);
+                let relativeFilePath = file.substring(siteConfig.source.length);
+                let filePath = path.join(siteConfig.destination, dir_build_destination, relativeFilePath);
 
-                var extension = /\.js$/.test(file) ? "js" : "json";
-                var regex = new RegExp(`${suffix}\\.${extension}$`);
+                let extension = /\.js$/.test(file) ? "js" : "json";
+                let regex = new RegExp(`${suffix}\\.${extension}$`);
 
                 let original = filePath.replace(regex, `.${extension}`);
                 let renamed = original.replace(/\.js$/, `${siteConfig.original_js_suffix}.${extension}`);
@@ -112,23 +110,23 @@ var buildClient = function(siteConfig) {
             Create the client and dev builds with browserify.
             Take the entry point from siteConfig, which defaults to app.js
         */
-        var browserifyFiles = function*(dir_build_destination, bundleName) {
-            var config = siteConfig.tasks.build_client.browserify;
+        let browserifyFiles = function*(dir_build_destination, bundleName) {
+            let config = siteConfig.tasks.build-client.browserify;
 
-            var entry = path.join(siteConfig.destination, dir_build_destination, siteConfig.entry_point);
-            var output = path.join(siteConfig.destination, dir_build_destination, bundleName);
+            let entry = path.join(siteConfig.destination, dir_build_destination, siteConfig.entry_point);
+            let output = path.join(siteConfig.destination, dir_build_destination, bundleName);
 
-            var debug = tryRead(siteConfig, ["tasks", "build_client", "browserify", "debug"], false);
-            var b = browserify([entry], { debug });
+            let debug = tryRead(siteConfig, ["tasks", "build-client", "browserify", "debug"], false);
+            let b = browserify([entry], { debug });
 
-            var globals = tryRead(siteConfig, ["tasks", "build_client", "browserify", "globals"], {});
-            var exclude = tryRead(siteConfig, ["tasks", "build_client", "browserify", "exclude"], []);
+            let globals = tryRead(siteConfig, ["tasks", "build-client", "browserify", "globals"], {});
+            let exclude = tryRead(siteConfig, ["tasks", "build-client", "browserify", "exclude"], []);
 
             exclude.concat(Object.keys(globals)).forEach(function(e) {
                 b = b.external(e);
             });
 
-            var blacklist = tryRead(siteConfig, ["tasks", "build_client", "browserify", "babel", "blacklist"], []);
+            let blacklist = tryRead(siteConfig, ["tasks", "build-client", "browserify", "babel", "blacklist"], []);
             b.transform(babelify.configure({ blacklist }), { global: true })
                 .transform(exposify, { expose: globals, global: true })
                 .bundle()

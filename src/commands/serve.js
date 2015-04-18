@@ -2,9 +2,9 @@ import koa from "koa";
 import koaStatic from "koa-static";
 import { print, getLogger } from "../utils/logging";
 
-var serve = function*(siteConfig) {
-    var koa = require('koa');
-    var app = koa();
+let serve = function*(siteConfig) {
+    let koa = require('koa');
+    let app = koa();
     app.use(koaStatic(siteConfig.destination));
     app.listen(siteConfig.port);
 

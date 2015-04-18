@@ -1,5 +1,5 @@
 /*
-    No ES6 allowed.
+    IMPORTANT! No ES6 allowed.
     This file is used by the build bootstrap.
 */
 
@@ -18,6 +18,14 @@ var exists = generatorify(function(what, cb) {
         cb(null, exists);
     });
 });
+
+var ensureDirExists = function*(outputPath) {
+    var outputDir = path.dirname(outputPath);
+    if (!(yield* exists(outputDir))) {
+        yield* mkdirp(outputDir);
+    }
+};
+
 
 var empty = generatorify(function(path, cb) {
     extfs.isEmpty(path, function(result) {
@@ -99,6 +107,7 @@ module.exports = {
     writeFile: generatorify(fs.writeFile),
     copyFile: copyFile,
     mkdirp: mkdirp,
+    ensureDirExists: ensureDirExists,
     copyRecursive: generatorify(wrench.copyDirRecursive),
     exists: exists,
     empty: empty,

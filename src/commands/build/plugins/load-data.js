@@ -9,12 +9,10 @@ import { print, getLogger } from "../../../utils/logging";
     config.dirs_data directory contains a set of yaml files.
     Yaml is loaded into site.data.filename. eg: site.data.songs
 */
-var loadStaticData = function(siteConfig) {
-    var logger = getLogger(siteConfig.quiet, "load_data");
+let loadStaticData = function(siteConfig, buildConfig, taskConfig) {
+    let logger = getLogger(siteConfig.quiet, "load_data");
 
-    var taskConfig = siteConfig.tasks.load_data;
-
-    var fn = function() {
+    let fn = function() {
         GLOBAL.site.data = {};
 
         this.watch(
@@ -22,13 +20,13 @@ var loadStaticData = function(siteConfig) {
                 .map(ext => taskConfig.dirs_data.map(dir => `${dir}/*.${ext}`))
                 .reduce((a,b) => a.concat(b)),
             function*(filePath) {
-                var extension = path.extname(filePath);
+                let extension = path.extname(filePath);
 
-                var records;
+                let records;
                 try {
                     records = yield* readFileByFormat(filePath);
 
-                    var filename = path.basename(filePath, extension);
+                    let filename = path.basename(filePath, extension);
                     if (records && records.length) {
                         GLOBAL.site.data[filename] = GLOBAL.site.data[filename] ? GLOBAL.site.data[filename].concat(records) : records  ;
                     }
@@ -43,12 +41,12 @@ var loadStaticData = function(siteConfig) {
 
 
         //Add a watch for each collection.
-        var addToCollection = function(collection) {
+        let addToCollection = function(collection) {
             return function*(filePath) {
-                var extension = path.extname(filePath);
+                let extension = path.extname(filePath);
 
                 try {
-                    var record = yield* readFileByFormat(filePath, { markdown: taskConfig.markdown_ext });
+                    let record = yield* readFileByFormat(filePath, { markdown: taskConfig.markdown_ext });
                     record.__filePath = filePath;
 
                     if (record)
@@ -63,9 +61,9 @@ var loadStaticData = function(siteConfig) {
         //Check the collection directories
         for (let collectionName in siteConfig.collections) {
             GLOBAL.site.data[collectionName] = [];
-            var collection = siteConfig.collections[collectionName];
+            let collection = siteConfig.collections[collectionName];
             if (collection.dir) {
-                var collectionDir = taskConfig.collections_root_dir ? path.combine(taskConfig.collections_root_dir, collection.dir) : collection.dir;
+                let collectionDir = taskConfig.collections_root_dir ? path.combine(taskConfig.collections_root_dir, collection.dir) : collection.dir;
                 this.watch(
                     taskConfig.markdown_ext.concat(["json"]).map(ext => `${collectionDir}/*.${ext}`),
                     addToCollection(collectionName)
@@ -78,13 +76,13 @@ var loadStaticData = function(siteConfig) {
         if (siteConfig.scavenge_collection) {
             GLOBAL.site.data[siteConfig.scavenge_collection] = [];
 
-            var collectionsAndDataDirs = Object.keys(siteConfig.collections)
+            let collectionsAndDataDirs = Object.keys(siteConfig.collections)
                 .map(coll => siteConfig.collections[coll].dir)
                 .filter(item => item)
                 .concat(taskConfig.dirs_data)
                 .map(dir => `!${dir}/`);
 
-            var exclusions = ["!node_modules/", "!config.json", "!config.yml", "!config.yaml"].concat(collectionsAndDataDirs);
+            let exclusions = ["!node_modules/", "!config.json", "!config.yml", "!config.yaml"].concat(collectionsAndDataDirs);
 
             this.watch(
                 exclusions.concat(taskConfig.markdown_ext.concat(["json"]).map(ext => `*.${ext}`)),

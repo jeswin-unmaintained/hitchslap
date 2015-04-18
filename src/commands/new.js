@@ -4,29 +4,38 @@ import path from "path";
 import fsutils from "../utils/fs";
 import { print, getLogger } from "../utils/logging";
 
-var argv = optimist.argv;
+let argv = optimist.argv;
 
 /*
     Search paths are:
         a) Current node_modules directory
         b) ~/.fora/templates/node_modules
 */
-var resolveTemplatePath = function*(name) {
-    var templateName = /^fora-template-/.test(name) ? name : `fora-template-${name}`;
+let resolveTemplatePath = function*(name) {
+    let templateName = /^fora-template-/.test(name) ? name : `fora-template-${name}`;
 
     //Current node_modules_dir
-    var node_modules_templatePath = path.resolve(GLOBAL.__libdir, "../node_modules", name);
-    var node_modules_prefixedTemplatePath = path.resolve(GLOBAL.__libdir, "../node_modules", `fora-template-${name}`);
+    let node_modules_templatePath = path.resolve(GLOBAL.__libdir, "../node_modules", name);
+    let node_modules_prefixedTemplatePath = path.resolve(GLOBAL.__libdir, "../node_modules", `fora-template-${name}`);
 
-    var HOME_DIR = process.env.HOME || process.env.HOMEPATH || process.env.USERPROFILE;
-    var HOME_templatePath = path.resolve(`${HOME_DIR}/.fora/templates/node_modules`, name);
-    var HOME_prefixedTemplatePath = path.resolve(`${HOME_DIR}/.fora/templates/node_modules`, `fora-template-${name}`);
+    /*
+        Templates can also be under
+            ~/.fora/templates/example-template
+            ~/.fora/templates/node_modules/example-template
+    */
+    let HOME_DIR = process.env.HOME || process.env.HOMEPATH || process.env.USERPROFILE;
+    let HOME_templatePath = path.resolve(`${HOME_DIR}/.fora/templates`, name);
+    let HOME_prefixedTemplatePath = path.resolve(`${HOME_DIR}/.fora/templates`, `fora-template-${name}`);
+    let HOME_node_modules_templatePath = path.resolve(`${HOME_DIR}/.fora/templates/node_modules`, name);
+    let HOME_node_modules_prefixedTemplatePath = path.resolve(`${HOME_DIR}/.fora/templates/node_modules`, `fora-template-${name}`);
 
-    var paths = [
+    let paths = [
         node_modules_templatePath,
         node_modules_prefixedTemplatePath,
         HOME_templatePath,
-        HOME_prefixedTemplatePath
+        HOME_prefixedTemplatePath,
+        HOME_node_modules_templatePath,
+        HOME_node_modules_prefixedTemplatePath
     ];
 
     for (let templatePath of paths) {
@@ -42,10 +51,10 @@ var resolveTemplatePath = function*(name) {
 /*
     Copy files from the template directory to the destination directory.
 */
-var copyTemplateFiles = function*() {
-    var logger = getLogger(argv.quiet || false);
+let copyTemplateFiles = function*() {
+    let logger = getLogger(argv.quiet || false);
 
-    var dest = argv.destination || argv.d || !(/^--/.test(process.argv[3])) ? process.argv[3] : "";
+    let dest = argv.destination || argv.d || !(/^--/.test(process.argv[3])) ? process.argv[3] : "";
     if (!dest) {
         print("Error:  You must specify a path. eg: hitchslap new <dir> [options..].");
         return;
@@ -64,16 +73,16 @@ var copyTemplateFiles = function*() {
         }
 
         //Copy template
-        var exec = tools.process.exec();
-        var template = argv.template || argv.t || "blog";
-        var templatePath = yield* resolveTemplatePath(template);
+        let exec = tools.process.exec();
+        let template = argv.template || argv.t || "blog";
+        let templatePath = yield* resolveTemplatePath(template);
         logger(`Copying ${templatePath} -> ${dest}`);
         yield* fsutils.copyRecursive(templatePath, dest, { forceDelete: true });
 
         //Install npm dependencies.
-        var curdir = yield* exec(`pwd`);
+        let curdir = yield* exec(`pwd`);
         process.chdir(dest);
-        var npmMessages = yield* exec(`npm install`);
+        let npmMessages = yield* exec(`npm install`);
         print(npmMessages);
         process.chdir(curdir);
 

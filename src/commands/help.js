@@ -1,6 +1,6 @@
 import { print } from "../utils/logging";
 
-var help = function*() {
+let help = function*() {
     print(`
         hitchslap 0.0.1 -- hitchslap is a blog-aware, static site generator in NodeJS
 

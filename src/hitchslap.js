@@ -6,18 +6,22 @@ import optimist from "optimist";
 import * as commands from "./commands";
 import yaml from "js-yaml";
 import path from "path";
+import configutils from "./utils/config";
 import fsutils from "./utils/fs";
 import { print } from "./utils/logging";
 import readFileByFormat from "./utils/file-reader";
 
 //modes
-import jekyllMode from "./jekyll-mode";
-var modes = {
-    "jekyll": jekyllMode
+import defaultConfig from "./configurations/default";
+import jekyllConfig from "./configurations/jekyll";
+
+let configurations = {
+    "default": defaultConfig,
+    "jekyll": jekyllConfig
 };
 
 
-var argv = optimist.argv;
+let argv = optimist.argv;
 
 //debug mode?
 if (argv.debug) {
@@ -27,201 +31,24 @@ if (argv.debug) {
 //Commands might need the templates directory. Easier from root.
 GLOBAL.__libdir = __dirname;
 
-var getCommand = function() {
-    return (
-        (argv.help || argv.h) ? "help" :
-        (argv.version || argv.v) ? "version" :
-        process.argv[2]
-    );
-};
 
-var isEmpty = function(val) {
-    return typeof val === "undefined" || val === null;
-};
+let getSiteConfig = function*() {
+    let siteConfig = {};
 
-/*
-    getValueSetter() returns a valueSetter function.
-    valueSetter initializes config properties with
-        a) command-line params, if specified
-        b) default values, if property is currently empty
-*/
-var getValueSetter = (config) => {
-    config.__defaultFields = [];
+    let source = argv.source || argv.s || "./";
+    let destination = argv.destination || argv.d || "_site";
 
-    return (fullyQualifiedProperty, defaultValue, options = {}) => {
-        //props are like "a.b.c"; we need to find config.a.b.c
-        //propParent will be config.a.b, in this case.
-        var propArray = fullyQualifiedProperty.split(".");
-        var prop = propArray.slice(propArray.length - 1)[0];
-        var propParents = propArray.slice(0, propArray.length - 1);
-
-        //Make sure a.b exists in config
-        var currentProp = config;
-        for (let parent of propParents) {
-            if (isEmpty(currentProp[parent])) {
-                currentProp[parent] = {};
-            }
-            currentProp = currentProp[parent];
-        }
-
-        //Commandline switches can override everything. Including config.json
-        var commandLineArg = argv[fullyQualifiedProperty];
-        if (!isEmpty(commandLineArg)) {
-            if (isEmpty(currentProp[prop])) {
-                currentProp[prop] = commandLineArg;
-            } else if (argv[fullyQualifiedProperty + "-replace"]) {
-                currentProp[prop] = commandLineArg;
-            }
-        } else {
-            if (isEmpty(currentProp[prop])) {
-                currentProp[prop] = defaultValue;
-                config.__defaultFields.push(fullyQualifiedProperty);
-            } else {
-                if (config.__defaultFields.indexOf(fullyQualifiedProperty) !== -1) {
-                    if (options.replace) {
-                        currentProp[prop] = defaultValue;
-                    }
-                }
-            }
-        }
-    };
-};
-
-
-/*
-    example of obj:
-    {
-        prop1: false,
-        prop2: "hello",
-        prop3: { value: ["A"], options: { replace: true } }
-        prop4: {
-            propInner1: 100
-        }
-    }
-
-    returns [
-        ["prop1", false],
-        ["prop2", "hello"],
-        ["prop3", "A", { replace: true}],
-        ["prop4.propInner", 1000]
-    ]
-}
-*/
-var getFullyQualifiedProperties = (obj, prefixes = [], acc = []) => {
-    for (var key in obj) {
-        let val = obj[key];
-        var fullNameArray = prefixes.concat(key);
-        if (!(val instanceof Array) && val !== null && typeof val === "object" && (typeof val.value === "undefined")) {
-            acc.push([fullNameArray.join("."), {}]);
-            getFullyQualifiedProperties(val, fullNameArray, acc);
-        } else {
-            if (val && typeof val.value !== "undefined") {
-                acc.push([fullNameArray.join("."), val.value, val]);
-            } else {
-                acc.push([fullNameArray.join("."), val]);
-            }
-        }
-    }
-    return acc;
-};
-
-
-var getSiteConfig = function*() {
-    var siteConfig = {};
-
-    var source = argv.source || argv.s || "./";
-    var destination = argv.destination || argv.d || "_site";
-
-    var configFilePath = argv.config ? path.join(source, argv.config) :
+    let configFilePath = argv.config ? path.join(source, argv.config) :
         (yield* fsutils.exists(path.join(source, "config.json"))) ? path.join(source, "config.json") : path.join(source, "config.yml");
 
     siteConfig = yield* readFileByFormat(configFilePath);
+    siteConfig.mode = siteConfig.mode || "default";
 
-    var setter = getValueSetter(siteConfig);
+    let modeSpecificConfigDefaults = configurations[siteConfig.mode].loadDefaults(source, destination);
+    let defaults = configutils.getFullyQualifiedProperties(modeSpecificConfigDefaults);
 
-    var defaults = getFullyQualifiedProperties({
-        mode: "default",
-
-        source: source,
-        destination: destination,
-
-        dir_custom_tasks: "custom_tasks",
-        dirs_client_vendor: ["vendor"],
-
-        //Exclude these patterns
-        dirs_exclude: [".git", "node_modules"],
-        patterns_exclude: [
-            { exclude: "file", regex: "\.gitignore" }
-        ],
-
-        //build
-        dir_client_build: "js",
-        client_js_suffix: "~client",
-        client_bundle_name: "app.bundle.js",
-
-        build_dev: true,
-        dir_dev_build: "dev_js",
-        dev_js_suffix: "~dev",
-        dev_bundle_name: "dev.bundle.js",
-
-        //original file replaced by *~client.js and *~dev.js will be renamed to *_base.js
-        original_js_suffix: "_base",
-
-        //collections
-        collections: {},
-        collections_root_dir: "",
-
-        entry_point: "app.js",
-        js_extensions: ["js", "jsx"],
-
-
-        //Handling Reading
-        watch: true,
-
-        //Serving
-        detach: false,
-        port: 4000,
-        host: "127.0.0.1",
-        baseurl: "",
-        serve_static: "true",
-        dirs_static_files: ["js", "vendor", "css", "images", "fonts"],
-
-        //Outputting
-        beautify: true, //beautify html output?
-
-        //Make too much noise while processing?
-        quiet: false,
-
-        enabled_tasks: ["transpile", "load_data", "less", "copy_static_files", "build_client", "write_config"],
-        tasks: {
-            transpile: {
-                blacklist: ["regenerator"]
-            },
-            load_data: {
-                dirs_data: ["data"]
-            },
-            less: {
-                dirs: ["css"]
-            },
-            copy_static_files: {
-                skip_extensions: ["less"]
-            },
-            build_client: {
-                browserify: {}
-            },
-            write_config: {
-                filename: "config.json"
-            }
-        }
-    });
-
-
-    var modeDefaults = (
-            siteConfig.mode !== "default" &&
-            modes[siteConfig.mode] &&
-            modes[siteConfig.mode].loadDefaults
-        ) ? modes[siteConfig.mode].loadDefaults() : [];
-    for (let args of defaults.concat(getFullyQualifiedProperties(modeDefaults))) {
+    let setter = configutils.getValueSetter(siteConfig);
+    for (let args of defaults) {
         setter.apply(null, args);
     }
 
@@ -230,9 +57,8 @@ var getSiteConfig = function*() {
     siteConfig.destination = path.resolve(siteConfig.source, siteConfig.destination);
 
     //Give modes one chance to update the siteConfig
-    if (siteConfig.mode !== "default" && modes[siteConfig.mode].updateSiteConfig) {
-        defaults = defaults.concat(modes[siteConfig.mode].updateSiteConfig(siteConfig));
-    }
+    if (configurations[siteConfig.mode].updateSiteConfig)
+    configurations[siteConfig.mode].updateSiteConfig(siteConfig);
 
     //We don't need this anymore.
     delete siteConfig.__defaultFields;
@@ -240,20 +66,29 @@ var getSiteConfig = function*() {
 };
 
 
+let getCommand = function() {
+    return (
+        (argv.help || argv.h) ? "help" :
+        (argv.version || argv.v) ? "version" :
+        process.argv[2]
+    );
+};
+
+
 co(function*() {
     try {
-        var commandName = getCommand();
+        let commandName = getCommand();
         if (commandName) {
-            var command = commands[`_${commandName}`];
+            let command = commands[`_${commandName}`];
             if (["new", "help", "version"].indexOf(commandName) !== -1) {
                 yield* command();
             } else {
-                var config = yield* getSiteConfig();
+                let config = yield* getSiteConfig();
                 yield* command(config);
             }
         } else {
             print("Invalid command. Use --help for more information.");
-        }        
+        }
     }
     catch(err) {
         print(err.stack);

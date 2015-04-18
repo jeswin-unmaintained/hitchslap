@@ -2,13 +2,13 @@ import fsutils from "./fs";
 import yaml from "js-yaml";
 import frontMatter from "front-matter";
 
-var reader = {
+let reader = {
     json: JSON.parse,
     yaml: yaml.safeLoad,
     markdown: function(contents) {
-        var doc = frontMatter(contents);
-        var result = {};
-        for (var key in doc.attributes) {
+        let doc = frontMatter(contents);
+        let result = {};
+        for (let key in doc.attributes) {
             result[key] = doc.attributes[key];
         }
         result.content = doc.body;
@@ -17,7 +17,7 @@ var reader = {
     text: a => a
 };
 
-var knownFormats = {
+let knownFormats = {
     json: ["json"],
     yaml: ["yml", "yaml"],
     markdown: ["markdown","mkdown","mkdn","mkd","md"],
@@ -25,7 +25,7 @@ var knownFormats = {
 };
 
 export default function*(fileName, _formats) {
-    var formats = Object.assign({}, knownFormats);
+    let formats = Object.assign({}, knownFormats);
 
     if (_formats) {
         for (let key in _formats) {
@@ -34,7 +34,7 @@ export default function*(fileName, _formats) {
     }
 
     for (let key in formats) {
-        var regexen = formats[key].map(f => new RegExp(`\.${f}$`));
+        let regexen = formats[key].map(f => new RegExp(`\.${f}$`));
         if (regexen.some(regex => regex.test(fileName))) {
             return reader[key](yield* fsutils.readFile(fileName));
         }
