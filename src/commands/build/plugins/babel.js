@@ -12,6 +12,7 @@ let argv = optimist.argv;
         extensions: [string],
         excludedDirectories: [string],
         excludedPatterns: [regex or string],
+        excludedWatchPatterns: [regex],
         blacklist: [string],
         quiet: bool
     }
@@ -26,6 +27,7 @@ let babel = function(name, options) {
     options.excludedPatterns = (options.excludedPatterns || [])
         .map(p => typeof p === "string" ? new RegExp(p) : p);
     options.blacklist = options.blacklist || [];
+    options.excludedWatchPatterns = options.excludedWatchPatterns || [];
 
     let fn = function() {
         let extensions = options.extensions.map(e => `*.${e}`);
@@ -38,22 +40,25 @@ let babel = function(name, options) {
 
         //We compile client, dev build separately because they may have different blacklists.
         //For example, on iojs we want to blacklist regenerator. But on the client, we don't.
-        this.watch(extensions.concat(excluded), function*(filePath, ev, match) {
-            transpiledFiles.push(filePath);
+        this.watch(extensions.concat(excluded), function*(filePath, ev, match) {            
+            if (!options.excludedWatchPatterns.some(regex => regex.test(filePath))) {
+                transpiledFiles.push(filePath);
 
-            //Make the output dir, if it doesn't exist
-            let outputPath = fsutils.changeExtension(
-                path.join(options.destination, filePath),
-                [ { to:"js", from: options.extensions }]
-            );
-            yield* fsutils.ensureDirExists(outputPath);
-            let contents = yield* fsutils.readFile(filePath);
+                //Make the output dir, if it doesn't exist
+                let outputPath = fsutils.changeExtension(
+                    path.join(options.destination, filePath),
+                    [ { to:"js", from: options.extensions }]
+                );
+                yield* fsutils.ensureDirExists(outputPath);
+                let contents = yield* fsutils.readFile(filePath);
 
-            let result = transform(contents, { blacklist: options.blacklist });
-            yield* fsutils.writeFile(outputPath, result.code);
+                let result = transform(contents, { blacklist: options.blacklist });
+                yield* fsutils.writeFile(outputPath, result.code);
 
-            if (argv[`verbose-${name}`])
-                logger(`${filePath} -> ${outputPath}`);
+                if (argv[`verbose-${name}`]) {
+                    logger(`${filePath} -> ${outputPath}`);
+                }
+            }
         }, "babel_em_all");
 
         this.onComplete(function*() {

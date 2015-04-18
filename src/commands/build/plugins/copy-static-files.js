@@ -13,6 +13,7 @@ let argv = optimist.argv;
         excludedDirectories: [string],
         excludedPatterns: [regex or string],
         excludedExtensions: [string],
+        excludedWatchPatterns = [regex],
         changeExtensions: [ { to: "js", from: ["es6", "jsx"]}]
         quiet: bool
     }
@@ -26,6 +27,7 @@ let copyStaticFiles = function(name, options) {
     options.excludedPatterns = (options.excludedPatterns || [])
         .map(p => typeof p === "string" ? new RegExp(p) : p);
     options.excludedExtensions = options.excludedExtensions || [];
+    options.excludedWatchPatterns = options.excludedWatchPatterns || [];
 
     let fn = function() {
         let excluded = options.excludedDirectories
@@ -36,13 +38,16 @@ let copyStaticFiles = function(name, options) {
         let copiedFiles = [];
 
         this.watch(options.extensions.concat(excluded), function*(filePath, ev, matches) {
-            copiedFiles.push(filePath);
-            let newFilePath = fsutils.changeExtension(filePath, options.changeExtensions);
-            let outputPath = path.join(options.destination, newFilePath);
-            yield* fsutils.copyFile(filePath, outputPath, { overwrite: false });
+            if (!options.excludedWatchPatterns.some(regex => regex.test(filePath))) {
+                copiedFiles.push(filePath);
+                let newFilePath = fsutils.changeExtension(filePath, options.changeExtensions);
+                let outputPath = path.join(options.destination, newFilePath);
+                yield* fsutils.copyFile(filePath, outputPath, { overwrite: false });
 
-            if (argv[`verbose-${name}`])
-                logger(`${filePath} -> ${outputPath}`);
+                if (argv[`verbose-${name}`]) {
+                    logger(`${filePath} -> ${outputPath}`);
+                }
+            }
         }, "copy-static-files");
 
         this.onComplete(function*() {

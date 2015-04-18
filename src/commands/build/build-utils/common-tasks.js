@@ -2,6 +2,9 @@ import configutils from "../../../utils/config";
 
 var getCommonTasks = function(siteConfig, buildConfig, builtInPlugins) {
 
+    var excludedJSSuffixes = [siteConfig["client-js-suffix"], siteConfig["dev-js-suffix"]].filter(e => typeof e === "string");
+    var excludedWatchPatterns = excludedJSSuffixes.map(s => new RegExp(`${s}\.(js|json)$`));
+
     var transpileServer = {
         name: "transpile-server", //babel transpile server files, blacklist (regenerator)
         plugin: builtInPlugins.babel,
@@ -12,6 +15,7 @@ var getCommonTasks = function(siteConfig, buildConfig, builtInPlugins) {
                 .concat(siteConfig["dirs-client-vendor"])
                 .concat(siteConfig["dirs-exclude"]),
             excludedPatterns: siteConfig["patterns-exclude"],
+            excludedWatchPatterns: excludedWatchPatterns,
             blacklist: ["regenerator"]
         }
     };
@@ -36,6 +40,7 @@ var getCommonTasks = function(siteConfig, buildConfig, builtInPlugins) {
                 .concat(siteConfig["dirs-exclude"]),
             excludedPatterns: siteConfig["patterns-exclude"],
             excludedExtensions: configutils.tryRead(buildConfig, ["tasks", "copy-static-files", "exclude-extensions"], ["less"]),
+            excludedWatchPatterns: excludedWatchPatterns,
             changeExtensions: configutils.tryRead(buildConfig, ["tasks", "copy-static-files", "change-extensions"], [{ to: "js", from: ["jsx"] }])
         }
     };

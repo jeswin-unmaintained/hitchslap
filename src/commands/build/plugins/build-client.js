@@ -27,7 +27,7 @@ let argv = optimist.argv;
         blacklist: [string]
         excludedDirectories: [string],
         excludedPatterns: [regex or string],
-        excludedJSSuffixes: [string],
+        excludedWatchPatterns = [regex],
         quiet: bool
     }
 */
@@ -41,6 +41,7 @@ let buildClient = function(name, options) {
     options.excludedPatterns = (options.excludedPatterns || [])
         .map(p => typeof p === "string" ? new RegExp(p) : p);
     options.blacklist = options.blacklist || [];
+    options.excludedWatchPatterns = options.excludedWatchPatterns || [];
 
     //Copy file into destDir
     let copyFile = function*(filePath, root) {
@@ -62,14 +63,13 @@ let buildClient = function(name, options) {
         let clientSpecificFiles = [];
 
         this.watch(extensions.concat(excluded), function*(filePath, ev, matches) {
-            let clientFileRegex = new RegExp(`${options.clientJSSuffix}\.(js|json)$`);
-            var excludeRegexes = options.excludedJSSuffixes.map(s => new RegExp(`${s}\.(js|json)$`));
+            if (!options.excludedWatchPatterns.some(regex => regex.test(filePath))) {
+                let clientFileRegex = new RegExp(`${options.clientJSSuffix}\.(js|json)$`);
 
-            if (clientFileRegex.test(filePath)) {
-                clientSpecificFiles.push(filePath);
-            }
+                if (clientFileRegex.test(filePath)) {
+                    clientSpecificFiles.push(filePath);
+                }
 
-            if (!excludeRegexes.some(regex => regex.test(filePath))) {
                 yield* copyFile(filePath, this.root);
             }
         }, "build-client");

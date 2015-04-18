@@ -33,6 +33,7 @@ let build = function*(siteConfig, buildConfig, builtInPlugins, buildUtils) {
 
     var tasks = [transpileServer, less, copyStaticFiles, writeConfig];
 
+
     tasks.push({
         name: "build-client", //build client js bundle
         plugin: builtInPlugins["build-client"],
@@ -52,8 +53,8 @@ let build = function*(siteConfig, buildConfig, builtInPlugins, buildUtils) {
                 .concat(siteConfig["dirs-exclude"]),
             excludedPatterns: siteConfig["patterns-exclude"],
             clientJSSuffix: siteConfig["client-js-suffix"],
-            excludedJSSuffixes: (siteConfig["dev-js-suffix"] ? [siteConfig["dev-js-suffix"]] : []),
             originalJSSuffix: siteConfig["original-js-suffix"],
+            excludedWatchPatterns: siteConfig["dev-js-suffix"] ? [new RegExp(`${siteConfig["dev-js-suffix"]}\.(js|json)$`)] : [],
             blacklist: configutils.tryRead(buildConfig, ["tasks", "build-client", "es6-transpile", "blacklist"], [])
         }
     });
