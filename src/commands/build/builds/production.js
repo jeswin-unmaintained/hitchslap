@@ -18,7 +18,7 @@ import { getLogger } from "../../../utils/logging";
 
 let build = function*(siteConfig, buildConfig, builtInPlugins, buildUtils) {
     var startTime = Date.now();
-    
+
     let { runTasks, getCustomTasks } = buildUtils.tasks;
 
     let logger = getLogger(siteConfig.quiet, "production-build");
@@ -62,11 +62,10 @@ let build = function*(siteConfig, buildConfig, builtInPlugins, buildUtils) {
             destination: siteConfig.destination,
             extensions: ["*.*"],
             excludedDirectories: [siteConfig.destination]
-                .concat(siteConfig["dirs-client-vendor"])
                 .concat(siteConfig["dirs-exclude"]),
             excludedPatterns: siteConfig["patterns-exclude"],
             excludedExtensions: configutils.tryRead(buildConfig, ["tasks", "copy-static-files", "exclude-extensions"], ["less"]),
-            changeExtensions: [ { to: "js", from: ["es6", "jsx"]}]
+            changeExtensions: configutils.tryRead(buildConfig, ["tasks", "copy-static-files", "change-extensions"], [{ to: "js", from: ["jsx"] }])
         }
     });
 
@@ -81,12 +80,43 @@ let build = function*(siteConfig, buildConfig, builtInPlugins, buildUtils) {
         }
     });
 
+    tasks.push({
+        name: "build-client", //build client js bundle
+        plugin: builtInPlugins["build-client"],
+        options: {
+            source: siteConfig.source,
+            destination: siteConfig.destination,
+            clientBuildDirectory: siteConfig["dir-client-build"],
+            appEntryPoint: siteConfig["app-entry-point"],
+            bundleName: siteConfig["client-bundle-name"],
+            extensions: ["js", "jsx", "json"],
+            changeExtensions: configutils.tryRead(buildConfig, ["tasks", "build-client", "change-extensions"], [{ to: "js", from: ["jsx"] }]),
+            debug: false,
+            globalModules: configutils.tryRead(buildConfig, ["tasks", "build-client", "globalModules"], []),
+            excludedModules: configutils.tryRead(buildConfig, ["tasks", "build-client", "excludedModules"], []),
+            excludedDirectories: [siteConfig.destination]
+                .concat(siteConfig["dirs-client-vendor"])
+                .concat(siteConfig["dirs-exclude"]),
+            excludedPatterns: siteConfig["patterns-exclude"],
+            clientJSSuffix: siteConfig["client-js-suffix"],
+            excludedJSSuffixes: (siteConfig["dev-js-suffix"] ? [siteConfig["dev-js-suffix"]] : []),
+            originalJSSuffix: siteConfig["original-js-suffix"],
+            blacklist: configutils.tryRead(buildConfig, ["tasks", "build-client", "es6-transpile", "blacklist"], [])
+        }
+    });
+
+
     var onComplete = function*() {
         let endTime = Date.now();
         logger(`Build took ${(endTime - startTime)/1000} seconds.`);
     };
 
-    yield* buildUtils.tasks.runTasks(tasks, siteConfig.source, onComplete, siteConfig.watch);
+    try {
+        yield* buildUtils.tasks.runTasks(tasks, siteConfig.source, onComplete, siteConfig.watch);
+    } catch (ex) {
+        console.log(ex);
+        console.log(ex.stack);
+    }
 };
 
 export default build;

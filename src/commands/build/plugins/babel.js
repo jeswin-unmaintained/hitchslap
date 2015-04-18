@@ -52,7 +52,7 @@ let babel = function(name, options) {
             let result = transform(contents, { blacklist: options.blacklist });
             yield* fsutils.writeFile(outputPath, result.code);
 
-            if (argv["verbose-transpile"])
+            if (argv[`verbose-${name}`])
                 logger(`${filePath} -> ${outputPath}`);
         }, "babel_em_all");
 

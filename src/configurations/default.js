@@ -33,7 +33,7 @@ let loadDefaults = function(source, destination) {
         "collections": {},
         "collections-root-dir": "",
 
-        "entry-point": "app.js",
+        "app-entry-point": "app.js",
         "js-extensions": ["js", "jsx"],
 
         //Handling Reading
@@ -66,9 +66,7 @@ let loadDefaults = function(source, destination) {
                     "copy-static-files": {
                         "skip-extensions": ["less"]
                     },
-                    "build-client": {
-                        "browserify": {}
-                    },
+                    "build-client": {},
                     "write-config": {
                         "filename": "config.json"
                     }

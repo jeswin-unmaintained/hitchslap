@@ -2,6 +2,9 @@ import path from "path";
 import fs from "fs";
 import fsutils from "../../../utils/fs";
 import { print, getLogger } from "../../../utils/logging";
+import optimist from "optimist";
+
+let argv = optimist.argv;
 
 /*
     options: {
@@ -15,7 +18,7 @@ import { print, getLogger } from "../../../utils/logging";
     }
 */
 let copyStaticFiles = function(name, options) {
-    let logger = getLogger(options.quiet, name || "babel");
+    let logger = getLogger(options.quiet, name || "copy-static-files");
 
     //defaults
     options.extensions = options.extensions || ["*.*"];
@@ -35,7 +38,11 @@ let copyStaticFiles = function(name, options) {
         this.watch(options.extensions.concat(excluded), function*(filePath, ev, matches) {
             copiedFiles.push(filePath);
             let newFilePath = fsutils.changeExtension(filePath, options.changeExtensions);
-            yield* fsutils.copyFile(filePath, path.join(options.destination, newFilePath), { overwrite: false });
+            let outputPath = path.join(options.destination, newFilePath);
+            yield* fsutils.copyFile(filePath, outputPath, { overwrite: false });
+
+            if (argv[`verbose-${name}`])
+                logger(`${filePath} -> ${outputPath}`);
         }, "copy-static-files");
 
         this.onComplete(function*() {
