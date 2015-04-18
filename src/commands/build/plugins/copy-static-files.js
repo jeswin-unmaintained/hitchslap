@@ -4,25 +4,38 @@ import fsutils from "../../../utils/fs";
 import { print, getLogger } from "../../../utils/logging";
 
 /*
-    Copy everything that is not a markdown or yml file.
+    options: {
+        destination: string,
+        extensions: [string],
+        excludedDirectories: [string],
+        excludedPatterns: [regex or string],
+        excludedExtensions: [string],
+        changeExtensions: [ { to: "js", from: ["es6", "jsx"]}]
+        quiet: bool
+    }
 */
-let copyStaticFiles = function(siteConfig, buildConfig, taskConfig) {
-    let logger = getLogger(siteConfig.quiet, "copy-static-files");
+let copyStaticFiles = function(name, options) {
+    let logger = getLogger(options.quiet, name || "babel");
+
+    //defaults
+    options.extensions = options.extensions || ["*.*"];
+    options.excludedDirectories = options.excludedDirectories || [options.destination];
+    options.excludedPatterns = (options.excludedPatterns || [])
+        .map(p => typeof p === "string" ? new RegExp(p) : p);
+    options.excludedExtensions = options.excludedExtensions || [];
 
     let fn = function() {
-        let extensions = ["*.*"];
-        let excluded = siteConfig.dirs_exclude
-            .concat(siteConfig.destination)
+        let excluded = options.excludedDirectories
             .map(dir => `!${dir}/`)
-            .concat(taskConfig.skip_extensions.map(ext => `!*.${ext}`))
-            .concat(siteConfig.patterns_exclude);
+            .concat(options.excludedExtensions.map(ext => `!*.${ext}`))
+            .concat(options.excludedPatterns);
 
         let copiedFiles = [];
 
-        this.watch(extensions.concat(excluded), function*(filePath, ev, matches) {
+        this.watch(options.extensions.concat(excluded), function*(filePath, ev, matches) {
             copiedFiles.push(filePath);
-            let newFilePath = fsutils.changeExtension(filePath, [{ to: "js", from: siteConfig.js_extensions }]);
-            yield* fsutils.copyFile(filePath, path.join(siteConfig.destination, newFilePath), { overwrite: false });
+            let newFilePath = fsutils.changeExtension(filePath, options.changeExtensions);
+            yield* fsutils.copyFile(filePath, path.join(options.destination, newFilePath), { overwrite: false });
         }, "copy-static-files");
 
         this.onComplete(function*() {

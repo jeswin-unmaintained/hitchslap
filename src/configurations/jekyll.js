@@ -1,6 +1,6 @@
 let loadDefaults = function(source, destination) {
     return {
-        "dir-custom-plugins": { "value": "_custom_plugins", "replace": true },
+        "dir-custom-tasks": { "value": "_custom_tasks", "replace": true },
         "dir-client-build": { "value": "_js", "replace": true },
         "dir-dev-build": { "value": "_dev_js", "replace": true },
         "dirs-client-vendor": { "value": ["_vendor"], "replace": true },

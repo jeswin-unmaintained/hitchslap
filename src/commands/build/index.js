@@ -65,7 +65,7 @@ let build = function*(siteConfig) {
     let startTime = Date.now();
 
     //Transpile custom builds and custom tasks directory first.
-    yield* transpileCustomBuildsAndPlugins(siteConfig);
+    yield* transpileCustomBuildsAndTasks(siteConfig);
 
     let build = builds[siteConfig.build] || (yield* getCustomBuild(siteConfig));
 
@@ -84,19 +84,19 @@ let build = function*(siteConfig) {
 /*
     Transpile dir_custom_builds and dir_custom_tasks
 */
-let transpileCustomBuildsAndPlugins = function*(siteConfig) {
-    for(var dir of [siteConfig["dir-custom-builds"], siteConfig["dir-custom-plugins"]]) {
+let transpileCustomBuildsAndTasks = function*(siteConfig) {
+    for(var dir of [siteConfig["dir-custom-builds"], siteConfig["dir-custom-tasks"]]) {
         var buildRoot = path.resolve(siteConfig.source, dir);
         if (yield* fsutils.exists(buildRoot)) {
             yield* buildUtils.tasks.runTasks(
                  {
-                    task: builtInPlugins.babel,
-                    options: {
+                     name: "transpile-custom-builds-and-plugins",
+                     plugin: builtInPlugins.babel,
+                     options: {
                         source: buildRoot,
                         destination: path.resolve(siteConfig.destination, dir),
                         extensions: siteConfig["js-extensions"],
-                        blacklist: ["regenerator"],
-                        taskName: "transpile-custom-builds-and-plugins"
+                        blacklist: ["regenerator"]
                     }
                 },
                 buildRoot

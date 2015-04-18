@@ -13,20 +13,19 @@ let argv = optimist.argv;
         excludedDirectories: [string],
         excludedPatterns: [regex or string],
         blacklist: [string],
-        taskName: string,
-        quite: bool
+        quiet: bool
     }
 */
 
-let babel = function(options) {
+let babel = function(name, options) {
+    let logger = getLogger(options.quiet, name || "babel");
+
     //defaults
-    options.extensions = options.extensions || ["js"];
+    options.extensions = options.extensions || ["js", "jsx"];
     options.excludedDirectories = options.excludedDirectories || [options.destination];
     options.excludedPatterns = (options.excludedPatterns || [])
         .map(p => typeof p === "string" ? new RegExp(p) : p);
     options.blacklist = options.blacklist || [];
-
-    let logger = getLogger(options.quiet, options.taskName || "babel");
 
     let fn = function() {
         let extensions = options.extensions.map(e => `*.${e}`);

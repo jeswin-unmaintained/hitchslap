@@ -6,16 +6,27 @@ import { print, getLogger } from "../../../utils/logging";
 
 let lessc = generatorify(less.render.bind(less));
 
-let compileLess = function(siteConfig, buildConfig, taskConfig) {
+/*
+    options: {
+        destination: string,
+        directories: [string],
+        quiet: bool
+    }
+*/
+let compileLess = function(name, options) {
+    let logger = getLogger(options.quiet, name || "less");
 
-    let logger = getLogger(siteConfig.quiet, "less");
+    //defaults
+    options.excludedDirectories = options.excludedDirectories || [];
 
-    let watchPattern = Array.prototype.concat.apply([], taskConfig.dirs.map(dir => [`${dir}/*.less`, `!${dir}/includes/*.less`]));
+    let extensions = options.directories.map(dir => `${dir}/*.less`);
+    let excluded = options.excludedDirectories.map(dir => `!${dir}/`);
+
     let fn = function() {
         this.watch(
-            watchPattern,
+            extensions.concat(excluded),
             function*(filePath, ev, match) {
-                let outputPath = path.join(siteConfig.destination, filePath).replace(/\.less$/, ".css");
+                let outputPath = path.join(options.destination, filePath).replace(/\.less$/, ".css");
                 let outputDir = path.dirname(outputPath);
                 if (!(yield* fsutils.exists(outputDir))) {
                     yield* fsutils.mkdirp(outputDir);

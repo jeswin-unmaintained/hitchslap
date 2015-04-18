@@ -5,7 +5,7 @@ let loadDefaults = function(source, destination) {
 
         //Build customization
         "dir-custom-builds": "custom-builds",
-        "dir-custom-plugins": "custom-plugins",
+        "dir-custom-tasks": "custom-tasks",
 
         "dirs-client-vendor": ["vendor"],
 

@@ -17,68 +17,76 @@ import { getLogger } from "../../../utils/logging";
 */
 
 let build = function*(siteConfig, buildConfig, builtInPlugins, buildUtils) {
-    let { runTasks, runCustomTasks, getCustomTasks } = buildUtils.tasks;
+    var startTime = Date.now();
+    
+    let { runTasks, getCustomTasks } = buildUtils.tasks;
 
     let logger = getLogger(siteConfig.quiet, "production-build");
 
     //Before Transpile
-    yield* runCustomTasks("on-start");
+    var customTasks = yield* getCustomTasks(siteConfig, buildConfig, builtInPlugins, buildUtils);
 
-    /*
-        Jo:
-            - transpile-server: babel transpile server files, blacklist (regenerator)
-            - less: compile less
-            - copy-static-files: copy static files
-            - browserify: browserify the client, with babel transpile
-            - write-config: write config to destination
-            - add any custom tasks in the "main" directory
+    if (customTasks)
+        yield* buildUtils.tasks.runTasks(customTasks["on-start"]);
 
-        Out of these ignore tasks in the ignored
-    */
+    var tasks = [];
 
-    var builtInTasks = [
-        "transpile-server", //babel transpile server files, blacklist (regenerator)
-        "less", //compile less
-        "copy-static-files", //copy static files
-        "browserify", //browserify the client, with babel transpile
-        "write-config", //write config to destination
-    ];
-
-    let enabled = (prefix) => (task) => siteConfig.enabled_tasks.indexOf(`${prefix}${task}`) > -1;
-    let runnableDefaultTasks = Object.keys(defaultTasks.main).filter(enabled('')).map(task => defaultTasks.main[task]);
-
-    let runnableModeTasks = (siteConfig.mode !== "default") ?
-        Object.keys(modeTasks[siteConfig.mode].main)
-            .filter(enabled(`${siteConfig.mode}.`))
-            .map(task => modeTasks[siteConfig.mode].main[task]) :
-        [];
-
-    let customTasks = yield* getCustomTasks();
-    let runnableCustomTasks = Object.keys(customTasks)
-            .filter(enabled("custom."))
-            .map(task => customTasks[task]);
-
-    let onComplete = function*() {
-        //We can remove the custom customTasks directory
-        for (let pluginDir of siteConfig.dir_custom_tasks) {
-            let customTasksPath = path.resolve(siteConfig.destination, pluginDir);
-            if (yield* fsutils.exists(customTasksPath))
-                yield* fsutils.remove(customTasksPath);
+    tasks.push({
+        name: "transpile-server", //babel transpile server files, blacklist (regenerator)
+        plugin: builtInPlugins.babel,
+        options: {
+            destination: siteConfig.destination,
+            extensions: siteConfig["js-extensions"],
+            excludedDirectories: [siteConfig.destination]
+                .concat(siteConfig["dirs-client-vendor"])
+                .concat(siteConfig["dirs-exclude"]),
+            excludedPatterns: siteConfig["patterns-exclude"],
+            blacklist: ["regenerator"]
         }
+    });
 
-        //On Complete
-        yield* runCustomTasks("on-complete");
+    tasks.push({
+        name: "less", //compile less files
+        plugin: builtInPlugins.less,
+        options: {
+            destination: siteConfig.destination,
+            directories: configutils.tryRead(buildConfig, ["tasks", "less", "dirs"], [])
+        }
+    });
 
+
+    tasks.push({
+        name: "copy-static-files", //copy static funny .gifs
+        plugin: builtInPlugins["copy-static-files"],
+        options: {
+            destination: siteConfig.destination,
+            extensions: ["*.*"],
+            excludedDirectories: [siteConfig.destination]
+                .concat(siteConfig["dirs-client-vendor"])
+                .concat(siteConfig["dirs-exclude"]),
+            excludedPatterns: siteConfig["patterns-exclude"],
+            excludedExtensions: configutils.tryRead(buildConfig, ["tasks", "copy-static-files", "exclude-extensions"], ["less"]),
+            changeExtensions: [ { to: "js", from: ["es6", "jsx"]}]
+        }
+    });
+
+
+    tasks.push({
+        name: "write-config", //write the merged config file into the destination directory
+        plugin: builtInPlugins["write-config"],
+        options: {
+            destination: siteConfig.destination,
+            filename: configutils.tryRead(buildConfig, ["tasks", "write-config", "filename"], ["config.json"]),
+            config: siteConfig
+        }
+    });
+
+    var onComplete = function*() {
         let endTime = Date.now();
         logger(`Build took ${(endTime - startTime)/1000} seconds.`);
     };
 
-    yield* runTasks(
-        runnableDefaultTasks.concat(runnableModeTasks).concat(runnableCustomTasks),
-        onComplete,
-        siteConfig.watch
-    );
-
+    yield* buildUtils.tasks.runTasks(tasks, siteConfig.source, onComplete, siteConfig.watch);
 };
 
 export default build;
