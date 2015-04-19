@@ -29,10 +29,11 @@ let loadDefaults = function(source, destination) {
         //original file replaced by *~client.js and *~dev.js will be renamed to *-base.js
         "original-js-suffix": "_base",
 
-        //collections
+        //static data and collections
         "collections": {},
         "collections-root-dir": "",
-
+        "data-directories": [],
+        
         "app-entry-point": "app.js",
         "js-extensions": ["js", "jsx"],
 

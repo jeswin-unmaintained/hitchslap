@@ -6,18 +6,29 @@ import readFileByFormat from "../../../utils/file-reader";
 import { print, getLogger } from "../../../utils/logging";
 
 /*
-    config.dirs_data directory contains a set of yaml files.
-    Yaml is loaded into site.data.filename. eg: site.data.songs
+    options: {
+        dataVariable: object,
+        collections: {
+            name1: { dir: string },
+            name2: { dir: string }
+        },
+        collectionRootDirectory: string,
+        dataDirectories: [string],
+        scavengeCollection: string,
+        excludedDirectories: [string],
+        excludedFiles: [string],
+        markdownExtensions: [string]
+    }
 */
-let loadStaticData = function(siteConfig, buildConfig, taskConfig) {
-    let logger = getLogger(siteConfig.quiet, "load_data");
+let loadStaticData = function(name, options) {
+    let logger = getLogger(options.quiet, name || "load-static-data");
+
+    var data = options.data;
 
     let fn = function() {
-        GLOBAL.site.data = {};
-
         this.watch(
             ["yaml", "yml", "json"]
-                .map(ext => taskConfig.dirs_data.map(dir => `${dir}/*.${ext}`))
+                .map(ext => options.dataDirectories.map(dir => `${dir}/*.${ext}`))
                 .reduce((a,b) => a.concat(b)),
             function*(filePath) {
                 let extension = path.extname(filePath);
@@ -28,7 +39,7 @@ let loadStaticData = function(siteConfig, buildConfig, taskConfig) {
 
                     let filename = path.basename(filePath, extension);
                     if (records && records.length) {
-                        GLOBAL.site.data[filename] = GLOBAL.site.data[filename] ? GLOBAL.site.data[filename].concat(records) : records  ;
+                        data[filename] = data[filename] ? data[filename].concat(records) : records ;
                     }
 
                     logger(`loaded ${filePath} into ${filename}`);
@@ -46,11 +57,11 @@ let loadStaticData = function(siteConfig, buildConfig, taskConfig) {
                 let extension = path.extname(filePath);
 
                 try {
-                    let record = yield* readFileByFormat(filePath, { markdown: taskConfig.markdown_ext });
+                    let record = yield* readFileByFormat(filePath, { markdown: options.markdownExtensions });
                     record.__filePath = filePath;
 
                     if (record)
-                        GLOBAL.site.data[collection].push(record);
+                        data[collection].push(record);
                         logger(`loaded ${filePath} into ${collection}`);
                 } catch (ex) {
                     logger(ex);
@@ -59,13 +70,13 @@ let loadStaticData = function(siteConfig, buildConfig, taskConfig) {
         };
 
         //Check the collection directories
-        for (let collectionName in siteConfig.collections) {
-            GLOBAL.site.data[collectionName] = [];
-            let collection = siteConfig.collections[collectionName];
+        for (let collectionName in options.collections) {
+            data[collectionName] = [];
+            let collection = options.collections[collectionName];
             if (collection.dir) {
-                let collectionDir = taskConfig.collections_root_dir ? path.combine(taskConfig.collections_root_dir, collection.dir) : collection.dir;
+                let collectionDir = options.collectionRootDirectory ? path.combine(options.collectionRootDirectory, collection.dir) : collection.dir;
                 this.watch(
-                    taskConfig.markdown_ext.concat(["json"]).map(ext => `${collectionDir}/*.${ext}`),
+                    options.markdownExtensions.concat(["json"]).map(ext => `${collectionDir}/*.${ext}`),
                     addToCollection(collectionName)
                 );
             }
@@ -73,20 +84,23 @@ let loadStaticData = function(siteConfig, buildConfig, taskConfig) {
 
         //If scavenging is on, we need to pick up md and json files outside
         //  collection and data_dir and push them into the scavenge collection.
-        if (siteConfig.scavenge_collection) {
-            GLOBAL.site.data[siteConfig.scavenge_collection] = [];
+        if (options.scavengeCollection) {
+            data[options.scavengeCollection] = [];
 
-            let collectionsAndDataDirs = Object.keys(siteConfig.collections)
-                .map(coll => siteConfig.collections[coll].dir)
+            let collectionsAndDataDirs = Object.keys(options.collections)
+                .map(coll => options.collections[coll].dir)
                 .filter(item => item)
-                .concat(taskConfig.dirs_data)
+                .concat(options.dataDirectories)
                 .map(dir => `!${dir}/`);
 
-            let exclusions = ["!node_modules/", "!config.json", "!config.yml", "!config.yaml"].concat(collectionsAndDataDirs);
+            let exclusions = options.excludedDirectories.map(e => `!${e}/`)
+                .concat(options.excludedFiles.map(e => `!${e}`))
+                .concat(collectionsAndDataDirs);
 
-            this.watch(
-                exclusions.concat(taskConfig.markdown_ext.concat(["json"]).map(ext => `*.${ext}`)),
-                addToCollection(siteConfig.scavenge_collection)
+            var filePatterns = options.markdownExtensions.concat(["json"]).map(ext => `*.${ext}`);
+
+            this.watch(filePatterns.concat(exclusions),
+                addToCollection(options.scavengeCollection)
             );
         }
     };

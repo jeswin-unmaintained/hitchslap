@@ -3,34 +3,10 @@ import fsutils from "../../../utils/fs";
 import configutils from "../../../utils/config";
 import { getLogger } from "../../../utils/logging";
 import getCommonTasks from "../build-utils/common-tasks";
-/*
-    Hookable Build Pipeline Events
-    ------------------------------
-    To hook these events, place plugins in the following directory names
-    under the dir_custom_tasks/client-debug directory. Main tasks should not be under a specific
-    sub-directory.
+import getStandardBuild from "../build-utils/standard-build";
 
-    - on-start
-    - on-complete
-
-    example: dir_custom_tasks/client-debug/on-start/*.js will be run "on start".
-*/
-
-let build = function*(siteConfig, buildConfig, builtInPlugins, buildUtils) {
-    var startTime = Date.now();
-
-    let { runTasks, getCustomTasks } = buildUtils.tasks;
-
-    let logger = getLogger(siteConfig.quiet, "client-debug-build");
-
-    //Before Transpile
-    var customTasks = yield* getCustomTasks(siteConfig, buildConfig, builtInPlugins, buildUtils);
-
-    if (customTasks)
-        yield* buildUtils.tasks.runTasks(customTasks["on-start"]);
-
+var build = getStandardBuild("client-debug", function*(siteConfig, buildConfig, builtInPlugins, buildUtils) {
     var { transpileServer, less, copyStaticFiles, writeConfig } = getCommonTasks(siteConfig, buildConfig, builtInPlugins);
-
     var tasks = [transpileServer, less, copyStaticFiles, writeConfig];
 
     tasks.push({
@@ -58,21 +34,7 @@ let build = function*(siteConfig, buildConfig, builtInPlugins, buildUtils) {
         }
     });
 
-
-    var onComplete = function*() {
-        if (customTasks)
-            yield* buildUtils.tasks.runTasks(customTasks["on-complete"]);
-
-        let endTime = Date.now();
-        logger(`Build took ${(endTime - startTime)/1000} seconds.`);
-    };
-
-    try {
-        yield* buildUtils.tasks.runTasks(tasks, siteConfig.source, onComplete, siteConfig.watch);
-    } catch (ex) {
-        console.log(ex);
-        console.log(ex.stack);
-    }
-};
+    return tasks;
+});
 
 export default build;
