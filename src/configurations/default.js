@@ -16,7 +16,7 @@ let loadDefaults = function(source, destination) {
         ],
 
         //build
-        "build": "client-debug",
+        "build-name": "client-debug",
         "dir-client-build": "js",
         "client-js-suffix": "~client",
         "client-bundle-name": "app.bundle.js",
@@ -32,8 +32,8 @@ let loadDefaults = function(source, destination) {
         //static data and collections
         "collections": {},
         "collections-root-dir": "",
-        "data-directories": [],
-        
+        "data-directories": ["data"],
+
         "app-entry-point": "app.js",
         "js-extensions": ["js", "jsx"],
 

@@ -7,6 +7,7 @@ import productionBuild from "./builds/production";
 import clientDebugBuild from "./builds/client-debug";
 import devBuild from "./builds/dev";
 import staticBuild from "./builds/static";
+import createDatabase from "./builds/create-database";
 
 import buildUtils from "./build-utils";
 import builtInPlugins from "./plugins";
@@ -15,7 +16,8 @@ let builds = {
     "production": productionBuild,
     "client-debug": clientDebugBuild,
     "dev": devBuild,
-    "static": staticBuild
+    "static": staticBuild,
+    "create-database": createDatabase
 };
 
 /*
@@ -67,13 +69,13 @@ let build = function*(siteConfig) {
     //Transpile custom builds and custom tasks directory first.
     yield* transpileCustomBuildsAndTasks(siteConfig);
 
-    let build = builds[siteConfig.build] || (yield* getCustomBuild(siteConfig));
+    let build = builds[siteConfig["build-name"]] || (yield* getCustomBuild(siteConfig));
 
     if (build) {
-        let buildConfig = siteConfig.builds[siteConfig.build] || {};
+        let buildConfig = siteConfig.builds[siteConfig["build-name"]] || {};
         yield* build(siteConfig, buildConfig, builtInPlugins, buildUtils);
     } else {
-        throw new Error(`Build named ${siteConfig.build} was not found.`);
+        throw new Error(`Build named ${siteConfig["build-name"]} was not found.`);
     }
 
     let endTime = Date.now();
@@ -111,8 +113,8 @@ let transpileCustomBuildsAndTasks = function*(siteConfig) {
     Basically, require(dir_custom_builds/buildName);
 */
 let getCustomBuild = function*(siteConfig) {
-    if (siteConfig["dir-custom-builds"] && siteConfig.build) {
-        let fullPath = path.resolve(siteConfig.destination, siteConfig["dir-custom-builds"], `${siteConfig.build}.js`);
+    if (siteConfig["dir-custom-builds"] && siteConfig["build-name"]) {
+        let fullPath = path.resolve(siteConfig.destination, siteConfig["dir-custom-builds"], `${siteConfig["build-name"]}.js`);
         if (yield* fsutils.exists(fullPath)) {
             return require(fullPath);
         }

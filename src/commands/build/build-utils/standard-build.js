@@ -13,7 +13,7 @@ import getCommonTasks from "../build-utils/common-tasks";
     example: dir_custom_tasks/production/on-start/*.js will be run "on start".
 */
 
-let getStandardBuild = function(buildName, fn) {
+let getStandardBuild = function(buildName, fn, cbOnComplete) {
     return function*(siteConfig, buildConfig, builtInPlugins, buildUtils) {
 
         var tasks = yield* fn(siteConfig, buildConfig, builtInPlugins, buildUtils);
@@ -32,6 +32,10 @@ let getStandardBuild = function(buildName, fn) {
         var onComplete = function*() {
             if (customTasks)
                 yield* buildUtils.tasks.runTasks(customTasks["on-complete"]);
+
+            if (cbOnComplete) {
+                yield* cbOnComplete();
+            }
 
             let endTime = Date.now();
             logger(`Build took ${(endTime - startTime)/1000} seconds.`);

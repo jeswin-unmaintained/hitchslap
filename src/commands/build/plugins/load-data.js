@@ -25,7 +25,26 @@ let loadStaticData = function(name, options) {
 
     var data = options.data;
 
+    //Add a watch for each collection.
+    let getCollectionLoader = function(collection) {
+        return function*(filePath) {
+            let extension = path.extname(filePath);
+
+            try {
+                let record = yield* readFileByFormat(filePath, { markdown: options.markdownExtensions });
+                record.__filePath = filePath;
+
+                if (record)
+                    data[collection].push(record);
+                    logger(`loaded ${filePath} into ${collection}`);
+            } catch (ex) {
+                logger(ex);
+            }
+        };
+    };
+
     let fn = function() {
+        //Data directories
         this.watch(
             ["yaml", "yml", "json"]
                 .map(ext => options.dataDirectories.map(dir => `${dir}/*.${ext}`))
@@ -50,25 +69,6 @@ let loadStaticData = function(name, options) {
             }
         );
 
-
-        //Add a watch for each collection.
-        let addToCollection = function(collection) {
-            return function*(filePath) {
-                let extension = path.extname(filePath);
-
-                try {
-                    let record = yield* readFileByFormat(filePath, { markdown: options.markdownExtensions });
-                    record.__filePath = filePath;
-
-                    if (record)
-                        data[collection].push(record);
-                        logger(`loaded ${filePath} into ${collection}`);
-                } catch (ex) {
-                    logger(ex);
-                }
-            };
-        };
-
         //Check the collection directories
         for (let collectionName in options.collections) {
             data[collectionName] = [];
@@ -77,7 +77,7 @@ let loadStaticData = function(name, options) {
                 let collectionDir = options.collectionRootDirectory ? path.combine(options.collectionRootDirectory, collection.dir) : collection.dir;
                 this.watch(
                     options.markdownExtensions.concat(["json"]).map(ext => `${collectionDir}/*.${ext}`),
-                    addToCollection(collectionName)
+                    getCollectionLoader(collectionName)
                 );
             }
         }
@@ -100,7 +100,7 @@ let loadStaticData = function(name, options) {
             var filePatterns = options.markdownExtensions.concat(["json"]).map(ext => `*.${ext}`);
 
             this.watch(filePatterns.concat(exclusions),
-                addToCollection(options.scavengeCollection)
+                getCollectionLoader(options.scavengeCollection)
             );
         }
     };
