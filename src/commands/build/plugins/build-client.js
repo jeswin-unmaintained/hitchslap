@@ -119,10 +119,14 @@ let buildClient = function(name, options) {
                 b = b.external(e);
             });
 
-            b.transform(babelify.configure({ blacklist: options.blacklist }), { global: true })
+            var r = b.transform(babelify.configure({ blacklist: options.blacklist }), { global: true })
                 .transform(exposify, { expose: options.globalModules, global: true })
                 .bundle()
                 .pipe(fs.createWriteStream(output));
+
+            yield* generatorify(function(cb) {
+                r.on("finish", cb);
+            })();
         };
 
 

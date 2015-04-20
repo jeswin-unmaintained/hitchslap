@@ -27,7 +27,7 @@ var build = getStandardBuild("production", function*(siteConfig, buildConfig, bu
 
     return tasks;
 }, function*() {
-    console.log(GLOBAL.site);
+    console.log(GLOBAL.site);    
     console.log("Create-db completed");
 });
 
