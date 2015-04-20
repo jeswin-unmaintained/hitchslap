@@ -44,7 +44,9 @@
     "rimraf": "*",
     "less": "*",
     "koa": "*",
-    "koa-static": "*"
+    "koa-static": "*",
+    "ceramic-backend-mongodb": "*",
+    "ceramic-backend-nedb": "*"
   },
   "devDependencies": {
   }

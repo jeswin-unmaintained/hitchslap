@@ -79,7 +79,7 @@ let build = function*(siteConfig) {
     }
 
     let endTime = Date.now();
-    logger(`Build took ${(endTime - startTime)/1000} seconds.`);
+    logger(`Total ${(endTime - startTime)/1000} seconds.`);
 };
 
 

@@ -16,20 +16,20 @@ import getCommonTasks from "../build-utils/common-tasks";
 let getStandardBuild = function(buildName, fn, cbOnComplete) {
     return function*(siteConfig, buildConfig, builtInPlugins, buildUtils) {
 
-        var tasks = yield* fn(siteConfig, buildConfig, builtInPlugins, buildUtils);
+        let tasks = yield* fn(siteConfig, buildConfig, builtInPlugins, buildUtils);
 
-        var startTime = Date.now();
+        let startTime = Date.now();
 
         let { runTasks, getCustomTasks } = buildUtils.tasks;
 
         let logger = getLogger(siteConfig.quiet, buildName);
 
-        var customTasks = yield* getCustomTasks(siteConfig, buildConfig, builtInPlugins, buildUtils);
+        let customTasks = yield* getCustomTasks(siteConfig, buildConfig, builtInPlugins, buildUtils);
 
         if (customTasks)
             yield* buildUtils.tasks.runTasks(customTasks["on-start"]);
 
-        var onComplete = function*() {
+        let onComplete = function*() {
             if (customTasks)
                 yield* buildUtils.tasks.runTasks(customTasks["on-complete"]);
 
@@ -38,7 +38,7 @@ let getStandardBuild = function(buildName, fn, cbOnComplete) {
             }
 
             let endTime = Date.now();
-            logger(`Build took ${(endTime - startTime)/1000} seconds.`);
+            logger(`Build ${buildName} took ${(endTime - startTime)/1000} seconds.`);
         };
 
         try {
